@@ -508,7 +508,7 @@
                                 <div class="quantity-control">
                                     <button 
                                         class="quantity-btn" 
-                                        onclick="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                        onclick="updateQuantity('{{ $item->id }}', '{{ $item->quantity - 1 }}')"
                                         {{ $item->quantity <= 1 ? 'disabled' : '' }}
                                     >
                                         <i class="fas fa-minus"></i>
@@ -520,12 +520,12 @@
                                         value="{{ $item->quantity }}" 
                                         min="1" 
                                         max="{{ $item->item->stock ?? 99 }}"
-                                        onchange="updateQuantity({{ $item->id }}, this.value)"
+                                        onchange="updateQuantity('{{ $item->id }}', this.value)"
                                     >
                                     
                                     <button 
                                         class="quantity-btn" 
-                                        onclick="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                        onclick="updateQuantity('{{ $item->id }}', '{{ $item->quantity + 1 }}')"
                                         {{ $item->quantity >= ($item->item->stock ?? 99) ? 'disabled' : '' }}
                                     >
                                         <i class="fas fa-plus"></i>
@@ -540,7 +540,7 @@
                                 <!-- Remove Button -->
                                 <button 
                                     class="remove-btn" 
-                                    onclick="removeItem({{ $item->id }})"
+                                    onclick="removeItem('{{ $item->id }}')"
                                     title="{{ __('Remove Item') }}"
                                 >
                                     <i class="fas fa-trash"></i>

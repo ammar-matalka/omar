@@ -122,6 +122,39 @@
         justify-content: flex-end;
     }
     
+    .btn {
+        padding: var(--space-sm) var(--space-lg);
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--admin-primary-600);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--admin-primary-700);
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: var(--admin-secondary-300);
+        color: var(--admin-secondary-700);
+    }
+
+    .btn-secondary:hover {
+        background: var(--admin-secondary-400);
+    }
+    
     .orders-table-container {
         background: white;
         border-radius: var(--radius-xl);
@@ -301,6 +334,21 @@
         color: var(--error-700);
         border: 1px solid var(--error-200);
     }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--space-xs) var(--space-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .badge-info {
+        background: var(--info-100);
+        color: var(--info-700);
+        border: 1px solid var(--info-200);
+    }
     
     .order-date {
         color: var(--admin-secondary-600);
@@ -475,6 +523,54 @@
             align-items: flex-start;
         }
     }
+
+    @keyframes slideOut {
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .order-checkbox:checked {
+        accent-color: var(--admin-primary-500);
+    }
+    
+    #selectAll:indeterminate {
+        opacity: 0.5;
+    }
+
+    .alert {
+        padding: var(--space-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-md);
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+    }
+
+    .alert-success {
+        background: var(--success-100);
+        color: var(--success-700);
+        border: 1px solid var(--success-200);
+    }
+
+    .alert-error {
+        background: var(--error-100);
+        color: var(--error-700);
+        border: 1px solid var(--error-200);
+    }
+
+    .alert-warning {
+        background: var(--warning-100);
+        color: var(--warning-700);
+        border: 1px solid var(--warning-200);
+    }
+
+    .alert-info {
+        background: var(--info-100);
+        color: var(--info-700);
+        border: 1px solid var(--info-200);
+    }
 </style>
 @endpush
 
@@ -491,9 +587,85 @@
     <div class="orders-stats">
         <div class="stat-item">
             <div class="stat-number">{{ $orders->total() }}</div>
-            <div class="stat-label">{{ __('Total Orders') }}            </div>
+            <div class="stat-label">{{ __('Total Orders') }}</div>
         </div>
         
+        <div class="stat-item">
+            <div class="stat-number">{{ $orders->where('status', 'pending')->count() }}</div>
+            <div class="stat-label">{{ __('Pending') }}</div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-number">{{ $orders->where('status', 'delivered')->count() }}</div>
+            <div class="stat-label">{{ __('Delivered') }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Section -->
+<div class="filters-section fade-in">
+    <h2 class="filters-title">
+        <i class="fas fa-filter"></i>
+        {{ __('Filter Orders') }}
+    </h2>
+    
+    <form method="GET" action="{{ route('admin.orders.index') }}">
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label class="filter-label">{{ __('Order ID') }}</label>
+                <input 
+                    type="text" 
+                    name="order_id" 
+                    class="filter-input" 
+                    placeholder="{{ __('Search by order ID...') }}"
+                    value="{{ request('order_id') }}"
+                >
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">{{ __('Customer') }}</label>
+                <input 
+                    type="text" 
+                    name="customer" 
+                    class="filter-input" 
+                    placeholder="{{ __('Search by customer name...') }}"
+                    value="{{ request('customer') }}"
+                >
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">{{ __('Status') }}</label>
+                <select name="status" class="filter-input">
+                    <option value="">{{ __('All Statuses') }}</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+                    <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>{{ __('Processing') }}</option>
+                    <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>{{ __('Shipped') }}</option>
+                    <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>{{ __('Delivered') }}</option>
+                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('Cancelled') }}</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">{{ __('Date From') }}</label>
+                <input 
+                    type="date" 
+                    name="date_from" 
+                    class="filter-input"
+                    value="{{ request('date_from') }}"
+                >
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">{{ __('Date To') }}</label>
+                <input 
+                    type="date" 
+                    name="date_to" 
+                    class="filter-input"
+                    value="{{ request('date_to') }}"
+                >
+            </div>
+        </div>
+
         <div class="filter-actions">
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-search"></i>
@@ -619,7 +791,7 @@
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 
-                                <button class="action-btn delete" onclick="deleteOrder({{ $order->id }})" title="{{ __('Delete Order') }}">
+                                <button class="action-btn delete" onclick="deleteOrder('{{ $order->id }}')" title="{{ __('Delete Order') }}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -679,7 +851,7 @@
         const selectAll = document.getElementById('selectAll');
         const checkboxes = document.querySelectorAll('.order-checkbox');
         
-        checkboxes.forEach(checkbox => {
+        checkboxes.forEach(function(checkbox) {
             checkbox.checked = selectAll.checked;
         });
         
@@ -692,7 +864,9 @@
         const bulkActions = document.getElementById('bulkActions');
         const selectedCount = document.getElementById('selectedCount');
         
-        selectedOrders = Array.from(checkboxes).map(cb => cb.value);
+        selectedOrders = Array.from(checkboxes).map(function(cb) {
+            return cb.value;
+        });
         selectedCount.textContent = selectedOrders.length;
         
         if (selectedOrders.length > 0) {
@@ -718,119 +892,130 @@
     }
     
     // Bulk update status
-    async function bulkUpdateStatus(status) {
+    function bulkUpdateStatus(status) {
         if (selectedOrders.length === 0) {
             showNotification('{{ __("Please select orders to update") }}', 'warning');
             return;
         }
         
-        if (!confirm(`{{ __("Are you sure you want to update") }} ${selectedOrders.length} {{ __("orders to") }} ${status}?`)) {
+        if (!confirm('{{ __("Are you sure you want to update") }} ' + selectedOrders.length + ' {{ __("orders to") }} ' + status + '?')) {
             return;
         }
         
-        try {
-            const promises = selectedOrders.map(orderId => 
-                fetch(`/admin/orders/${orderId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ status: status })
-                })
-            );
-            
-            await Promise.all(promises);
-            
+        var promises = selectedOrders.map(function(orderId) {
+            return fetch('/admin/orders/' + orderId, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ status: status })
+            });
+        });
+        
+        Promise.all(promises).then(function() {
             showNotification('{{ __("Orders updated successfully") }}', 'success');
-            setTimeout(() => location.reload(), 1000);
-        } catch (error) {
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        }).catch(function(error) {
             showNotification('{{ __("Error updating orders") }}', 'error');
-        }
+        });
     }
     
     // Bulk delete
-    async function bulkDelete() {
+    function bulkDelete() {
         if (selectedOrders.length === 0) {
             showNotification('{{ __("Please select orders to delete") }}', 'warning');
             return;
         }
         
-        if (!confirm(`{{ __("Are you sure you want to delete") }} ${selectedOrders.length} {{ __("orders? This action cannot be undone.") }}`)) {
+        if (!confirm('{{ __("Are you sure you want to delete") }} ' + selectedOrders.length + ' {{ __("orders? This action cannot be undone.") }}')) {
             return;
         }
         
-        try {
-            const promises = selectedOrders.map(orderId => 
-                fetch(`/admin/orders/${orderId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-            );
-            
-            await Promise.all(promises);
-            
-            showNotification('{{ __("Orders deleted successfully") }}', 'success');
-            setTimeout(() => location.reload(), 1000);
-        } catch (error) {
-            showNotification('{{ __("Error deleting orders") }}', 'error');
-        }
-    }
-    
-    // Delete single order
-    async function deleteOrder(orderId) {
-        if (!confirm('{{ __("Are you sure you want to delete this order? This action cannot be undone.") }}')) {
-            return;
-        }
-        
-        try {
-            const response = await fetch(`/admin/orders/${orderId}`, {
+        var promises = selectedOrders.map(function(orderId) {
+            return fetch('/admin/orders/' + orderId, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
             });
-            
+        });
+        
+        Promise.all(promises).then(function() {
+            showNotification('{{ __("Orders deleted successfully") }}', 'success');
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        }).catch(function(error) {
+            showNotification('{{ __("Error deleting orders") }}', 'error');
+        });
+    }
+    
+    // Delete single order
+    function deleteOrder(orderId) {
+        if (!confirm('{{ __("Are you sure you want to delete this order? This action cannot be undone.") }}')) {
+            return;
+        }
+        
+        fetch('/admin/orders/' + orderId, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        }).then(function(response) {
             if (response.ok) {
                 showNotification('{{ __("Order deleted successfully") }}', 'success');
-                setTimeout(() => location.reload(), 1000);
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
             } else {
                 showNotification('{{ __("Error deleting order") }}', 'error');
             }
-        } catch (error) {
+        }).catch(function(error) {
             showNotification('{{ __("Error deleting order") }}', 'error');
-        }
+        });
     }
     
     // Export orders
     function exportOrders() {
-        const params = new URLSearchParams(window.location.search);
+        var params = new URLSearchParams(window.location.search);
         params.set('export', 'csv');
         
-        window.location.href = `{{ route('admin.orders.index') }}?${params.toString()}`;
+        window.location.href = '{{ route("admin.orders.index") }}?' + params.toString();
     }
     
     // Show notification
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type}`;
+    function showNotification(message, type) {
+        if (type === undefined) {
+            type = 'info';
+        }
+        
+        var notification = document.createElement('div');
+        notification.className = 'alert alert-' + type;
         notification.style.position = 'fixed';
         notification.style.top = '20px';
         notification.style.right = '20px';
         notification.style.zIndex = '9999';
         notification.style.maxWidth = '300px';
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-            ${message}
-        `;
+        
+        var iconClass = 'info-circle';
+        if (type === 'success') {
+            iconClass = 'check-circle';
+        } else if (type === 'error') {
+            iconClass = 'exclamation-circle';
+        } else if (type === 'warning') {
+            iconClass = 'exclamation-triangle';
+        }
+        
+        notification.innerHTML = '<i class="fas fa-' + iconClass + '"></i> ' + message;
         
         document.body.appendChild(notification);
         
-        setTimeout(() => {
+        setTimeout(function() {
             notification.style.animation = 'slideOut 0.3s ease-out forwards';
-            setTimeout(() => {
+            setTimeout(function() {
                 if (document.body.contains(notification)) {
                     document.body.removeChild(notification);
                 }
@@ -840,10 +1025,10 @@
     
     // Initialize animations
     document.addEventListener('DOMContentLoaded', function() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry, index) {
                 if (entry.isIntersecting) {
-                    setTimeout(() => {
+                    setTimeout(function() {
                         entry.target.style.opacity = '1';
                         entry.target.style.transform = 'translateY(0)';
                     }, index * 100);
@@ -852,7 +1037,8 @@
             });
         }, { threshold: 0.1 });
         
-        document.querySelectorAll('.fade-in').forEach(el => {
+        var fadeElements = document.querySelectorAll('.fade-in');
+        fadeElements.forEach(function(el) {
             el.style.opacity = '0';
             el.style.transform = 'translateY(30px)';
             el.style.transition = 'all 0.6s ease-out';
@@ -861,99 +1047,10 @@
     });
     
     // Auto-refresh every 30 seconds
-    setInterval(() => {
+    setInterval(function() {
         if (selectedOrders.length === 0) {
             location.reload();
         }
     }, 30000);
 </script>
-
-<style>
-    @keyframes slideOut {
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .order-checkbox:checked {
-        accent-color: var(--admin-primary-500);
-    }
-    
-    #selectAll:indeterminate {
-        opacity: 0.5;
-    }
-</style>
 @endpush
-        <div class="stat-item">
-            <div class="stat-number">{{ $orders->where('status', 'pending')->count() }}</div>
-            <div class="stat-label">{{ __('Pending') }}</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">{{ $orders->where('status', 'delivered')->count() }}</div>
-            <div class="stat-label">{{ __('Delivered') }}</div>
-        </div>
-    </div>
-</div>
-
-<!-- Filters Section -->
-<div class="filters-section fade-in">
-    <h2 class="filters-title">
-        <i class="fas fa-filter"></i>
-        {{ __('Filter Orders') }}
-    </h2>
-    
-    <form method="GET" action="{{ route('admin.orders.index') }}">
-        <div class="filters-grid">
-            <div class="filter-group">
-                <label class="filter-label">{{ __('Order ID') }}</label>
-                <input 
-                    type="text" 
-                    name="order_id" 
-                    class="filter-input" 
-                    placeholder="{{ __('Search by order ID...') }}"
-                    value="{{ request('order_id') }}"
-                >
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">{{ __('Customer') }}</label>
-                <input 
-                    type="text" 
-                    name="customer" 
-                    class="filter-input" 
-                    placeholder="{{ __('Search by customer name...') }}"
-                    value="{{ request('customer') }}"
-                >
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">{{ __('Status') }}</label>
-                <select name="status" class="filter-input">
-                    <option value="">{{ __('All Statuses') }}</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
-                    <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>{{ __('Processing') }}</option>
-                    <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>{{ __('Shipped') }}</option>
-                    <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>{{ __('Delivered') }}</option>
-                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('Cancelled') }}</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">{{ __('Date From') }}</label>
-                <input 
-                    type="date" 
-                    name="date_from" 
-                    class="filter-input"
-                    value="{{ request('date_from') }}"
-                >
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">{{ __('Date To') }}</label>
-                <input 
-                    type="date" 
-                    name="date_to" 
-                    class="filter-input"
-                    value="{{ request('date_to') }}"
-                >

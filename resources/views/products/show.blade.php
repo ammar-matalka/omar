@@ -599,7 +599,7 @@
             @if($product->images->count() > 1)
                 <div class="thumbnail-gallery">
                     @foreach($product->images as $index => $image)
-                        <div class="thumbnail {{ $index === 0 ? 'active' : '' }}" onclick="changeMainImage('{{ asset('storage/' . $image->image_path) }}', this)">
+                        <div class="thumbnail {{ $index === 0 ? 'active' : '' }}" onclick="changeMainImage(this.getAttribute('data-image-src'), this)">
                             <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $product->name }}">
                         </div>
                     @endforeach
@@ -781,7 +781,7 @@
 @push('scripts')
 <script>
     let currentQuantity = 1;
-    const maxQuantity = {{ $product->stock }};
+    const maxQuantity = '{{ $product->stock }}';
     
     // Quantity control
     function changeQuantity(change) {
@@ -848,7 +848,7 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({
-                    product_id: {{ $product->id }},
+                    product_id: '{{ $product->id }}',
                     quantity: currentQuantity,
                     type: 'product'
                 })
@@ -882,7 +882,7 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({
-                    product_id: {{ $product->id }}
+                    product_id: '{{ $product->id }}'
                 })
             });
             

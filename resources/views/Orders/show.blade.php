@@ -870,18 +870,18 @@
                         @endif
                         
                         @if(in_array($order->status, ['pending', 'processing']))
-                            <button class="action-btn btn-warning-outline" onclick="cancelOrder({{ $order->id }})">
+                            <button class="action-btn btn-warning-outline" onclick="cancelOrder('{{ $order->id }}')">
                                 <i class="fas fa-times"></i>
                                 {{ __('Cancel Order') }}
                             </button>
                         @endif
                         
-                        <button class="action-btn btn-primary-fill" onclick="reorder({{ $order->id }})">
+                        <button class="action-btn btn-primary-fill" onclick="reorder('{{ $order->id }}')">
                             <i class="fas fa-redo"></i>
                             {{ __('Reorder') }}
                         </button>
                         
-                        <button class="action-btn btn-secondary-outline" onclick="downloadInvoice({{ $order->id }})">
+                        <button class="action-btn btn-secondary-outline" onclick="downloadInvoice('{{ $order->id }}')">
                             <i class="fas fa-download"></i>
                             {{ __('Download Invoice') }}
                         </button>

@@ -251,6 +251,7 @@
         transform: translateY(-8px);
         box-shadow: var(--shadow-xl);
         border-color: var(--primary-200);
+        color: inherit;
     }
     
     .result-card:hover::before {
@@ -503,6 +504,42 @@
     .page-link.disabled {
         opacity: 0.5;
         cursor: not-allowed;
+    }
+
+    .btn {
+        padding: var(--space-sm) var(--space-lg);
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary-600);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-700);
+        transform: translateY(-1px);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: var(--surface);
+        color: var(--on-surface);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--surface-variant);
+        color: var(--on-surface);
     }
     
     @media (max-width: 768px) {
@@ -827,10 +864,10 @@
 @push('scripts')
 <script>
     // Initialize animations
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry, index) {
             if (entry.isIntersecting) {
-                setTimeout(() => {
+                setTimeout(function() {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
                 }, index * 50);
@@ -839,34 +876,36 @@
         });
     }, { threshold: 0.1 });
     
-    document.querySelectorAll('.fade-in').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'all 0.6s ease-out';
-        observer.observe(el);
-    });
-    
-    // Search functionality
     document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.fade-in').forEach(function(el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+        
+        // Search functionality
         const searchInput = document.querySelector('.search-input-hero');
         const searchForm = document.querySelector('.search-form-hero');
         
         // Auto-submit search after typing stops
         let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                if (this.value.length > 2 || this.value.length === 0) {
-                    // Auto-search after 1 second of no typing
-                    // searchForm.submit();
-                }
-            }, 1000);
-        });
-        
-        // Search suggestions
-        searchInput.addEventListener('focus', function() {
-            // You can add search suggestions dropdown here
-        });
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    if (searchInput.value.length > 2 || searchInput.value.length === 0) {
+                        // Auto-search after 1 second of no typing
+                        // searchForm.submit();
+                    }
+                }, 1000);
+            });
+            
+            // Search suggestions
+            searchInput.addEventListener('focus', function() {
+                // You can add search suggestions dropdown here
+            });
+        }
         
         // Price range validation
         const minPriceInput = document.querySelector('input[name="min_price"]');
@@ -894,7 +933,7 @@
     });
     
     // Add loading animation for result cards
-    document.querySelectorAll('.result-card').forEach(card => {
+    document.querySelectorAll('.result-card').forEach(function(card) {
         card.addEventListener('click', function(e) {
             const placeholder = this.querySelector('.image-placeholder');
             if (placeholder) {
@@ -909,13 +948,15 @@
         const query = '{{ $query }}';
         if (!query) return;
         
-        const terms = query.toLowerCase().split(' ').filter(term => term.length > 2);
+        const terms = query.toLowerCase().split(' ').filter(function(term) {
+            return term.length > 2;
+        });
         
-        document.querySelectorAll('.result-title, .result-description').forEach(element => {
+        document.querySelectorAll('.result-title, .result-description').forEach(function(element) {
             let html = element.innerHTML;
             
-            terms.forEach(term => {
-                const regex = new RegExp(`(${term})`, 'gi');
+            terms.forEach(function(term) {
+                const regex = new RegExp('(' + term + ')', 'gi');
                 html = html.replace(regex, '<mark style="background: var(--primary-100); color: var(--primary-700); padding: 0 2px; border-radius: 2px;">$1</mark>');
             });
             
@@ -929,7 +970,7 @@
     // Add search analytics (optional)
     function trackSearch() {
         const query = '{{ $query }}';
-        const resultsCount = {{ $cards->total() }};
+        const resultsCount = '{{ $cards->total() }}';
         
         if (query && typeof gtag !== 'undefined') {
             gtag('event', 'search', {
@@ -946,13 +987,16 @@
         // Focus search with Ctrl+K or Cmd+K
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
-            document.querySelector('.search-input-hero').focus();
+            const searchInput = document.querySelector('.search-input-hero');
+            if (searchInput) {
+                searchInput.focus();
+            }
         }
         
         // Clear search with Escape
         if (e.key === 'Escape') {
             const searchInput = document.querySelector('.search-input-hero');
-            if (document.activeElement === searchInput) {
+            if (searchInput && document.activeElement === searchInput) {
                 searchInput.blur();
             }
         }
@@ -961,8 +1005,8 @@
     // Infinite scroll (optional - can be enabled if needed)
     function enableInfiniteScroll() {
         let loading = false;
-        let currentPage = {{ $cards->currentPage() }};
-        const lastPage = {{ $cards->lastPage() }};
+        let currentPage = '{{ $cards->currentPage() }}';
+        const lastPage ='{{ $cards->lastPage() }}';
         
         window.addEventListener('scroll', function() {
             if (loading || currentPage >= lastPage) return;

@@ -38,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',         // Add phone field
         'address',       // Add address field
         'profile_image', // Add profile image field
+        'email_verified_at', // Add this for manual verification
     ];
 
     protected $hidden = [
@@ -47,7 +48,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        // ❌ Remove this line - it causes double hashing!
+        // 'password' => 'hashed',
     ];
 
     // ====================================

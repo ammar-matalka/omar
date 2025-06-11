@@ -361,12 +361,14 @@
         align-items: center;
         justify-content: center;
         gap: var(--space-sm);
+        text-decoration: none;
     }
     
     .add-to-cart-btn:hover:not(:disabled) {
         background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
+        color: white;
     }
     
     .add-to-cart-btn:disabled {
@@ -490,6 +492,7 @@
         transform: translateY(-4px);
         box-shadow: var(--shadow-lg);
         border-color: var(--primary-200);
+        color: inherit;
     }
     
     .related-image {
@@ -524,6 +527,55 @@
         font-size: 1.125rem;
         font-weight: 700;
         color: var(--primary-600);
+    }
+
+    .alert {
+        padding: var(--space-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-md);
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+    }
+
+    .alert-success {
+        background: var(--success-100);
+        color: var(--success-700);
+        border: 1px solid var(--success-200);
+    }
+
+    .alert-error {
+        background: var(--error-100);
+        color: var(--error-700);
+        border: 1px solid var(--error-200);
+    }
+
+    .alert-info {
+        background: var(--info-100);
+        color: var(--info-700);
+        border: 1px solid var(--info-200);
+    }
+
+    @keyframes slideOut {
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .slide-in {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
     
     @media (max-width: 768px) {
@@ -623,7 +675,9 @@
                 @if($card->images->count() > 1)
                     <div class="thumbnail-gallery">
                         @foreach($card->images as $index => $image)
-                            <div class="thumbnail {{ $index === 0 ? 'active' : '' }}" onclick="changeMainImage('{{ asset('storage/' . $image->image_path) }}', this)">
+                            <div class="thumbnail {{ $index === 0 ? 'active' : '' }}" 
+                                 data-image-src="{{ asset('storage/' . $image->image_path) }}"
+                                 onclick="changeMainImage(this.getAttribute('data-image-src'), this)">
                                 <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $card->title }}">
                             </div>
                         @endforeach
@@ -827,49 +881,25 @@
 @push('scripts')
 <script>
     // Initialize animations
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry, index) {
             if (entry.isIntersecting) {
-                setTimeout(() => {
+                setTimeout(function() {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
                 }, index * 100);
                 observer.unobserve(entry.target);
             }
         });
-</script>
-
-<style>
-    @keyframes slideOut {
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .slide-in {
-        animation: slideIn 0.3s ease-out;
-    }
-    
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-</style>
-@endpush
     }, { threshold: 0.1 });
     
-    document.querySelectorAll('.fade-in').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'all 0.6s ease-out';
-        observer.observe(el);
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.fade-in').forEach(function(el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
     });
     
     // Gallery functionality
@@ -880,44 +910,47 @@
         }
         
         // Update active thumbnail
-        document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+        document.querySelectorAll('.thumbnail').forEach(function(thumb) {
+            thumb.classList.remove('active');
+        });
         thumbnailElement.classList.add('active');
     }
     
     // Quantity controls
     function changeQuantity(delta) {
         const quantityInput = document.getElementById('quantity');
-        const currentValue = parseInt(quantityInput.value);
-        const newValue = currentValue + delta;
-        const max = parseInt(quantityInput.getAttribute('max'));
-        const min = parseInt(quantityInput.getAttribute('min'));
-        
-        if (newValue >= min && newValue <= max) {
-            quantityInput.value = newValue;
+        if (quantityInput) {
+            const currentValue = parseInt(quantityInput.value);
+            const newValue = currentValue + delta;
+            const max = parseInt(quantityInput.getAttribute('max'));
+            const min = parseInt(quantityInput.getAttribute('min'));
+            
+            if (newValue >= min && newValue <= max) {
+                quantityInput.value = newValue;
+            }
         }
     }
     
     // Add to cart functionality
-    async function addToCart() {
-        const quantity = document.getElementById('quantity').value;
-        const cardId = {{ $card->id }};
+    function addToCart() {
+        const quantityEl = document.getElementById('quantity');
+        const quantity = quantityEl ? quantityEl.value : 1;
+        const cardId = '{{ $card->id }}';
         
-        try {
-            const response = await fetch('{{ route("cart.addItem") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    educational_card_id: cardId,
-                    quantity: parseInt(quantity),
-                    type: 'educational_card'
-                })
-            });
-            
-            const data = await response.json();
-            
+        fetch('{{ route("cart.addItem") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                educational_card_id: cardId,
+                quantity: parseInt(quantity),
+                type: 'educational_card'
+            })
+        }).then(function(response) {
+            return response.json();
+        }).then(function(data) {
             if (data.success) {
                 showNotification('{{ __("Educational card added to cart!") }}', 'success');
                 updateCartCount();
@@ -928,36 +961,34 @@
                 button.innerHTML = '<i class="fas fa-check"></i> {{ __("Added!") }}';
                 button.style.background = 'linear-gradient(135deg, var(--success-500), var(--success-600))';
                 
-                setTimeout(() => {
+                setTimeout(function() {
                     button.innerHTML = originalText;
                     button.style.background = 'linear-gradient(135deg, var(--primary-500), var(--primary-600))';
                 }, 2000);
             } else {
                 showNotification(data.message || '{{ __("Error adding to cart") }}', 'error');
             }
-        } catch (error) {
+        }).catch(function(error) {
             showNotification('{{ __("Error adding to cart") }}', 'error');
-        }
+        });
     }
     
     // Wishlist functionality
-    async function toggleWishlist() {
-        const cardId = {{ $card->id }};
+    function toggleWishlist() {
+        const cardId = '{{ $card->id }}';
         
-        try {
-            const response = await fetch('{{ route("wishlist.toggle") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    product_id: cardId
-                })
-            });
-            
-            const data = await response.json();
-            
+        fetch('{{ route("wishlist.toggle") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                product_id: cardId
+            })
+        }).then(function(response) {
+            return response.json();
+        }).then(function(data) {
             if (data.success) {
                 showNotification(data.message, 'success');
                 
@@ -977,46 +1008,54 @@
                     wishlistCount.textContent = data.count;
                 }
             }
-        } catch (error) {
+        }).catch(function(error) {
             showNotification('{{ __("Error updating wishlist") }}', 'error');
-        }
+        });
     }
     
     // Update cart count
-    async function updateCartCount() {
-        try {
-            const response = await fetch('{{ route("cart.count") }}');
-            const data = await response.json();
-            
+    function updateCartCount() {
+        fetch('{{ route("cart.count") }}').then(function(response) {
+            return response.json();
+        }).then(function(data) {
             const cartCount = document.querySelector('.cart-count');
             if (cartCount) {
                 cartCount.textContent = data.count;
             }
-        } catch (error) {
+        }).catch(function(error) {
             console.error('Error updating cart count:', error);
-        }
+        });
     }
     
     // Show notification
-    function showNotification(message, type = 'info') {
+    function showNotification(message, type) {
+        if (type === undefined) {
+            type = 'info';
+        }
+        
         const notification = document.createElement('div');
-        notification.className = `alert alert-${type} slide-in`;
+        notification.className = 'alert alert-' + type + ' slide-in';
         notification.style.position = 'fixed';
         notification.style.top = '20px';
         notification.style.right = '20px';
         notification.style.zIndex = '9999';
         notification.style.maxWidth = '300px';
         notification.style.boxShadow = 'var(--shadow-xl)';
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-            ${message}
-        `;
+        
+        var iconClass = 'info-circle';
+        if (type === 'success') {
+            iconClass = 'check-circle';
+        } else if (type === 'error') {
+            iconClass = 'exclamation-circle';
+        }
+        
+        notification.innerHTML = '<i class="fas fa-' + iconClass + '"></i> ' + message;
         
         document.body.appendChild(notification);
         
-        setTimeout(() => {
+        setTimeout(function() {
             notification.style.animation = 'slideOut 0.3s ease-out forwards';
-            setTimeout(() => {
+            setTimeout(function() {
                 if (document.body.contains(notification)) {
                     document.body.removeChild(notification);
                 }
@@ -1025,61 +1064,53 @@
     }
     
     // Image zoom functionality
-    document.getElementById('mainImage').addEventListener('click', function() {
-        const img = this.querySelector('img');
-        if (img) {
-            // Create zoom modal
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.9);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-                cursor: zoom-out;
-            `;
-            
-            const zoomedImg = document.createElement('img');
-            zoomedImg.src = img.src;
-            zoomedImg.style.cssText = `
-                max-width: 90%;
-                max-height: 90%;
-                object-fit: contain;
-                border-radius: var(--radius-lg);
-                box-shadow: var(--shadow-2xl);
-            `;
-            
-            modal.appendChild(zoomedImg);
-            document.body.appendChild(modal);
-            
-            modal.addEventListener('click', () => {
-                document.body.removeChild(modal);
+    document.addEventListener('DOMContentLoaded', function() {
+        const mainImage = document.getElementById('mainImage');
+        if (mainImage) {
+            mainImage.addEventListener('click', function() {
+                const img = this.querySelector('img');
+                if (img) {
+                    // Create zoom modal
+                    const modal = document.createElement('div');
+                    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out;';
+                    
+                    const zoomedImg = document.createElement('img');
+                    zoomedImg.src = img.src;
+                    zoomedImg.style.cssText = 'max-width: 90%; max-height: 90%; object-fit: contain; border-radius: var(--radius-lg); box-shadow: var(--shadow-2xl);';
+                    
+                    modal.appendChild(zoomedImg);
+                    document.body.appendChild(modal);
+                    
+                    modal.addEventListener('click', function() {
+                        document.body.removeChild(modal);
+                    });
+                }
             });
         }
-    });
-    
-    // Smooth scrolling for related cards
-    document.querySelectorAll('.related-card').forEach(card => {
-        card.addEventListener('click', function(e) {
-            const icon = this.querySelector('i');
-            if (icon && !icon.classList.contains('fa-spinner')) {
-                icon.classList.remove('fa-id-card');
-                icon.classList.add('fa-spinner', 'fa-spin');
-            }
+        
+        // Initialize quantity input validation
+        const quantityInput = document.getElementById('quantity');
+        if (quantityInput) {
+            quantityInput.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                const max = parseInt(this.getAttribute('max'));
+                const min = parseInt(this.getAttribute('min'));
+                
+                if (value > max) this.value = max;
+                if (value < min) this.value = min;
+            });
+        }
+        
+        // Smooth scrolling for related cards
+        document.querySelectorAll('.related-card').forEach(function(card) {
+            card.addEventListener('click', function(e) {
+                const icon = this.querySelector('i');
+                if (icon && !icon.classList.contains('fa-spinner')) {
+                    icon.classList.remove('fa-id-card');
+                    icon.classList.add('fa-spinner', 'fa-spin');
+                }
+            });
         });
     });
-    
-    // Initialize quantity input validation
-    document.getElementById('quantity').addEventListener('input', function() {
-        const value = parseInt(this.value);
-        const max = parseInt(this.getAttribute('max'));
-        const min = parseInt(this.getAttribute('min'));
-        
-        if (value > max) this.value = max;
-        if (value < min) this.value = min;
-    });
+</script>
+@endpush

@@ -619,7 +619,7 @@
                             <div class="product-actions">
                                 <button 
                                     class="action-btn wishlist-btn {{ Auth::user()->hasInWishlist($product->id) ? 'active' : '' }}" 
-                                    onclick="toggleWishlist({{ $product->id }})"
+                                    onclick="toggleWishlist('{{ $product->id }}')"
                                     title="{{ __('Add to Wishlist') }}"
                                 >
                                     <i class="fas fa-heart"></i>
@@ -627,7 +627,7 @@
                                 
                                 <button 
                                     class="action-btn quick-view-btn" 
-                                    onclick="quickView({{ $product->id }})"
+                                    onclick="quickView('{{ $product->id }}')"
                                     title="{{ __('Quick View') }}"
                                 >
                                     <i class="fas fa-eye"></i>
@@ -670,7 +670,7 @@
                                 @auth
                                     <button 
                                         class="add-to-cart-btn" 
-                                        onclick="addToCart({{ $product->id }})"
+                                        onclick="addToCart('{{ $product->id }}')"
                                     >
                                         <i class="fas fa-shopping-cart"></i>
                                         {{ __('Add to Cart') }}

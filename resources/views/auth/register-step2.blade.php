@@ -347,12 +347,14 @@
         align-items: center;
         justify-content: center;
         gap: var(--space-sm);
+        text-decoration: none;
     }
     
     .auth-btn:hover:not(:disabled) {
         background: linear-gradient(135deg, var(--secondary-600), var(--secondary-700));
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
+        color: white;
     }
     
     .auth-btn:disabled {
@@ -372,6 +374,7 @@
         background: var(--surface-variant);
         border-color: var(--border-hover);
         transform: translateY(-1px);
+        color: var(--on-surface-variant);
     }
     
     .loading-spinner {
@@ -617,6 +620,173 @@
                     {{ __('Change Email') }}
                 </a>
             </form>
+@section('content')
+<div class="auth-container" data-code-sent="{{ session('code_sent_at') ? '1' : '0' }}">
+    <div class="auth-card fade-in">
+        <!-- Header -->
+        <div class="auth-header">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step completed">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step active">2</div>
+            </div>
+            
+            <h1 class="auth-title">{{ __('Complete Registration') }}</h1>
+            <p class="auth-subtitle">{{ __('Verify your email and create your account') }}</p>
+            <div class="email-display">{{ $email }}</div>
+        </div>
+        
+        <!-- Body -->
+        <div class="auth-body">
+            <!-- Verification Section -->
+            <div class="verification-section">
+                <div class="verification-icon">
+                    <i class="fas fa-envelope-open"></i>
+                </div>
+                <p class="verification-text">{{ __('Enter the 6-digit verification code sent to your email') }}</p>
+                
+                <!-- Code Input -->
+                <div class="code-input-group">
+                    <input type="text" class="code-input" maxlength="1" id="code1">
+                    <input type="text" class="code-input" maxlength="1" id="code2">
+                    <input type="text" class="code-input" maxlength="1" id="code3">
+                    <input type="text" class="code-input" maxlength="1" id="code4">
+                    <input type="text" class="code-input" maxlength="1" id="code5">
+                    <input type="text" class="code-input" maxlength="1" id="code6">
+                </div>
+                
+                <!-- Resend Section -->
+                <div class="resend-section">
+                    <p class="resend-text">{{ __("Didn't receive the code?") }}</p>
+                    <button type="button" class="resend-btn" id="resendBtn" onclick="resendCode()">
+                        {{ __('Resend Code') }}
+                    </button>
+                    <span class="countdown" id="countdown" style="display: none;"></span>
+                </div>
+            </div>
+            
+            <form method="POST" action="{{ route('register.step2.process') }}" class="auth-form" id="registerForm">
+                @csrf
+                
+                <!-- Hidden verification code input -->
+                <input type="hidden" name="verification_code" id="verificationCode">
+                
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="name" class="form-label">{{ __('Full Name') }}</label>
+                    <input 
+                        id="name" 
+                        type="text" 
+                        class="form-input @error('name') error @enderror" 
+                        name="name" 
+                        value="{{ old('name') }}" 
+                        required 
+                        autocomplete="name"
+                        placeholder="{{ __('Enter your full name') }}"
+                    >
+                    <i class="form-icon fas fa-user"></i>
+                    @error('name')
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+                
+                <!-- Password Row -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="form-label">{{ __('Password') }}</label>
+                        <input 
+                            id="password" 
+                            type="password" 
+                            class="form-input @error('password') error @enderror" 
+                            name="password" 
+                            required 
+                            autocomplete="new-password"
+                            placeholder="{{ __('Create password') }}"
+                            onkeyup="checkPasswordStrength()"
+                        >
+                        <i class="form-icon fas fa-lock"></i>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                        </button>
+                        <div class="password-strength" id="passwordStrength" style="display: none;"></div>
+                        @error('password')
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password_confirmation" class="form-label">{{ __('Confirm Password') }}</label>
+                        <input 
+                            id="password_confirmation" 
+                            type="password" 
+                            class="form-input" 
+                            name="password_confirmation" 
+                            required 
+                            autocomplete="new-password"
+                            placeholder="{{ __('Confirm password') }}"
+                        >
+                        <i class="form-icon fas fa-lock"></i>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation')">
+                            <i class="fas fa-eye" id="password_confirmationToggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Optional Fields Row -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone" class="form-label">{{ __('Phone Number') }} <span style="color: var(--on-surface-variant);">({{ __('Optional') }})</span></label>
+                        <input 
+                            id="phone" 
+                            type="tel" 
+                            class="form-input" 
+                            name="phone" 
+                            value="{{ old('phone') }}" 
+                            autocomplete="tel"
+                            placeholder="{{ __('Enter phone number') }}"
+                        >
+                        <i class="form-icon fas fa-phone"></i>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address" class="form-label">{{ __('Address') }} <span style="color: var(--on-surface-variant);">({{ __('Optional') }})</span></label>
+                        <input 
+                            id="address" 
+                            type="text" 
+                            class="form-input" 
+                            name="address" 
+                            value="{{ old('address') }}" 
+                            autocomplete="address"
+                            placeholder="{{ __('Enter your address') }}"
+                        >
+                        <i class="form-icon fas fa-map-marker-alt"></i>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="auth-btn" id="submitBtn" disabled>
+                    <span class="btn-text">
+                        <i class="fas fa-user-plus"></i>
+                        {{ __('Create Account') }}
+                    </span>
+                    <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
+                </button>
+                
+                <!-- Back Button -->
+                <a href="{{ route('register.back') }}" class="auth-btn back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    {{ __('Change Email') }}
+                </a>
+            </form>
         </div>
     </div>
 </div>
@@ -624,200 +794,205 @@
 
 @push('scripts')
 <script>
-    let resendCountdown = 0;
-    
-    // Code input handling
-    document.querySelectorAll('.code-input').forEach((input, index) => {
-        input.addEventListener('input', function(e) {
-            if (this.value.length === 1) {
-                if (index < 5) {
-                    document.getElementById(`code${index + 2}`).focus();
-                }
-            }
-            updateVerificationCode();
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        let resendCountdown = 0;
+        var codeSentAt = document.querySelector('.auth-container').getAttribute('data-code-sent') === '1';
         
-        input.addEventListener('keydown', function(e) {
-            if (e.key === 'Backspace' && this.value === '' && index > 0) {
-                document.getElementById(`code${index}`).focus();
-            }
-        });
-        
-        input.addEventListener('paste', function(e) {
-            e.preventDefault();
-            const paste = e.clipboardData.getData('text');
-            if (paste.length === 6 && /^\d+$/.test(paste)) {
-                for (let i = 0; i < 6; i++) {
-                    document.getElementById(`code${i + 1}`).value = paste[i];
+        // Code input handling
+        document.querySelectorAll('.code-input').forEach(function(input, index) {
+            input.addEventListener('input', function(e) {
+                if (this.value.length === 1) {
+                    if (index < 5) {
+                        document.getElementById('code' + (index + 2)).focus();
+                    }
                 }
                 updateVerificationCode();
-            }
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    document.getElementById('code' + index).focus();
+                }
+            });
+            
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = e.clipboardData.getData('text');
+                if (paste.length === 6 && /^\d+$/.test(paste)) {
+                    for (let i = 0; i < 6; i++) {
+                        document.getElementById('code' + (i + 1)).value = paste[i];
+                    }
+                    updateVerificationCode();
+                }
+            });
         });
-    });
-    
-    function updateVerificationCode() {
-        let code = '';
-        for (let i = 1; i <= 6; i++) {
-            code += document.getElementById(`code${i}`).value;
+        
+        function updateVerificationCode() {
+            let code = '';
+            for (let i = 1; i <= 6; i++) {
+                code += document.getElementById('code' + i).value;
+            }
+            document.getElementById('verificationCode').value = code;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const name = document.getElementById('name').value;
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password_confirmation').value;
+            
+            if (code.length === 6 && name && password && passwordConfirm && password === passwordConfirm) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
         }
-        document.getElementById('verificationCode').value = code;
         
-        const submitBtn = document.getElementById('submitBtn');
-        const name = document.getElementById('name').value;
-        const password = document.getElementById('password').value;
-        const passwordConfirm = document.getElementById('password_confirmation').value;
+        // Password toggle functionality
+        window.togglePassword = function(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(inputId + 'ToggleIcon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
         
-        if (code.length === 6 && name && password && passwordConfirm && password === passwordConfirm) {
-            submitBtn.disabled = false;
-        } else {
+        // Password strength checker
+        window.checkPasswordStrength = function() {
+            const password = document.getElementById('password').value;
+            const strengthDiv = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthDiv.style.display = 'none';
+                return;
+            }
+            
+            strengthDiv.style.display = 'block';
+            
+            let score = 0;
+            let feedback = [];
+            
+            if (password.length >= 8) score++;
+            else feedback.push('{{ __("At least 8 characters") }}');
+            
+            if (/[A-Z]/.test(password)) score++;
+            else feedback.push('{{ __("Uppercase letter") }}');
+            
+            if (/[a-z]/.test(password)) score++;
+            else feedback.push('{{ __("Lowercase letter") }}');
+            
+            if (/[0-9]/.test(password)) score++;
+            else feedback.push('{{ __("Number") }}');
+            
+            if (/[@$!%*#?&]/.test(password)) score++;
+            else feedback.push('{{ __("Special character") }}');
+            
+            if (score < 3) {
+                strengthDiv.className = 'password-strength weak';
+                strengthDiv.innerHTML = '{{ __("Weak password") }} - {{ __("Add") }}: ' + feedback.join(', ');
+            } else if (score < 5) {
+                strengthDiv.className = 'password-strength medium';
+                strengthDiv.innerHTML = '{{ __("Medium password") }} - {{ __("Add") }}: ' + feedback.join(', ');
+            } else {
+                strengthDiv.className = 'password-strength strong';
+                strengthDiv.innerHTML = '{{ __("Strong password") }} ✓';
+            }
+            
+            updateVerificationCode();
+        };
+        
+        // Resend code functionality
+        window.resendCode = function() {
+            const resendBtn = document.getElementById('resendBtn');
+            const countdown = document.getElementById('countdown');
+            
+            fetch('{{ route("register.resend") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    startResendCountdown();
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+        };
+        
+        function startResendCountdown() {
+            const resendBtn = document.getElementById('resendBtn');
+            const countdown = document.getElementById('countdown');
+            
+            resendCountdown = 120; // 2 minutes
+            resendBtn.disabled = true;
+            resendBtn.style.display = 'none';
+            countdown.style.display = 'inline';
+            
+            const timer = setInterval(function() {
+                const minutes = Math.floor(resendCountdown / 60);
+                const seconds = resendCountdown % 60;
+                countdown.textContent = '{{ __("Resend in") }} ' + minutes + ':' + seconds.toString().padStart(2, '0');
+                
+                resendCountdown--;
+                
+                if (resendCountdown < 0) {
+                    clearInterval(timer);
+                    resendBtn.disabled = false;
+                    resendBtn.style.display = 'inline';
+                    countdown.style.display = 'none';
+                }
+            }, 1000);
+        }
+        
+        // Form validation
+        document.querySelectorAll('#name, #password, #password_confirmation').forEach(function(input) {
+            input.addEventListener('input', updateVerificationCode);
+        });
+        
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const spinner = document.getElementById('loadingSpinner');
+            
             submitBtn.disabled = true;
-        }
-    }
-    
-    // Password toggle functionality
-    function togglePassword(inputId) {
-        const input = document.getElementById(inputId);
-        const icon = document.getElementById(inputId + 'ToggleIcon');
-        
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
-    
-    // Password strength checker
-    function checkPasswordStrength() {
-        const password = document.getElementById('password').value;
-        const strengthDiv = document.getElementById('passwordStrength');
-        
-        if (password.length === 0) {
-            strengthDiv.style.display = 'none';
-            return;
-        }
-        
-        strengthDiv.style.display = 'block';
-        
-        let score = 0;
-        let feedback = [];
-        
-        if (password.length >= 8) score++;
-        else feedback.push('{{ __("At least 8 characters") }}');
-        
-        if (/[A-Z]/.test(password)) score++;
-        else feedback.push('{{ __("Uppercase letter") }}');
-        
-        if (/[a-z]/.test(password)) score++;
-        else feedback.push('{{ __("Lowercase letter") }}');
-        
-        if (/[0-9]/.test(password)) score++;
-        else feedback.push('{{ __("Number") }}');
-        
-        if (/[@$!%*#?&]/.test(password)) score++;
-        else feedback.push('{{ __("Special character") }}');
-        
-        if (score < 3) {
-            strengthDiv.className = 'password-strength weak';
-            strengthDiv.innerHTML = `{{ __("Weak password") }} - {{ __("Add") }}: ${feedback.join(', ')}`;
-        } else if (score < 5) {
-            strengthDiv.className = 'password-strength medium';
-            strengthDiv.innerHTML = `{{ __("Medium password") }} - {{ __("Add") }}: ${feedback.join(', ')}`;
-        } else {
-            strengthDiv.className = 'password-strength strong';
-            strengthDiv.innerHTML = '{{ __("Strong password") }} ✓';
-        }
-        
-        updateVerificationCode();
-    }
-    
-    // Resend code functionality
-    function resendCode() {
-        const resendBtn = document.getElementById('resendBtn');
-        const countdown = document.getElementById('countdown');
-        
-        fetch('{{ route("register.resend") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                startResendCountdown();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
         });
-    }
-    
-    function startResendCountdown() {
-        const resendBtn = document.getElementById('resendBtn');
-        const countdown = document.getElementById('countdown');
         
-        resendCountdown = 120; // 2 minutes
-        resendBtn.disabled = true;
-        resendBtn.style.display = 'none';
-        countdown.style.display = 'inline';
+        // Initialize countdown if needed
+        if (codeSentAt) {
+            startResendCountdown();
+        }
         
-        const timer = setInterval(() => {
-            const minutes = Math.floor(resendCountdown / 60);
-            const seconds = resendCountdown % 60;
-            countdown.textContent = `{{ __("Resend in") }} ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
-            resendCountdown--;
-            
-            if (resendCountdown < 0) {
-                clearInterval(timer);
-                resendBtn.disabled = false;
-                resendBtn.style.display = 'inline';
-                countdown.style.display = 'none';
-            }
-        }, 1000);
-    }
-    
-    // Form validation
-    document.querySelectorAll('#name, #password, #password_confirmation').forEach(input => {
-        input.addEventListener('input', updateVerificationCode);
-    });
-    
-    // Form submission
-    document.getElementById('registerForm').addEventListener('submit', function() {
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = submitBtn.querySelector('.btn-text');
-        const spinner = document.getElementById('loadingSpinner');
+        // Intersection observer for animations
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
         
-        submitBtn.disabled = true;
-        btnText.style.display = 'none';
-        spinner.style.display = 'block';
-    });
-    
-    // Initialize countdown if needed
-    if ({{ session('code_sent_at') ? 'true' : 'false' }}) {
-        startResendCountdown();
-    }
-    
-    // Intersection observer for animations
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
+        document.querySelectorAll('.fade-in').forEach(function(el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
         });
-    }, { threshold: 0.1 });
-    
-    document.querySelectorAll('.fade-in').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'all 0.6s ease-out';
-        observer.observe(el);
     });
 </script>
 @endpush

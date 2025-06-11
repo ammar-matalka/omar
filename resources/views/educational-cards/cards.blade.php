@@ -747,10 +747,10 @@
                             <!-- Card Actions -->
                             @auth
                                 <div class="card-actions">
-                                    <button class="action-btn" onclick="addToWishlist({{ $card->id }})" title="{{ __('Add to Wishlist') }}">
+                                    <button class="action-btn" onclick="addToWishlist('{{ $card->id }}')" title="{{ __('Add to Wishlist') }}">
                                         <i class="fas fa-heart"></i>
                                     </button>
-                                    <button class="action-btn" onclick="quickView({{ $card->id }})" title="{{ __('Quick View') }}">
+                                    <button class="action-btn" onclick="quickView('{{ $card->id }}')" title="{{ __('Quick View') }}">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
@@ -790,7 +790,7 @@
                                 
                                 @if($card->stock > 0)
                                     @auth
-                                        <button class="add-to-cart-btn" onclick="addToCart({{ $card->id }})">
+                                        <button class="add-to-cart-btn" onclick="addToCart('{{ $card->id }}')">
                                             <i class="fas fa-cart-plus"></i>
                                             {{ __('Add to Cart') }}
                                         </button>
