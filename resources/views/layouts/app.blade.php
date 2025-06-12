@@ -15,6 +15,19 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
+    <!-- Google Translate Scripts -->
+    <script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,ar',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    
     <style>
         :root {
             /* === PRIMARY COLORS === */
@@ -173,6 +186,49 @@
             --z-toast: 1080;
         }
         
+        /* Google Translate Styling */
+        #google_translate_element {
+            display: inline-block !important;
+        }
+        
+        .goog-te-gadget {
+            font-size: 0 !important;
+            color: transparent !important;
+        }
+
+        .goog-te-gadget .goog-te-combo {
+            padding: 8px 12px !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: var(--radius-md) !important;
+            background: var(--surface) !important;
+            color: var(--gray-800) !important;
+            font-size: 14px !important;
+            font-family: inherit !important;
+            min-width: 120px !important;
+            cursor: pointer !important;
+        }
+
+        .goog-te-gadget .goog-te-combo:hover {
+            border-color: var(--primary-500) !important;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1) !important;
+        }
+
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+
+        .goog-logo-link {
+            display: none !important;
+        }
+
+        body {
+            top: 0px !important;
+        }
+
+        .skiptranslate {
+            display: none !important;
+        }
+        
         /* Dark mode variables */
         @media (prefers-color-scheme: dark) {
             :root {
@@ -206,6 +262,47 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            transition: all var(--transition-normal);
+        }
+        
+        /* RTL Support */
+        [dir="rtl"] {
+            direction: rtl;
+        }
+        
+        [dir="rtl"] .navbar {
+            direction: rtl;
+        }
+        
+        [dir="rtl"] .nav-links {
+            direction: rtl;
+        }
+        
+        /* Language Toggle Button */
+        .language-toggle {
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            color: var(--on-surface);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+        }
+        
+        .language-toggle:hover {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+        }
+        
+        .language-toggle:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
         }
         
         /* Utility classes */
@@ -492,6 +589,11 @@
             .nav-links {
                 flex-wrap: wrap;
                 justify-content: center;
+                gap: var(--space-md);
+            }
+            
+            #google_translate_element {
+                margin-top: var(--space-sm);
             }
         }
     </style>
@@ -510,14 +612,14 @@
                 
                 <!-- Navigation Links -->
                 <ul class="nav-links">
-                    <li><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">{{ __('Home') }}</a></li>
-                    <li><a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">{{ __('Products') }}</a></li>
-                    <li><a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}">{{ __('Educational Cards') }}</a></li>
+                    <li><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" data-translate="home">Home</a></li>
+                    <li><a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" data-translate="products">Products</a></li>
+                    <li><a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}" data-translate="educational-cards">Educational Cards</a></li>
                     
                     @auth
                         <!-- User Menu -->
                         <li class="dropdown">
-                            <a href="{{ route('user.profile.show') }}" class="nav-link">
+                            <a href="{{ route('user.profile.show') }}" class="nav-link" data-translate="my-profile">
                                 <i class="fas fa-user"></i>
                                 {{ Auth::user()->name }}
                             </a>
@@ -525,17 +627,17 @@
                         
                         <!-- Cart Icon -->
                         <li>
-                            <a href="{{ route('cart.index') }}" class="nav-link">
+                            <a href="{{ route('cart.index') }}" class="nav-link" data-translate="cart">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span class="cart-count">{{ Auth::user()->cart_items_count ?? 0 }}</span>
+                                Cart
                             </a>
                         </li>
                         
                         <!-- Wishlist Icon -->
                         <li>
-                            <a href="{{ route('wishlist.index') }}" class="nav-link">
+                            <a href="{{ route('wishlist.index') }}" class="nav-link" data-translate="wishlist">
                                 <i class="fas fa-heart"></i>
-                                <span class="wishlist-count">{{ Auth::user()->wishlist_items_count ?? 0 }}</span>
+                                Wishlist
                             </a>
                         </li>
                         
@@ -543,26 +645,29 @@
                         <li>
                             <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                                 @csrf
-                                <button type="submit" class="btn btn-secondary btn-sm">
+                                <button type="submit" class="btn btn-secondary btn-sm" data-translate="logout">
                                     <i class="fas fa-sign-out-alt"></i>
-                                    {{ __('Logout') }}
+                                    Logout
                                 </button>
                             </form>
                         </li>
                     @else
-                        <li><a href="{{ route('login') }}" class="btn btn-secondary btn-sm">{{ __('Login') }}</a></li>
-                        <li><a href="{{ route('register') }}" class="btn btn-primary btn-sm">{{ __('Register') }}</a></li>
+                        <li><a href="{{ route('login') }}" class="btn btn-secondary btn-sm" data-translate="login">Login</a></li>
+                        <li><a href="{{ route('register') }}" class="btn btn-primary btn-sm" data-translate="register">Register</a></li>
                     @endauth
                     
-                    <!-- Language Switcher -->
+                    <!-- Language Toggle Button -->
                     <li>
-                        <form action="{{ route('language.switch') }}" method="POST" style="display: inline;">
-                            @csrf
-                            <select name="language" onchange="this.form.submit()" class="form-input" style="width: auto; padding: 0.25rem 0.5rem;">
-                                <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>English</option>
-                                <option value="ar" {{ app()->getLocale() == 'ar' ? 'selected' : '' }}>العربية</option>
-                            </select>
-                        </form>
+                        <button onclick="toggleLanguage()" id="languageBtn" class="language-toggle">
+                            <span id="flagIcon">🇺🇸</span>
+                            <span id="langText">English</span>
+                            <span style="margin-left: 5px;">⇄</span>
+                        </button>
+                    </li>
+                    
+                    <!-- Google Translate Widget -->
+                    <li style="margin-left: 15px; padding: 5px;">
+                        <div id="google_translate_element"></div>
                     </li>
                 </ul>
             </nav>
@@ -612,39 +717,6 @@
             <div class="grid grid-cols-4">
                 <div>
                     <h3 style="margin-bottom: var(--space-md); color: white;">{{ config('app.name') }}</h3>
-                    <p style="color: var(--gray-400);">{{ __('Your trusted partner for educational products and services.') }}</p>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: var(--space-md); color: white;">{{ __('Quick Links') }}</h4>
-                    <ul style="list-style: none; color: var(--gray-400);">
-                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('home') }}" style="color: inherit; text-decoration: none;">{{ __('Home') }}</a></li>
-                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('products.index') }}" style="color: inherit; text-decoration: none;">{{ __('Products') }}</a></li>
-                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('educational-cards.index') }}" style="color: inherit; text-decoration: none;">{{ __('Educational Cards') }}</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: var(--space-md); color: white;">{{ __('Account') }}</h4>
-                    <ul style="list-style: none; color: var(--gray-400);">
-                        @auth
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('user.profile.show') }}" style="color: inherit; text-decoration: none;">{{ __('My Profile') }}</a></li>
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('orders.index') }}" style="color: inherit; text-decoration: none;">{{ __('My Orders') }}</a></li>
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('wishlist.index') }}" style="color: inherit; text-decoration: none;">{{ __('Wishlist') }}</a></li>
-                        @else
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('login') }}" style="color: inherit; text-decoration: none;">{{ __('Login') }}</a></li>
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('register') }}" style="color: inherit; text-decoration: none;">{{ __('Register') }}</a></li>
-                        @endauth
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: var(--space-md); color: white;">{{ __('Contact') }}</h4>
-                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
-                        <i class="fas fa-envelope"></i>
-                        info@example.com
-                    </p>
-                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
-                        <i class="fas fa-phone"></i>
-                        +962 6 123 4567
-                    </p>
                     <p style="color: var(--gray-400);">
                         <i class="fas fa-map-marker-alt"></i>
                         Irbid, Jordan
@@ -653,11 +725,160 @@
             </div>
             
             <div style="border-top: 1px solid var(--gray-700); margin-top: var(--space-2xl); padding-top: var(--space-lg); text-align: center; color: var(--gray-400);">
-                <p>&copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('All rights reserved.') }}</p>
+                <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
+    <!-- Language Toggle Script -->
+    <script>
+        // تعريف المتغيرات العامة
+        let currentLanguage = localStorage.getItem('siteLanguage') || 'en';
+        
+        // قاموس الترجمات
+        const translations = {
+            'home': { en: 'Home', ar: 'الرئيسية' },
+            'products': { en: 'Products', ar: 'المنتجات' },
+            'educational-cards': { en: 'Educational Cards', ar: 'البطاقات التعليمية' },
+            'cart': { en: 'Cart', ar: 'السلة' },
+            'wishlist': { en: 'Wishlist', ar: 'المفضلة' },
+            'login': { en: 'Login', ar: 'تسجيل الدخول' },
+            'register': { en: 'Register', ar: 'تسجيل جديد' },
+            'logout': { en: 'Logout', ar: 'تسجيل الخروج' },
+            'my-profile': { en: 'My Profile', ar: 'ملفي الشخصي' },
+            'my-orders': { en: 'My Orders', ar: 'طلباتي' },
+            'quick-links': { en: 'Quick Links', ar: 'روابط سريعة' },
+            'account': { en: 'Account', ar: 'الحساب' },
+            'contact': { en: 'Contact', ar: 'اتصل بنا' },
+            'footer-description': { 
+                en: 'Your trusted partner for educational products and services.', 
+                ar: 'شريكك الموثوق للمنتجات والخدمات التعليمية.' 
+            }
+        };
+        
+        // تطبيق اللغة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            applyLanguage(currentLanguage);
+            updateButton();
+        });
+        
+        // دالة تبديل اللغة
+        function toggleLanguage() {
+            if (currentLanguage === 'en') {
+                currentLanguage = 'ar';
+                applyLanguage('ar');
+            } else {
+                currentLanguage = 'en';
+                applyLanguage('en');
+            }
+            
+            // حفظ اللغة في localStorage
+            localStorage.setItem('siteLanguage', currentLanguage);
+            updateButton();
+        }
+        
+        // تحديث نص وأيقونة الزر
+        function updateButton() {
+            const flagIcon = document.getElementById('flagIcon');
+            const langText = document.getElementById('langText');
+            
+            if (currentLanguage === 'ar') {
+                flagIcon.textContent = '🇸🇦';
+                langText.textContent = 'العربية';
+            } else {
+                flagIcon.textContent = '🇺🇸';
+                langText.textContent = 'English';
+            }
+        }
+        
+        // تطبيق اللغة على الصفحة
+        function applyLanguage(lang) {
+            // تغيير اتجاه الصفحة
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('lang', lang === 'ar' ? 'ar' : 'en');
+            
+            // تطبيق الترجمات على العناصر
+            const elementsToTranslate = document.querySelectorAll('[data-translate]');
+            elementsToTranslate.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[key] && translations[key][lang]) {
+                    // إذا كان العنصر يحتوي على أيقونة، احتفظ بها
+                    const icon = element.querySelector('i');
+                    if (icon) {
+                        const iconHtml = icon.outerHTML;
+                        element.innerHTML = iconHtml + ' ' + translations[key][lang];
+                    } else {
+                        element.textContent = translations[key][lang];
+                    }
+                }
+            });
+            
+            // تطبيق خط اللغة العربية إذا لزم الأمر
+            if (lang === 'ar') {
+                document.body.style.fontFamily = "'Cairo', 'Inter', system-ui, -apple-system, sans-serif";
+            } else {
+                document.body.style.fontFamily = "'Inter', 'Cairo', system-ui, -apple-system, sans-serif";
+            }
+        }
+        
+        // دالة لإضافة ترجمة ديناميكية
+        function addTranslation(key, enText, arText) {
+            translations[key] = { en: enText, ar: arText };
+        }
+        
+        // دالة للحصول على النص المترجم
+        function getTranslation(key) {
+            return translations[key] && translations[key][currentLanguage] 
+                ? translations[key][currentLanguage] 
+                : key;
+        }
+        
+        // دالة لإعادة تطبيق اللغة (مفيدة للمحتوى الديناميكي)
+        function reapplyLanguage() {
+            applyLanguage(currentLanguage);
+        }
+        
+        // تصدير الدوال للاستخدام العام
+        window.toggleLanguage = toggleLanguage;
+        window.addTranslation = addTranslation;
+        window.getTranslation = getTranslation;
+        window.reapplyLanguage = reapplyLanguage;
+        window.currentLanguage = currentLanguage;
+    </script>
+
     @stack('scripts')
 </body>
-</html>
+</html>--gray-400);" data-translate="footer-description">Your trusted partner for educational products and services.</p>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: var(--space-md); color: white;" data-translate="quick-links">Quick Links</h4>
+                    <ul style="list-style: none; color: var(--gray-400);">
+                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('home') }}" style="color: inherit; text-decoration: none;" data-translate="home">Home</a></li>
+                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('products.index') }}" style="color: inherit; text-decoration: none;" data-translate="products">Products</a></li>
+                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('educational-cards.index') }}" style="color: inherit; text-decoration: none;" data-translate="educational-cards">Educational Cards</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: var(--space-md); color: white;" data-translate="account">Account</h4>
+                    <ul style="list-style: none; color: var(--gray-400);">
+                        @auth
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('user.profile.show') }}" style="color: inherit; text-decoration: none;" data-translate="my-profile">My Profile</a></li>
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('orders.index') }}" style="color: inherit; text-decoration: none;" data-translate="my-orders">My Orders</a></li>
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('wishlist.index') }}" style="color: inherit; text-decoration: none;" data-translate="wishlist">Wishlist</a></li>
+                        @else
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('login') }}" style="color: inherit; text-decoration: none;" data-translate="login">Login</a></li>
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('register') }}" style="color: inherit; text-decoration: none;" data-translate="register">Register</a></li>
+                        @endauth
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: var(--space-md); color: white;" data-translate="contact">Contact</h4>
+                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
+                        <i class="fas fa-envelope"></i>
+                        info@example.com
+                    </p>
+                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
+                        <i class="fas fa-phone"></i>
+                        +962 6 123 4567
+                    </p>
+                    <p style="color: var(

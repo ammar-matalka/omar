@@ -8,30 +8,25 @@ use Illuminate\Support\Facades\Session;
 
 class LanguageController extends Controller
 {
-    /**
-     * Switch language and redirect back
-     */
     public function switch(Request $request)
     {
         $language = $request->language;
         
-        // Validate language
+        // تأكد من أن اللغة صحيحة
         if (!in_array($language, ['en', 'ar'])) {
-            $language = 'en'; // Default to English
+            $language = 'en';
         }
         
-        // Set the application locale
-        App::setLocale($language);
-        
-        // Store language preference in session
+        // احفظ في الـ session
         Session::put('locale', $language);
+        Session::save();
+        
+        // طبق فوراً
+        App::setLocale($language);
         
         return redirect()->back()->with('success', __('Language changed successfully'));
     }
     
-    /**
-     * Get current language
-     */
     public function current()
     {
         return response()->json([

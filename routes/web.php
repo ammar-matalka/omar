@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\EducationalCardsController;
 
 /*
@@ -17,17 +16,12 @@ use App\Http\Controllers\EducationalCardsController;
 */
 
 // ====================================
-// AUTHENTICATION ROUTES (CUSTOM)
+// AUTHENTICATION ROUTES (SIMPLE)
 // ====================================
 
-// Step Registration Routes
-Route::get('/register', [App\Http\Controllers\Auth\StepRegistrationController::class, 'showStep1'])->name('register')->middleware('guest');
-Route::get('/register/step1', [App\Http\Controllers\Auth\StepRegistrationController::class, 'showStep1'])->name('register.step1')->middleware('guest');
-Route::post('/register/step1', [App\Http\Controllers\Auth\StepRegistrationController::class, 'processStep1'])->name('register.step1.process')->middleware('guest');
-Route::get('/register/verify', [App\Http\Controllers\Auth\StepRegistrationController::class, 'showStep2'])->name('register.step2')->middleware('guest');
-Route::post('/register/step2', [App\Http\Controllers\Auth\StepRegistrationController::class, 'processStep2'])->name('register.step2.process')->middleware('guest');
-Route::post('/register/resend', [App\Http\Controllers\Auth\StepRegistrationController::class, 'resendCode'])->name('register.resend')->middleware('guest');
-Route::get('/register/back', [App\Http\Controllers\Auth\StepRegistrationController::class, 'backToStep1'])->name('register.back')->middleware('guest');
+// Simple Registration Routes (بدون كود تحقق)
+Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register')->middleware('guest');
+Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->middleware('guest');
 
 // Login Routes
 Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
@@ -40,7 +34,7 @@ Route::post('/password/email', [App\Http\Controllers\Auth\ForgotPasswordControll
 Route::get('/password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset')->middleware('guest');
 Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update')->middleware('guest');
 
-// Email Verification Routes
+// Email Verification Routes (اختياري - يمكنك حذفها إذا لم تكن تريد التحقق من الإيميل)
 Route::get('/email/verify', [App\Http\Controllers\Auth\VerificationController::class, 'show'])->name('verification.notice')->middleware('auth');
 Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Auth\VerificationController::class, 'verify'])->name('verification.verify')->middleware(['auth', 'signed']);
 Route::post('/email/resend', [App\Http\Controllers\Auth\VerificationController::class, 'resend'])->name('verification.resend')->middleware(['auth', 'throttle:6,1']);
@@ -49,11 +43,6 @@ Route::post('/email/resend', [App\Http\Controllers\Auth\VerificationController::
 Route::get('/password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordController::class, 'showConfirmForm'])->name('password.confirm')->middleware('auth');
 Route::post('/password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordController::class, 'confirm'])->middleware('auth');
 
-// ====================================
-// LANGUAGE SWITCHING
-// ====================================
-Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
-Route::get('/language/current', [LanguageController::class, 'current'])->name('language.current');
 
 // ====================================
 // PUBLIC ROUTES

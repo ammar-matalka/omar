@@ -19,7 +19,7 @@
         box-shadow: var(--shadow-2xl);
         overflow: hidden;
         width: 100%;
-        max-width: 450px;
+        max-width: 500px;
         margin: 0 var(--space-md);
     }
     
@@ -43,43 +43,18 @@
         animation: float 20s ease-in-out infinite;
     }
     
-    .step-indicator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-md);
-        margin-bottom: var(--space-lg);
-        position: relative;
-        z-index: 1;
-    }
-    
-    .step {
-        width: 40px;
-        height: 40px;
+    .auth-icon {
+        width: 64px;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.2);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 600;
-        font-size: 0.875rem;
+        margin: 0 auto var(--space-lg);
+        font-size: 1.5rem;
         position: relative;
-    }
-    
-    .step.active {
-        background: white;
-        color: var(--secondary-600);
-        box-shadow: 0 0 0 4px rgba(255,255,255,0.3);
-    }
-    
-    .step.inactive {
-        background: rgba(255,255,255,0.3);
-        color: white;
-    }
-    
-    .step-connector {
-        width: 40px;
-        height: 2px;
-        background: rgba(255,255,255,0.3);
+        z-index: 1;
     }
     
     .auth-title {
@@ -101,41 +76,16 @@
         padding: var(--space-2xl);
     }
     
-    .info-box {
-        background: linear-gradient(135deg, var(--info-50), var(--primary-50));
-        border: 1px solid var(--info-200);
-        border-radius: var(--radius-lg);
-        padding: var(--space-lg);
-        margin-bottom: var(--space-xl);
-        display: flex;
-        gap: var(--space-md);
-        align-items: flex-start;
-    }
-    
-    .info-icon {
-        color: var(--info-600);
-        font-size: 1.25rem;
-        margin-top: 2px;
-    }
-    
-    .info-content h4 {
-        font-weight: 600;
-        color: var(--info-800);
-        margin-bottom: var(--space-xs);
-        font-size: 0.95rem;
-    }
-    
-    .info-content p {
-        color: var(--info-700);
-        font-size: 0.875rem;
-        line-height: 1.5;
-        margin: 0;
-    }
-    
     .auth-form {
         display: flex;
         flex-direction: column;
         gap: var(--space-lg);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-md);
     }
     
     .form-group {
@@ -177,7 +127,7 @@
     .form-icon {
         position: absolute;
         left: var(--space-md);
-        top: 50%;
+        top: calc(50% + 10px);
         transform: translateY(-50%);
         color: var(--on-surface-variant);
         font-size: 1.125rem;
@@ -186,6 +136,49 @@
     
     .form-input:focus + .form-icon {
         color: var(--secondary-500);
+    }
+    
+    .password-toggle {
+        position: absolute;
+        right: var(--space-md);
+        top: calc(50% + 10px);
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--on-surface-variant);
+        cursor: pointer;
+        font-size: 1.125rem;
+        transition: color var(--transition-fast);
+    }
+    
+    .password-toggle:hover {
+        color: var(--secondary-500);
+    }
+    
+    .password-strength {
+        margin-top: var(--space-sm);
+        padding: var(--space-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        transition: all var(--transition-fast);
+    }
+    
+    .password-strength.weak {
+        background: var(--error-50);
+        color: var(--error-700);
+        border: 1px solid var(--error-200);
+    }
+    
+    .password-strength.medium {
+        background: var(--warning-50);
+        color: var(--warning-700);
+        border: 1px solid var(--warning-200);
+    }
+    
+    .password-strength.strong {
+        background: var(--success-50);
+        color: var(--success-700);
+        border: 1px solid var(--success-200);
     }
     
     .error-message {
@@ -281,6 +274,12 @@
         50% { transform: translateY(-10px) rotate(3deg); }
     }
     
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+    
     @media (max-width: 480px) {
         .auth-card {
             margin: 0 var(--space-sm);
@@ -295,20 +294,6 @@
         .auth-title {
             font-size: 1.5rem;
         }
-        
-        .step-indicator {
-            gap: var(--space-sm);
-        }
-        
-        .step {
-            width: 35px;
-            height: 35px;
-            font-size: 0.75rem;
-        }
-        
-        .step-connector {
-            width: 30px;
-        }
     }
 </style>
 @endpush
@@ -318,30 +303,40 @@
     <div class="auth-card fade-in">
         <!-- Header -->
         <div class="auth-header">
-            <!-- Step Indicator -->
-            <div class="step-indicator">
-                <div class="step active">1</div>
-                <div class="step-connector"></div>
-                <div class="step inactive">2</div>
+            <div class="auth-icon">
+                <i class="fas fa-user-plus"></i>
             </div>
-            
             <h1 class="auth-title">{{ __('Create Account') }}</h1>
-            <p class="auth-subtitle">{{ __('Enter your email to get started') }}</p>
+            <p class="auth-subtitle">{{ __('Join us today and start your journey') }}</p>
         </div>
         
         <!-- Body -->
         <div class="auth-body">
-            <!-- Information Box -->
-            <div class="info-box">
-                <i class="info-icon fas fa-shield-alt"></i>
-                <div class="info-content">
-                    <h4>{{ __('Secure Registration') }}</h4>
-                    <p>{{ __('We will send a verification code to your email address to ensure your account security.') }}</p>
-                </div>
-            </div>
-            
-            <form method="POST" action="{{ route('register.step1.process') }}" class="auth-form" id="registerForm">
+            <form method="POST" action="{{ route('register') }}" class="auth-form" id="registerForm">
                 @csrf
+                
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="name" class="form-label">{{ __('Full Name') }}</label>
+                    <input 
+                        id="name" 
+                        type="text" 
+                        class="form-input @error('name') error @enderror" 
+                        name="name" 
+                        value="{{ old('name') }}" 
+                        required 
+                        autocomplete="name"
+                        autofocus
+                        placeholder="{{ __('Enter your full name') }}"
+                    >
+                    <i class="form-icon fas fa-user"></i>
+                    @error('name')
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
                 
                 <!-- Email -->
                 <div class="form-group">
@@ -353,8 +348,7 @@
                         name="email" 
                         value="{{ old('email') }}" 
                         required 
-                        autocomplete="email" 
-                        autofocus
+                        autocomplete="email"
                         placeholder="{{ __('Enter your email address') }}"
                     >
                     <i class="form-icon fas fa-envelope"></i>
@@ -366,11 +360,87 @@
                     @enderror
                 </div>
                 
+                <!-- Password Row -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="form-label">{{ __('Password') }}</label>
+                        <input 
+                            id="password" 
+                            type="password" 
+                            class="form-input @error('password') error @enderror" 
+                            name="password" 
+                            required 
+                            autocomplete="new-password"
+                            placeholder="{{ __('Create password') }}"
+                            onkeyup="checkPasswordStrength()"
+                        >
+                        <i class="form-icon fas fa-lock"></i>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                        </button>
+                        <div class="password-strength" id="passwordStrength" style="display: none;"></div>
+                        @error('password')
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password_confirmation" class="form-label">{{ __('Confirm Password') }}</label>
+                        <input 
+                            id="password_confirmation" 
+                            type="password" 
+                            class="form-input" 
+                            name="password_confirmation" 
+                            required 
+                            autocomplete="new-password"
+                            placeholder="{{ __('Confirm password') }}"
+                        >
+                        <i class="form-icon fas fa-lock"></i>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation')">
+                            <i class="fas fa-eye" id="password_confirmationToggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Optional Fields Row -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone" class="form-label">{{ __('Phone Number') }} <span style="color: var(--on-surface-variant);">({{ __('Optional') }})</span></label>
+                        <input 
+                            id="phone" 
+                            type="tel" 
+                            class="form-input" 
+                            name="phone" 
+                            value="{{ old('phone') }}" 
+                            autocomplete="tel"
+                            placeholder="{{ __('Enter phone number') }}"
+                        >
+                        <i class="form-icon fas fa-phone"></i>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address" class="form-label">{{ __('Address') }} <span style="color: var(--on-surface-variant);">({{ __('Optional') }})</span></label>
+                        <input 
+                            id="address" 
+                            type="text" 
+                            class="form-input" 
+                            name="address" 
+                            value="{{ old('address') }}" 
+                            autocomplete="address"
+                            placeholder="{{ __('Enter your address') }}"
+                        >
+                        <i class="form-icon fas fa-map-marker-alt"></i>
+                    </div>
+                </div>
+                
                 <!-- Submit Button -->
                 <button type="submit" class="auth-btn" id="submitBtn">
                     <span class="btn-text">
-                        <i class="fas fa-paper-plane"></i>
-                        {{ __('Send Verification Code') }}
+                        <i class="fas fa-user-plus"></i>
+                        {{ __('Create Account') }}
                     </span>
                     <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
                 </button>
@@ -391,6 +461,64 @@
 
 @push('scripts')
 <script>
+    // Password toggle functionality
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(inputId + 'ToggleIcon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    
+    // Password strength checker
+    function checkPasswordStrength() {
+        const password = document.getElementById('password').value;
+        const strengthDiv = document.getElementById('passwordStrength');
+        
+        if (password.length === 0) {
+            strengthDiv.style.display = 'none';
+            return;
+        }
+        
+        strengthDiv.style.display = 'block';
+        
+        let score = 0;
+        let feedback = [];
+        
+        if (password.length >= 8) score++;
+        else feedback.push('{{ __("At least 8 characters") }}');
+        
+        if (/[A-Z]/.test(password)) score++;
+        else feedback.push('{{ __("Uppercase letter") }}');
+        
+        if (/[a-z]/.test(password)) score++;
+        else feedback.push('{{ __("Lowercase letter") }}');
+        
+        if (/[0-9]/.test(password)) score++;
+        else feedback.push('{{ __("Number") }}');
+        
+        if (/[@$!%*#?&]/.test(password)) score++;
+        else feedback.push('{{ __("Special character") }}');
+        
+        if (score < 3) {
+            strengthDiv.className = 'password-strength weak';
+            strengthDiv.innerHTML = '{{ __("Weak password") }} - {{ __("Add") }}: ' + feedback.join(', ');
+        } else if (score < 5) {
+            strengthDiv.className = 'password-strength medium';
+            strengthDiv.innerHTML = '{{ __("Medium password") }} - {{ __("Add") }}: ' + feedback.join(', ');
+        } else {
+            strengthDiv.className = 'password-strength strong';
+            strengthDiv.innerHTML = '{{ __("Strong password") }} ✓';
+        }
+    }
+    
     // Form submission with loading state
     document.getElementById('registerForm').addEventListener('submit', function() {
         const submitBtn = document.getElementById('submitBtn');
@@ -400,26 +528,6 @@
         submitBtn.disabled = true;
         btnText.style.display = 'none';
         spinner.style.display = 'block';
-    });
-    
-    // Email validation
-    const emailInput = document.getElementById('email');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    emailInput.addEventListener('input', function() {
-        const email = this.value;
-        const submitBtn = document.getElementById('submitBtn');
-        
-        if (email && emailRegex.test(email)) {
-            this.classList.remove('error');
-            submitBtn.disabled = false;
-        } else if (email) {
-            this.classList.add('error');
-            submitBtn.disabled = true;
-        } else {
-            this.classList.remove('error');
-            submitBtn.disabled = false;
-        }
     });
     
     // Input focus effects

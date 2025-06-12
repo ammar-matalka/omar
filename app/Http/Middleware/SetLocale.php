@@ -9,36 +9,21 @@ use Illuminate\Support\Facades\Session;
 
 class SetLocale
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
-     */
+    
     public function handle(Request $request, Closure $next)
     {
-        // Get the locale from session, URL parameter, or default to 'en'
+        // احصل على اللغة من الـ session
         $locale = Session::get('locale', config('app.locale', 'en'));
         
-        // Check if locale is passed as URL parameter
-        if ($request->has('lang')) {
-            $requestedLocale = $request->get('lang');
-            if (in_array($requestedLocale, ['en', 'ar'])) {
-                $locale = $requestedLocale;
-                Session::put('locale', $locale);
-            }
-        }
-        
-        // Validate locale
+        // تأكد من أن اللغة صحيحة
         if (!in_array($locale, ['en', 'ar'])) {
             $locale = 'en';
         }
         
-        // Set the application locale
+        // طبق اللغة على التطبيق
         App::setLocale($locale);
         
-        // Set direction for RTL languages
+        // ضبط الاتجاه للغات RTL
         if ($locale === 'ar') {
             config(['app.direction' => 'rtl']);
         } else {
