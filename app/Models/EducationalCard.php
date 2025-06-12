@@ -1,143 +1,13 @@
 <?php
 
-// ==============================================
-// Platform.php Model
-// ==============================================
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-class Platform extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'name_ar',
-        'description',
-        'description_ar',
-        'image',
-        'is_active'
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean'
-    ];
-
-    public function grades()
-    {
-        return $this->hasMany(Grade::class);
-    }
-
-    public function getImageUrlAttribute()
-    {
-        if ($this->image) {
-            return asset('storage/' . $this->image);
-        }
-        return asset('images/no-platform-image.jpg');
-    }
-}
-
-// ==============================================
-// Grade.php Model
-// ==============================================
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Grade extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'platform_id',
-        'name',
-        'name_ar',
-        'grade_number',
-        'description',
-        'description_ar',
-        'is_active'
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean',
-        'grade_number' => 'integer'
-    ];
-
-    public function platform()
-    {
-        return $this->belongsTo(Platform::class);
-    }
-
-    public function subjects()
-    {
-        return $this->hasMany(Subject::class);
-    }
-}
-
-// ==============================================
-// Subject.php Model
-// ==============================================
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Subject extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'grade_id',
-        'name',
-        'name_ar',
-        'description',
-        'description_ar',
-        'image',
-        'is_active'
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean'
-    ];
-
-    public function grade()
-    {
-        return $this->belongsTo(Grade::class);
-    }
-
-    public function educationalCards()
-    {
-        return $this->hasMany(EducationalCard::class);
-    }
-
-    public function getImageUrlAttribute()
-    {
-        if ($this->image) {
-            return asset('storage/' . $this->image);
-        }
-        return asset('images/no-subject-image.jpg');
-    }
-}
-
-// ==============================================
-// EducationalCard.php Model
-// ==============================================
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EducationalCard extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'subject_id',
         'title',
@@ -148,94 +18,69 @@ class EducationalCard extends Model
         'stock',
         'image',
         'is_active',
-        'card_type', // digital, physical, both
-        'difficulty_level' // easy, medium, hard
+        'card_type',
+        'difficulty_level'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
+        'stock' => 'integer',
     ];
 
-    public function subject()
+    /**
+     * Get the subject that owns the educational card.
+     */
+    public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
     }
 
-    public function images()
+    /**
+     * Get the images for the educational card.
+     */
+    public function images(): HasMany
     {
-        return $this->hasMany(EducationalCardImage::class)->orderBy('sort_order');
+        return $this->hasMany(EducationalCardImage::class);
     }
 
+    /**
+     * Get the primary image.
+     */
     public function primaryImage()
     {
         return $this->hasOne(EducationalCardImage::class)->where('is_primary', true);
     }
 
-    public function cartItems()
+    /**
+     * Scope active cards.
+     */
+    public function scopeActive($query)
     {
-        return $this->hasMany(CartItem::class);
+        return $query->where('is_active', true);
     }
 
-    public function orderItems()
+    /**
+     * Scope by subject.
+     */
+    public function scopeBySubject($query, $subjectId)
     {
-        return $this->hasMany(OrderItem::class);
+        return $query->where('subject_id', $subjectId);
     }
 
-    // Get main image URL
-    public function getMainImageUrlAttribute()
+    /**
+     * Scope in stock.
+     */
+    public function scopeInStock($query)
     {
-        $primaryImage = $this->primaryImage;
-        
-        if ($primaryImage) {
-            return asset('storage/' . $primaryImage->image_path);
-        }
-        
-        $firstImage = $this->images()->first();
-        if ($firstImage) {
-            return asset('storage/' . $firstImage->image_path);
-        }
-        
-        if ($this->image) {
-            return asset('storage/' . $this->image);
-        }
-        
-        return asset('images/no-card-image.jpg');
+        return $query->where('stock', '>', 0);
     }
 
-    // Check if card has images
-    public function hasImages()
+    /**
+     * Get formatted price.
+     */
+    public function getFormattedPriceAttribute()
     {
-        return $this->images()->exists() || !empty($this->image);
-    }
-}
-
-// ==============================================
-// EducationalCardImage.php Model
-// ==============================================
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class EducationalCardImage extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'educational_card_id',
-        'image_path',
-        'is_primary',
-        'sort_order'
-    ];
-
-    protected $casts = [
-        'is_primary' => 'boolean'
-    ];
-
-    public function educationalCard()
-    {
-        return $this->belongsTo(EducationalCard::class);
+        return '$' . number_format($this->price, 2);
     }
 }
