@@ -429,6 +429,24 @@
         font-weight: 600;
         font-size: 0.875rem;
     }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.375rem;
+        margin-left: 0.5rem;
+    }
+
+    .badge-warning {
+        color: #212529;
+        background-color: #ffc107;
+    }
     
     @media (max-width: 768px) {
         .dashboard-grid {
@@ -645,4 +663,177 @@
                     {{ __('View All') }}
                 </a>
             </div>
-            <div class="activity
+            <div class="activity-list">
+                @forelse($recentTestimonials as $testimonial)
+                    <div class="activity-item">
+                        <div class="testimonial-item">
+                            <div class="testimonial-avatar">
+                                {{ substr($testimonial->user->name, 0, 1) }}
+                            </div>
+                            <div class="testimonial-content">
+                                <div class="testimonial-text">{{ $testimonial->review }}</div>
+                                <div class="testimonial-meta">
+                                    <span>{{ $testimonial->user->name }}</span>
+                                    <div class="testimonial-rating">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="fas fa-star {{ $i <= $testimonial->rating ? 'star' : '' }}"></i>
+                                        @endfor
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p>{{ __('No recent testimonials') }}</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+        
+        <!-- Recent Conversations -->
+        <div class="activity-card fade-in">
+            <div class="activity-header">
+                <h3 class="activity-title">
+                    <i class="fas fa-comments"></i>
+                    {{ __('Recent Conversations') }}
+                    @if($unreadConversationsCount > 0)
+                        <span class="badge badge-warning">{{ $unreadConversationsCount }}</span>
+                    @endif
+                </h3>
+                <a href="{{ route('admin.conversations.index') }}" class="view-all-link">
+                    {{ __('View All') }}
+                </a>
+            </div>
+            <div class="activity-list">
+                @forelse($recentConversations as $conversation)
+                    <div class="activity-item">
+                        <div class="conversation-item">
+                            <div class="conversation-avatar">
+                                {{ substr($conversation->user->name, 0, 1) }}
+                            </div>
+                            <div class="conversation-content">
+                                <div class="conversation-title">{{ $conversation->subject }}</div>
+                                <div class="conversation-meta">
+                                    <span>{{ $conversation->user->name }}</span>
+                                    @if(!$conversation->is_read_by_admin)
+                                        <span class="unread-badge">{{ __('New') }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <p>{{ __('No recent conversations') }}</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Monthly Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: @json($monthlyLabels),
+                datasets: [{
+                    label: '{{ __("Revenue") }}',
+                    data: @json($monthlyData),
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        hoverBackgroundColor: '#6366f1'
+                    }
+                }
+            }
+        });
+
+        // Sales by Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @json($categoryLabels),
+                datasets: [{
+                    data: @json($categoryData),
+                    backgroundColor: [
+                        '#6366f1',
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444',
+                        '#8b5cf6',
+                        '#06b6d4'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    });
+</script>
+@endpush

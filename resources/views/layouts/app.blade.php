@@ -262,47 +262,6 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            transition: all var(--transition-normal);
-        }
-        
-        /* RTL Support */
-        [dir="rtl"] {
-            direction: rtl;
-        }
-        
-        [dir="rtl"] .navbar {
-            direction: rtl;
-        }
-        
-        [dir="rtl"] .nav-links {
-            direction: rtl;
-        }
-        
-        /* Language Toggle Button */
-        .language-toggle {
-            padding: 8px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background: var(--surface);
-            color: var(--on-surface);
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all var(--transition-fast);
-            font-family: inherit;
-        }
-        
-        .language-toggle:hover {
-            border-color: var(--primary-500);
-            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
-        }
-        
-        .language-toggle:focus {
-            outline: none;
-            border-color: var(--primary-500);
-            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
         }
         
         /* Utility classes */
@@ -612,14 +571,14 @@
                 
                 <!-- Navigation Links -->
                 <ul class="nav-links">
-                    <li><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" data-translate="home">Home</a></li>
-                    <li><a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" data-translate="products">Products</a></li>
-                    <li><a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}" data-translate="educational-cards">Educational Cards</a></li>
+                    <li><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
+                    <li><a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">Products</a></li>
+                    <li><a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}">Educational Cards</a></li>
                     
                     @auth
                         <!-- User Menu -->
                         <li class="dropdown">
-                            <a href="{{ route('user.profile.show') }}" class="nav-link" data-translate="my-profile">
+                            <a href="{{ route('user.profile.show') }}" class="nav-link">
                                 <i class="fas fa-user"></i>
                                 {{ Auth::user()->name }}
                             </a>
@@ -627,7 +586,7 @@
                         
                         <!-- Cart Icon -->
                         <li>
-                            <a href="{{ route('cart.index') }}" class="nav-link" data-translate="cart">
+                            <a href="{{ route('cart.index') }}" class="nav-link">
                                 <i class="fas fa-shopping-cart"></i>
                                 Cart
                             </a>
@@ -635,7 +594,7 @@
                         
                         <!-- Wishlist Icon -->
                         <li>
-                            <a href="{{ route('wishlist.index') }}" class="nav-link" data-translate="wishlist">
+                            <a href="{{ route('wishlist.index') }}" class="nav-link">
                                 <i class="fas fa-heart"></i>
                                 Wishlist
                             </a>
@@ -645,25 +604,16 @@
                         <li>
                             <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                                 @csrf
-                                <button type="submit" class="btn btn-secondary btn-sm" data-translate="logout">
+                                <button type="submit" class="btn btn-secondary btn-sm">
                                     <i class="fas fa-sign-out-alt"></i>
                                     Logout
                                 </button>
                             </form>
                         </li>
                     @else
-                        <li><a href="{{ route('login') }}" class="btn btn-secondary btn-sm" data-translate="login">Login</a></li>
-                        <li><a href="{{ route('register') }}" class="btn btn-primary btn-sm" data-translate="register">Register</a></li>
+                        <li><a href="{{ route('login') }}" class="btn btn-secondary btn-sm">Login</a></li>
+                        <li><a href="{{ route('register') }}" class="btn btn-primary btn-sm">Register</a></li>
                     @endauth
-                    
-                    <!-- Language Toggle Button -->
-                    <li>
-                        <button onclick="toggleLanguage()" id="languageBtn" class="language-toggle">
-                            <span id="flagIcon">🇺🇸</span>
-                            <span id="langText">English</span>
-                            <span style="margin-left: 5px;">⇄</span>
-                        </button>
-                    </li>
                     
                     <!-- Google Translate Widget -->
                     <li style="margin-left: 15px; padding: 5px;">
@@ -717,6 +667,39 @@
             <div class="grid grid-cols-4">
                 <div>
                     <h3 style="margin-bottom: var(--space-md); color: white;">{{ config('app.name') }}</h3>
+                    <p style="color: var(--gray-400);">Your trusted partner for educational products and services.</p>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: var(--space-md); color: white;">Quick Links</h4>
+                    <ul style="list-style: none; color: var(--gray-400);">
+                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('home') }}" style="color: inherit; text-decoration: none;">Home</a></li>
+                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('products.index') }}" style="color: inherit; text-decoration: none;">Products</a></li>
+                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('educational-cards.index') }}" style="color: inherit; text-decoration: none;">Educational Cards</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: var(--space-md); color: white;">Account</h4>
+                    <ul style="list-style: none; color: var(--gray-400);">
+                        @auth
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('user.profile.show') }}" style="color: inherit; text-decoration: none;">My Profile</a></li>
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('orders.index') }}" style="color: inherit; text-decoration: none;">My Orders</a></li>
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('wishlist.index') }}" style="color: inherit; text-decoration: none;">Wishlist</a></li>
+                        @else
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('login') }}" style="color: inherit; text-decoration: none;">Login</a></li>
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('register') }}" style="color: inherit; text-decoration: none;">Register</a></li>
+                        @endauth
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: var(--space-md); color: white;">Contact</h4>
+                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
+                        <i class="fas fa-envelope"></i>
+                        info@example.com
+                    </p>
+                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
+                        <i class="fas fa-phone"></i>
+                        +962 6 123 4567
+                    </p>
                     <p style="color: var(--gray-400);">
                         <i class="fas fa-map-marker-alt"></i>
                         Irbid, Jordan
@@ -730,155 +713,6 @@
         </div>
     </footer>
 
-    <!-- Language Toggle Script -->
-    <script>
-        // تعريف المتغيرات العامة
-        let currentLanguage = localStorage.getItem('siteLanguage') || 'en';
-        
-        // قاموس الترجمات
-        const translations = {
-            'home': { en: 'Home', ar: 'الرئيسية' },
-            'products': { en: 'Products', ar: 'المنتجات' },
-            'educational-cards': { en: 'Educational Cards', ar: 'البطاقات التعليمية' },
-            'cart': { en: 'Cart', ar: 'السلة' },
-            'wishlist': { en: 'Wishlist', ar: 'المفضلة' },
-            'login': { en: 'Login', ar: 'تسجيل الدخول' },
-            'register': { en: 'Register', ar: 'تسجيل جديد' },
-            'logout': { en: 'Logout', ar: 'تسجيل الخروج' },
-            'my-profile': { en: 'My Profile', ar: 'ملفي الشخصي' },
-            'my-orders': { en: 'My Orders', ar: 'طلباتي' },
-            'quick-links': { en: 'Quick Links', ar: 'روابط سريعة' },
-            'account': { en: 'Account', ar: 'الحساب' },
-            'contact': { en: 'Contact', ar: 'اتصل بنا' },
-            'footer-description': { 
-                en: 'Your trusted partner for educational products and services.', 
-                ar: 'شريكك الموثوق للمنتجات والخدمات التعليمية.' 
-            }
-        };
-        
-        // تطبيق اللغة عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            applyLanguage(currentLanguage);
-            updateButton();
-        });
-        
-        // دالة تبديل اللغة
-        function toggleLanguage() {
-            if (currentLanguage === 'en') {
-                currentLanguage = 'ar';
-                applyLanguage('ar');
-            } else {
-                currentLanguage = 'en';
-                applyLanguage('en');
-            }
-            
-            // حفظ اللغة في localStorage
-            localStorage.setItem('siteLanguage', currentLanguage);
-            updateButton();
-        }
-        
-        // تحديث نص وأيقونة الزر
-        function updateButton() {
-            const flagIcon = document.getElementById('flagIcon');
-            const langText = document.getElementById('langText');
-            
-            if (currentLanguage === 'ar') {
-                flagIcon.textContent = '🇸🇦';
-                langText.textContent = 'العربية';
-            } else {
-                flagIcon.textContent = '🇺🇸';
-                langText.textContent = 'English';
-            }
-        }
-        
-        // تطبيق اللغة على الصفحة
-        function applyLanguage(lang) {
-            // تغيير اتجاه الصفحة
-            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-            document.documentElement.setAttribute('lang', lang === 'ar' ? 'ar' : 'en');
-            
-            // تطبيق الترجمات على العناصر
-            const elementsToTranslate = document.querySelectorAll('[data-translate]');
-            elementsToTranslate.forEach(element => {
-                const key = element.getAttribute('data-translate');
-                if (translations[key] && translations[key][lang]) {
-                    // إذا كان العنصر يحتوي على أيقونة، احتفظ بها
-                    const icon = element.querySelector('i');
-                    if (icon) {
-                        const iconHtml = icon.outerHTML;
-                        element.innerHTML = iconHtml + ' ' + translations[key][lang];
-                    } else {
-                        element.textContent = translations[key][lang];
-                    }
-                }
-            });
-            
-            // تطبيق خط اللغة العربية إذا لزم الأمر
-            if (lang === 'ar') {
-                document.body.style.fontFamily = "'Cairo', 'Inter', system-ui, -apple-system, sans-serif";
-            } else {
-                document.body.style.fontFamily = "'Inter', 'Cairo', system-ui, -apple-system, sans-serif";
-            }
-        }
-        
-        // دالة لإضافة ترجمة ديناميكية
-        function addTranslation(key, enText, arText) {
-            translations[key] = { en: enText, ar: arText };
-        }
-        
-        // دالة للحصول على النص المترجم
-        function getTranslation(key) {
-            return translations[key] && translations[key][currentLanguage] 
-                ? translations[key][currentLanguage] 
-                : key;
-        }
-        
-        // دالة لإعادة تطبيق اللغة (مفيدة للمحتوى الديناميكي)
-        function reapplyLanguage() {
-            applyLanguage(currentLanguage);
-        }
-        
-        // تصدير الدوال للاستخدام العام
-        window.toggleLanguage = toggleLanguage;
-        window.addTranslation = addTranslation;
-        window.getTranslation = getTranslation;
-        window.reapplyLanguage = reapplyLanguage;
-        window.currentLanguage = currentLanguage;
-    </script>
-
     @stack('scripts')
 </body>
-</html>--gray-400);" data-translate="footer-description">Your trusted partner for educational products and services.</p>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: var(--space-md); color: white;" data-translate="quick-links">Quick Links</h4>
-                    <ul style="list-style: none; color: var(--gray-400);">
-                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('home') }}" style="color: inherit; text-decoration: none;" data-translate="home">Home</a></li>
-                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('products.index') }}" style="color: inherit; text-decoration: none;" data-translate="products">Products</a></li>
-                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('educational-cards.index') }}" style="color: inherit; text-decoration: none;" data-translate="educational-cards">Educational Cards</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: var(--space-md); color: white;" data-translate="account">Account</h4>
-                    <ul style="list-style: none; color: var(--gray-400);">
-                        @auth
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('user.profile.show') }}" style="color: inherit; text-decoration: none;" data-translate="my-profile">My Profile</a></li>
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('orders.index') }}" style="color: inherit; text-decoration: none;" data-translate="my-orders">My Orders</a></li>
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('wishlist.index') }}" style="color: inherit; text-decoration: none;" data-translate="wishlist">Wishlist</a></li>
-                        @else
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('login') }}" style="color: inherit; text-decoration: none;" data-translate="login">Login</a></li>
-                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('register') }}" style="color: inherit; text-decoration: none;" data-translate="register">Register</a></li>
-                        @endauth
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: var(--space-md); color: white;" data-translate="contact">Contact</h4>
-                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
-                        <i class="fas fa-envelope"></i>
-                        info@example.com
-                    </p>
-                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
-                        <i class="fas fa-phone"></i>
-                        +962 6 123 4567
-                    </p>
-                    <p style="color: var(
+</html>

@@ -2,7 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EducationalCardsController;
+use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Auth\ConfirmPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -144,12 +151,11 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
 // ====================================
 // ADMIN ROUTES
 // ====================================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
-    
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {    
     // Dashboard Routes
-    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/notifications', [App\Http\Controllers\Admin\DashboardController::class, 'getNotificationCounts'])->name('dashboard.notifications');
-    Route::get('/dashboard/export', [App\Http\Controllers\Admin\DashboardController::class, 'exportDashboardData'])->name('dashboard.export');
+    Route::get('/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/notifications', [App\Http\Controllers\Admin\AdminDashboardController::class, 'getNotificationCounts'])->name('dashboard.notifications');
+    Route::get('/dashboard/export', [App\Http\Controllers\Admin\AdminDashboardController::class, 'exportDashboardData'])->name('dashboard.export');
     
     // Admin Profile Routes
     Route::get('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('profile.show');
@@ -186,7 +192,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/conversations', [App\Http\Controllers\Admin\ConversationController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/{conversation}', [App\Http\Controllers\Admin\ConversationController::class, 'show'])->name('conversations.show');
     Route::post('/conversations/{conversation}/reply', [App\Http\Controllers\Admin\ConversationController::class, 'reply'])->name('conversations.reply');
-    Route::post('/conversations/mark-all-read', [App\Http\Controllers\Admin\DashboardController::class, 'markAllConversationsRead'])->name('conversations.mark-all-read');
+    Route::post('/conversations/mark-all-read', [AdminDashboardController::class, 'markAllConversationsRead'])->name('conversations.mark-all-read');
     
     // Testimonials Management
     Route::get('/testimonials', [App\Http\Controllers\Admin\TestimonialController::class, 'index'])->name('testimonials.index');
@@ -194,7 +200,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('/testimonials/{testimonial}/approve', [App\Http\Controllers\Admin\TestimonialController::class, 'approve'])->name('testimonials.approve');
     Route::patch('/testimonials/{testimonial}/reject', [App\Http\Controllers\Admin\TestimonialController::class, 'reject'])->name('testimonials.reject');
     Route::delete('/testimonials/{testimonial}', [App\Http\Controllers\Admin\TestimonialController::class, 'destroy'])->name('testimonials.destroy');
-    Route::post('/testimonials/mark-all-reviewed', [App\Http\Controllers\Admin\DashboardController::class, 'markAllTestimonialsReviewed'])->name('testimonials.mark-all-reviewed');
+    Route::post('/testimonials/mark-all-reviewed', [App\Http\Controllers\Admin\AdminDashboardController::class, 'markAllTestimonialsReviewed'])->name('testimonials.mark-all-reviewed');
     
     // Coupons Management
     Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);

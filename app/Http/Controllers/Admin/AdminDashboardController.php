@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 
-class DashboardController extends Controller
+class AdminDashboardController extends Controller
 {
     /**
      * Display the dashboard page.
@@ -75,7 +75,7 @@ class DashboardController extends Controller
         
         // === DATA FOR CHARTS ===
         
-        // 1. Sales by Category Chart Data
+        // 1. Sales by Category Chart Data (Fixed for SQLite)
         $salesByCategory = DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
@@ -88,34 +88,27 @@ class DashboardController extends Controller
         $categoryLabels = $salesByCategory->pluck('name');
         $categoryData = $salesByCategory->pluck('total_sales');
         
-        // 2. Monthly Revenue Chart Data (last 6 months)
-        $monthlyRevenue = Order::select(
-                DB::raw('YEAR(created_at) as year'),
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('SUM(total_amount) as total')
-            )
-            ->where('created_at', '>=', now()->subMonths(6))
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'asc')
-            ->orderBy('month', 'asc')
-            ->get();
+        // 2. Monthly Revenue Chart Data (Fixed for SQLite - last 6 months)
+        $monthlyRevenue = collect();
         
-        // Prepare monthly data for Chart.js
-        $monthlyLabels = [];
-        $monthlyData = [];
-        
-        // Fill in missing months with 0
+        // Get data using SQLite compatible date functions
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $monthName = $date->format('M Y');
-            $monthlyLabels[] = $monthName;
+            $startOfMonth = $date->startOfMonth()->format('Y-m-d H:i:s');
+            $endOfMonth = $date->endOfMonth()->format('Y-m-d H:i:s');
             
-            $monthData = $monthlyRevenue->where('year', $date->year)
-                                      ->where('month', $date->month)
-                                      ->first();
+            $revenue = Order::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->sum('total_amount');
             
-            $monthlyData[] = $monthData ? (float)$monthData->total : 0;
+            $monthlyRevenue->push([
+                'month' => $date->format('M Y'),
+                'revenue' => $revenue
+            ]);
         }
+        
+        // Prepare monthly data for Chart.js
+        $monthlyLabels = $monthlyRevenue->pluck('month');
+        $monthlyData = $monthlyRevenue->pluck('revenue');
         
         // Return the view with all variables including notification counts
         return view('admin.dashboard', compact(
