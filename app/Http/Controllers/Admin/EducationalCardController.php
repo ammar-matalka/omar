@@ -80,8 +80,10 @@ class EducationalCardController extends Controller
     public function show(EducationalCard $educationalCard)
     {
         $educationalCard->load(['subject.grade.platform', 'images']);
+            $card = $educationalCard;
         return view('admin.educational-cards.show', compact('educationalCard'));
     }
+    
 
     public function edit(EducationalCard $educationalCard)
     {

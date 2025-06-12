@@ -60,6 +60,11 @@ class EducationalCard extends Model
         return $query->where('is_active', true);
     }
 
+    public function getRouteKeyName()
+{
+    return 'id'; // أو أي حقل آخر تريد استخدامه
+}
+
     /**
      * Scope by subject.
      */
