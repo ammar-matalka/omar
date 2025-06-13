@@ -74,6 +74,14 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     // Mark conversation as read
     Route::patch('conversations/{conversation}/mark-read', [UserConversationController::class, 'markAsRead'])
         ->name('conversations.mark-read');
+    
+    // الطرق المفقودة
+    Route::get('conversations/{conversation}/check-new-messages', [UserConversationController::class, 'checkNewMessages'])
+        ->name('conversations.check-new-messages');
+    
+    // هذا هو المفقود الرئيسي:
+    Route::get('conversations/unread-count', [UserConversationController::class, 'getUnreadCount'])
+        ->name('conversations.unread-count');
 });
 
 // Alternative routes without 'user' prefix (if needed)
@@ -346,4 +354,55 @@ if (app()->environment('local')) {
 
         return "<pre>$structure</pre>";
     })->name('debug.structure');
+}
+
+if (app()->environment('local')) {
+    Route::get('/debug/conversation-form', function () {
+        return view('debug.conversation-form');
+    })->name('debug.conversation-form');
+    
+    Route::post('/debug/test-reply', function (Request $request) {
+        Log::info('=== DEBUG TEST REPLY ===', [
+            'method' => $request->method(),
+            'all_data' => $request->all(),
+            'headers' => $request->headers->all(),
+            'files' => $request->files->all(),
+            'content_type' => $request->header('Content-Type'),
+            'raw_input' => $request->getContent(),
+            'has_message' => $request->has('message'),
+            'message_value' => $request->input('message'),
+            'is_ajax' => $request->ajax(),
+            'expects_json' => $request->expectsJson(),
+        ]);
+        
+        $validator = Validator::make($request->all(), [
+            'message' => 'required|string|max:2000',
+        ]);
+        
+        if ($validator->fails()) {
+            Log::error('DEBUG: Validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'input' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()->toArray(),
+                'debug' => [
+                    'input' => $request->all(),
+                    'has_message' => $request->has('message'),
+                    'message_value' => $request->input('message'),
+                ]
+            ], 422);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Test successful',
+            'debug' => [
+                'input' => $request->all(),
+                'validated' => $validator->validated()
+            ]
+        ]);
+    })->name('debug.test-reply');
 }

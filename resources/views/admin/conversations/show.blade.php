@@ -19,6 +19,52 @@
 
 @push('styles')
 <style>
+/* متغيرات CSS للأدمن */
+:root {
+    --admin-primary-500: #3b82f6;
+    --admin-primary-600: #2563eb;
+    --admin-secondary-50: #f8fafc;
+    --admin-secondary-100: #f1f5f9;
+    --admin-secondary-200: #e2e8f0;
+    --admin-secondary-300: #cbd5e1;
+    --admin-secondary-600: #475569;
+    --admin-secondary-700: #334155;
+    --admin-secondary-900: #0f172a;
+    
+    --success-100: #dcfce7;
+    --success-500: #22c55e;
+    --success-600: #16a34a;
+    --success-700: #15803d;
+    
+    --error-50: #fef2f2;
+    --error-200: #fecaca;
+    --error-500: #ef4444;
+    --error-700: #b91c1c;
+    
+    --warning-100: #fef3c7;
+    --info-500: #3b82f6;
+    
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+    
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 1rem;
+    
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    --transition-fast: 150ms ease-in-out;
+    --transition-normal: 300ms ease-in-out;
+}
+
 /* تحسينات CSS للرسائل الفورية */
 .message-sending {
     opacity: 0.7;
@@ -100,6 +146,185 @@
     font-weight: 600;
     min-width: 20px;
     text-align: center;
+}
+
+/* Base Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-primary {
+    background: var(--admin-primary-500);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--admin-primary-600);
+}
+
+.btn-secondary {
+    background: var(--admin-secondary-200);
+    color: var(--admin-secondary-700);
+}
+
+.btn-success {
+    background: var(--success-500);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+.badge-danger {
+    background: var(--error-200);
+    color: var(--error-700);
+}
+
+.badge-warning {
+    background: var(--warning-100);
+    color: #92400e;
+}
+
+.badge-secondary {
+    background: var(--admin-secondary-100);
+    color: var(--admin-secondary-700);
+}
+
+.card {
+    background: white;
+    border: 1px solid var(--admin-secondary-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-normal);
+}
+
+.card-header {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--admin-secondary-200);
+    background: var(--admin-secondary-50);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-body {
+    padding: var(--space-lg);
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--admin-secondary-900);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--admin-secondary-300);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    transition: var(--transition-fast);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--admin-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Enhanced message animations */
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+div[style*="margin-bottom: var(--space-xl)"] {
+    animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Hover effects */
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Message bubble hover effects */
+div[style*="border-radius: var(--radius-xl)"]:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    div[style*="grid-template-columns: 1fr 350px"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    div[style*="height: calc(100vh - 200px)"] {
+        height: calc(100vh - 300px) !important;
+        min-height: 400px !important;
+    }
+    
+    div[style*="max-width: 75%"] {
+        max-width: 85% !important;
+    }
+    
+    div[style*="display: flex"][style*="justify-content: space-between"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: var(--space-md) !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn, .card-header, nav, .sidebar {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
 }
 </style>
 @endpush
@@ -215,7 +440,7 @@
                     </div>
                 </div>
                 
-                <!-- Reply Form -->
+                <!-- Reply Form - FIXED VERSION -->
                 <div style="border-top: 1px solid var(--admin-secondary-200); padding: var(--space-lg); background: var(--admin-secondary-50);">
                     <form action="{{ route('admin.conversations.reply', $conversation) }}" method="POST" id="messageForm">
                         @csrf
@@ -236,12 +461,17 @@
                                 onfocus="this.style.borderColor='var(--admin-primary-500)'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
                                 onblur="this.style.borderColor='var(--admin-secondary-300)'; this.style.boxShadow='none';"
                             >{{ old('message') }}</textarea>
-                            @error('message')
-                                <div style="color: var(--error-500); font-size: 0.875rem; margin-top: var(--space-sm);">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    {{ $message }}
-                                </div>
-                            @enderror
+                            
+                            <!-- Error Display -->
+                            @if ($errors->any())
+                            <div style="margin-top: var(--space-sm); padding: var(--space-sm); background: var(--error-50); border: 1px solid var(--error-200); border-radius: var(--radius-md); color: var(--error-700);">
+                                <ul style="margin: 0; padding-left: var(--space-md);">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            @endif
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="font-size: 0.875rem; color: var(--admin-secondary-600);">
@@ -294,7 +524,7 @@
                     <div style="border-top: 1px solid var(--admin-secondary-200); padding-top: var(--space-lg);">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
                             <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Member Since:</span>
-                            <span style="color: var(--admin-secondary-900); font-size: 0.875rem;">{{ $conversation->user->orders->count() ?? 0 }}</span>
+                            <span style="color: var(--admin-secondary-900); font-size: 0.875rem;">{{ $conversation->user->created_at->format('M d, Y') }}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
                             <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Role:</span>
@@ -410,74 +640,6 @@
         </div>
     </div>
 </div>
-
-<style>
-/* Enhanced message animations */
-@keyframes messageSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-div[style*="margin-bottom: var(--space-xl)"] {
-    animation: messageSlideIn 0.3s ease-out;
-}
-
-/* Hover effects */
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-}
-
-/* Message bubble hover effects */
-div[style*="border-radius: var(--radius-xl)"]:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md) !important;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    div[style*="grid-template-columns: 1fr 350px"] {
-        grid-template-columns: 1fr !important;
-    }
-    
-    div[style*="height: calc(100vh - 200px)"] {
-        height: calc(100vh - 300px) !important;
-        min-height: 400px !important;
-    }
-    
-    div[style*="max-width: 75%"] {
-        max-width: 85% !important;
-    }
-    
-    div[style*="display: flex"][style*="justify-content: space-between"] {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: var(--space-md) !important;
-    }
-}
-
-/* Print styles */
-@media print {
-    .btn, .card-header, nav, .sidebar {
-        display: none !important;
-    }
-    
-    .card {
-        border: none !important;
-        box-shadow: none !important;
-    }
-}
-</style>
 @endsection
 
 @push('scripts')
@@ -720,28 +882,39 @@ class RealTimeMessaging {
             e.preventDefault();
             
             const message = textarea.value.trim();
-            if (!message) return;
+            if (!message) {
+                alert('Please enter a message before sending.');
+                return;
+            }
 
             // تعطيل الـ form
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             textarea.disabled = true;
-            sendingStatus.style.display = 'inline';
+            if (sendingStatus) sendingStatus.style.display = 'inline';
 
             try {
-                const formData = new FormData(form);
+                // إنشاء FormData بشكل صحيح
+                const formData = new FormData();
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                formData.append('message', message);
                 
+                console.log('Admin sending message:', message);
+                console.log('Form action:', form.action);
+
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
 
+                console.log('Response status:', response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Response data:', data);
                     
                     if (data.success && data.message) {
                         // إضافة الرسالة فوراً
@@ -755,20 +928,24 @@ class RealTimeMessaging {
                         
                         // التمرير إلى أسفل
                         this.scrollToBottom();
+                    } else {
+                        throw new Error(data.error || 'Failed to send message');
                     }
                 } else {
-                    throw new Error('Failed to send message');
+                    const errorData = await response.json();
+                    console.error('Error response:', errorData);
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
                 }
             } catch (error) {
                 console.error('Error sending message:', error);
-                alert('خطأ في إرسال الرسالة. يرجى المحاولة مرة أخرى.');
+                alert('خطأ في إرسال الرسالة: ' + error.message + '. يرجى المحاولة مرة أخرى.');
             } finally {
                 // إعادة تفعيل الـ form
                 submitButton.disabled = false;
                 submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reply';
                 textarea.disabled = false;
                 textarea.focus();
-                sendingStatus.style.display = 'none';
+                if (sendingStatus) sendingStatus.style.display = 'none';
             }
         });
     }
@@ -916,12 +1093,17 @@ function toggleRealTimeMessaging() {
 // Auto-initialization
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin page DOM loaded, initializing...');
+    
     // استخراج معرف المحادثة من الـ URL
     const pathParts = window.location.pathname.split('/');
     const conversationId = pathParts[pathParts.length - 1];
     
     // التحقق من وجود صفحة المحادثة
     const messagesList = document.getElementById('messagesList');
+    
+    console.log('Admin Conversation ID:', conversationId);
+    console.log('Messages list found:', !!messagesList);
     
     if (messagesList && conversationId && !isNaN(conversationId)) {
         // إنشاء مثيل من نظام الرسائل الفورية للأدمن
@@ -939,11 +1121,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (textarea) {
             textarea.focus();
         }
+    } else {
+        console.error('Failed to initialize admin real-time messaging:', {
+            messagesList: !!messagesList,
+            conversationId,
+            isValidId: !isNaN(conversationId)
+        });
     }
 });
 </script>
-@endpush-size: 0.875rem;">{{ $conversation->user->created_at->format('M d, Y') }}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Total Orders:</span>
-                            <span style="color: var(--admin-secondary-900); font
+@endpush

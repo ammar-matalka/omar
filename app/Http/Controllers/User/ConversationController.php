@@ -106,25 +106,20 @@ class ConversationController extends Controller
     
     public function reply(Request $request, Conversation $conversation)
     {
-        // تسجيل مفصل للطلب
-        Log::info('=== REPLY ATTEMPT START ===', [
+        // تسجيل تفصيلي للطلب
+        Log::info('=== USER REPLY ATTEMPT START ===', [
             'timestamp' => now(),
             'user_id' => Auth::id(),
             'conversation_id' => $conversation->id,
-            'conversation_user_id' => $conversation->user_id,
             'method' => $request->method(),
             'url' => $request->url(),
             'is_ajax' => $request->ajax(),
             'expects_json' => $request->expectsJson(),
             'content_type' => $request->header('Content-Type'),
             'accept' => $request->header('Accept'),
-            'csrf_token' => $request->header('X-CSRF-TOKEN'),
-            'all_headers' => $request->headers->all(),
             'request_data' => $request->all(),
-            'input_message' => $request->input('message'),
-            'has_message' => $request->has('message'),
-            'conversation_exists' => !is_null($conversation),
-            'user_authenticated' => Auth::check(),
+            'message_content' => $request->input('message'),
+            'message_length' => strlen($request->input('message', '')),
         ]);
 
         // تحقق من الصلاحية
@@ -132,7 +127,6 @@ class ConversationController extends Controller
             Log::warning('Unauthorized reply attempt', [
                 'user_id' => Auth::id(),
                 'conversation_user_id' => $conversation->user_id,
-                'conversation_id' => $conversation->id
             ]);
             
             if ($request->expectsJson() || $request->ajax()) {
@@ -148,15 +142,38 @@ class ConversationController extends Controller
             // التحقق من صحة البيانات
             Log::info('Starting validation');
             
-            $validated = $request->validate([
+            $rules = [
                 'message' => 'required|string|max:2000',
-            ]);
+            ];
             
+            $validator = \Validator::make($request->all(), $rules);
+            
+            if ($validator->fails()) {
+                Log::error('Validation failed', [
+                    'errors' => $validator->errors()->toArray(),
+                    'input' => $request->all(),
+                ]);
+                
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Validation failed',
+                        'errors' => $validator->errors()->toArray(),
+                        'debug' => [
+                            'received_data' => $request->all(),
+                            'validation_rules' => $rules,
+                        ]
+                    ], 422);
+                }
+                
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+            
+            $validated = $validator->validated();
             Log::info('Validation passed', ['validated_data' => $validated]);
             
             // بدء المعاملة
             DB::beginTransaction();
-            Log::info('Database transaction started');
             
             // إنشاء الرسالة
             $message = Message::create([
@@ -168,7 +185,7 @@ class ConversationController extends Controller
             
             Log::info('Message created successfully', [
                 'message_id' => $message->id,
-                'message_content' => $message->message
+                'message_content' => $message->message,
             ]);
             
             // تحديث المحادثة
@@ -182,8 +199,7 @@ class ConversationController extends Controller
             
             // تأكيد المعاملة
             DB::commit();
-            Log::info('Database transaction committed');
-
+            
             // إعداد الاستجابة
             $response_data = [
                 'success' => true,
@@ -194,41 +210,42 @@ class ConversationController extends Controller
                     'user_name' => Auth::user()->name,
                     'created_at' => $message->created_at->format('M d, h:i A'),
                     'avatar' => substr(Auth::user()->name, 0, 1)
+                ],
+                'debug' => [
+                    'timestamp' => now()->toISOString(),
+                    'conversation_id' => $conversation->id,
+                    'message_id' => $message->id,
                 ]
             ];
             
-            Log::info('Response data prepared', $response_data);
+            Log::info('Response prepared successfully', $response_data);
 
-            // إذا كان الطلب AJAX، أرجع JSON
+            // إرجاع الاستجابة
             if ($request->expectsJson() || $request->ajax()) {
-                Log::info('Returning JSON response');
-                Log::info('=== REPLY ATTEMPT SUCCESS ===');
+                Log::info('=== USER REPLY SUCCESS (JSON) ===');
                 
-                return response()->json($response_data);
+                return response()->json($response_data, 200, [
+                    'Content-Type' => 'application/json',
+                ]);
             }
             
-            Log::info('Redirecting to conversation show');
-            Log::info('=== REPLY ATTEMPT SUCCESS ===');
-            
+            Log::info('=== USER REPLY SUCCESS (REDIRECT) ===');
             return redirect()->route('user.conversations.show', $conversation)
                 ->with('success', 'Reply sent successfully.');
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             
-            Log::error('Validation error in reply', [
+            Log::error('Validation exception', [
                 'errors' => $e->errors(),
                 'input' => $request->all(),
-                'validator_messages' => $e->validator->messages()->toArray()
             ]);
             
             if ($request->expectsJson() || $request->ajax()) {
-                Log::info('=== REPLY ATTEMPT VALIDATION FAILED ===');
                 return response()->json([
                     'success' => false,
                     'error' => 'Validation failed',
                     'errors' => $e->errors(),
-                    'messages' => $e->validator->messages()->toArray()
                 ], 422);
             }
             
@@ -242,24 +259,20 @@ class ConversationController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'conversation_id' => $conversation->id,
-                'user_id' => Auth::id()
             ]);
             
             if ($request->expectsJson() || $request->ajax()) {
-                Log::info('=== REPLY ATTEMPT FAILED ===');
                 return response()->json([
                     'success' => false,
                     'error' => 'Internal server error: ' . $e->getMessage(),
-                    'debug_info' => config('app.debug') ? [
+                    'debug' => config('app.debug') ? [
                         'file' => $e->getFile(),
                         'line' => $e->getLine(),
-                        'trace' => $e->getTraceAsString()
+                        'trace' => array_slice(explode("\n", $e->getTraceAsString()), 0, 10)
                     ] : null
                 ], 500);
             }
             
-            Log::info('=== REPLY ATTEMPT FAILED ===');
             throw $e;
         }
     }
@@ -378,8 +391,3 @@ class ConversationController extends Controller
         }
     }
 }
-
-// ========================================
-// أضف أيضاً دالة تشخيص في routes/web.php (للتطوير فقط)
-// ========================================
-
