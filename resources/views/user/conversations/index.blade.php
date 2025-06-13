@@ -2,281 +2,171 @@
 
 @section('title', 'My Conversations')
 
-@push('styles')
-<style>
-.conversations-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: var(--space-2xl) var(--space-md);
-}
-
-.page-header {
-    text-align: center;
-    margin-bottom: var(--space-2xl);
-}
-
-.page-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: var(--space-md);
-}
-
-.page-subtitle {
-    color: var(--on-surface-variant);
-    font-size: 1.125rem;
-    max-width: 600px;
-    margin: 0 auto var(--space-xl);
-}
-
-.conversations-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-xl);
-    padding: var(--space-lg);
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-}
-
-.conversations-stats {
-    display: flex;
-    gap: var(--space-lg);
-    color: var(--on-surface-variant);
-    font-size: 0.875rem;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-}
-
-.conversation-card {
-    background: var(--surface);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--space-lg);
-    overflow: hidden;
-    transition: all var(--transition-normal);
-    position: relative;
-}
-
-.conversation-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-    border-color: var(--primary-300);
-}
-
-.conversation-card.unread {
-    border-left: 4px solid var(--primary-500);
-    background: linear-gradient(90deg, rgba(14, 165, 233, 0.02), var(--surface));
-}
-
-.conversation-card.unread::before {
-    content: 'NEW';
-    position: absolute;
-    top: var(--space-md);
-    right: var(--space-md);
-    background: var(--primary-500);
-    color: white;
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--radius-sm);
-    font-size: 0.625rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.conversation-header {
-    padding: var(--space-lg);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.conversation-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--on-surface);
-    margin-bottom: var(--space-sm);
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-}
-
-.conversation-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-lg);
-    color: var(--on-surface-variant);
-    font-size: 0.875rem;
-}
-
-.meta-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-}
-
-.conversation-preview {
-    padding: var(--space-lg);
-    color: var(--on-surface-variant);
-    font-size: 0.875rem;
-    line-height: 1.6;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.last-message {
-    font-style: italic;
-    color: var(--on-surface-variant);
-}
-
-.conversation-actions {
-    padding: var(--space-md) var(--space-lg);
-    background: var(--surface-variant);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.conversation-status {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    font-size: 0.75rem;
-    color: var(--on-surface-variant);
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.status-dot.read {
-    background: var(--success-500);
-}
-
-.status-dot.unread {
-    background: var(--primary-500);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-.action-buttons {
-    display: flex;
-    gap: var(--space-sm);
-}
-
-.empty-state {
-    text-align: center;
-    padding: var(--space-3xl) var(--space-lg);
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-}
-
-.empty-icon {
-    font-size: 4rem;
-    color: var(--on-surface-variant);
-    margin-bottom: var(--space-lg);
-    opacity: 0.5;
-}
-
-.empty-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--on-surface);
-    margin-bottom: var(--space-md);
-}
-
-.empty-description {
-    color: var(--on-surface-variant);
-    margin-bottom: var(--space-xl);
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-@media (max-width: 768px) {
-    .conversations-container {
-        padding: var(--space-lg) var(--space-sm);
-    }
-    
-    .page-title {
-        font-size: 2rem;
-    }
-    
-    .conversations-header {
-        flex-direction: column;
-        gap: var(--space-md);
-        text-align: center;
-    }
-    
-    .conversations-stats {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .conversation-meta {
-        flex-wrap: wrap;
-        gap: var(--space-md);
-    }
-    
-    .conversation-actions {
-        flex-direction: column;
-        gap: var(--space-md);
-        text-align: center;
-    }
-}
-</style>
-@endpush
-
 @section('content')
-<div class="conversations-container">
+<div class="container" style="padding: 2rem 0;">
     <!-- Page Header -->
-    <div class="page-header">
-        <h1 class="page-title">My Conversations</h1>
-        <p class="page-subtitle">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: #333; margin-bottom: 1rem;">
+            <i class="fas fa-comments" style="color: #0ea5e9; margin-right: 0.5rem;"></i>
+            My Conversations
+        </h1>
+        <p style="color: #666; font-size: 1.1rem;">
             Manage your conversations and get support from our team
         </p>
     </div>
 
-    <!-- Conversations Header -->
-    <div class="conversations-header">
+    <!-- Action Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <div>
-            <h2 style="font-size: 1.125rem; font-weight: 600; color: var(--on-surface); margin-bottom: var(--space-xs);">
+            <h2 style="font-size: 1.2rem; font-weight: 600; color: #333; margin-bottom: 0.5rem;">
                 Your Support Conversations
             </h2>
-            <div class="conversations-stats">
-                <div class="stat-item">
-                    <i class="fas fa-comments"></i>
-                    <span>{{ $conversations && method_exists($conversations, 'total') ? $conversations->total() : ($conversations ? $conversations->count() : 0) }} Total</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-envelope"></i>
-                    <span>{{ $conversations && method_exists($conversations, 'where') ? $conversations->where('is_read_by_user', false)->count() : 0 }} Unread</span>
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-clock"></i>
-                    <span>Active Support</span>
-                </div>
+            <div style="display: flex; gap: 1.5rem; color: #666; font-size: 0.9rem;">
+                <span>
+                    <i class="fas fa-comments" style="margin-right: 0.5rem;"></i>
+                    {{ $conversations && method_exists($conversations, 'total') ? $conversations->total() : ($conversations ? $conversations->count() : 0) }} Total
+                </span>
+                <span>
+                    <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>
+                    {{ $conversations && method_exists($conversations, 'where') ? $conversations->where('is_read_by_user', false)->count() : 0 }} Unread
+                </span>
+                <span>
+                    <i class="fas fa-clock" style="margin-right: 0.5rem;"></i>
+                    Active Support
+                </span>
             </div>
         </div>
         
-        <div>
+        <a href="{{ route('user.conversations.create') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus"></i>
+            Start New Conversation
+        </a>
+    </div>
+
+    <!-- Conversations List -->
+    @if($conversations && $conversations->count() > 0)
+        <div style="display: grid; gap: 1.5rem;">
+            @foreach($conversations as $conversation)
+            <div class="card {{ !($conversation->is_read_by_user ?? true) ? 'unread-conversation' : '' }}" style="border: 1px solid #e5e7eb; border-radius: 1rem; overflow: hidden; transition: all 0.3s ease; position: relative;">
+                
+                @if(!($conversation->is_read_by_user ?? true))
+                <div style="position: absolute; top: 1rem; right: 1rem; background: #0ea5e9; color: white; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.5px;">
+                    NEW
+                </div>
+                @endif
+
+                <div class="card-header" style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem; font-weight: 700; color: #333; margin-bottom: 0.5rem;">
+                        <i class="fas fa-comment-dots" style="color: #0ea5e9;"></i>
+                        {{ $conversation->title ?? 'Untitled Conversation' }}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1.5rem; color: #666; font-size: 0.875rem; flex-wrap: wrap;">
+                        <span>
+                            <i class="fas fa-calendar-alt" style="margin-right: 0.25rem;"></i>
+                            Started {{ isset($conversation->created_at) ? $conversation->created_at->diffForHumans() : 'recently' }}
+                        </span>
+                        <span>
+                            <i class="fas fa-clock" style="margin-right: 0.25rem;"></i>
+                            Updated {{ isset($conversation->updated_at) ? $conversation->updated_at->diffForHumans() : 'recently' }}
+                        </span>
+                        <span>
+                            <i class="fas fa-comment" style="margin-right: 0.25rem;"></i>
+                            {{ isset($conversation->messages) ? $conversation->messages->count() : 0 }} messages
+                        </span>
+                    </div>
+                </div>
+
+                @if(isset($conversation->lastMessage) && $conversation->lastMessage)
+                <div class="card-body" style="padding: 1.5rem; color: #666; font-size: 0.875rem; line-height: 1.6; border-bottom: 1px solid #e5e7eb;">
+                    <strong>{{ $conversation->lastMessage->is_from_admin ? 'Support Team' : 'You' }}:</strong>
+                    <span style="font-style: italic;">"{{ Str::limit($conversation->lastMessage->message, 120) }}"</span>
+                </div>
+                @endif
+
+                <div style="padding: 1rem 1.5rem; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #666;">
+                        @if($conversation->is_read_by_user ?? true)
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></div>
+                            <span>Read</span>
+                        @else
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: #0ea5e9;"></div>
+                            <span>New messages available</span>
+                        @endif
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <a href="{{ route('user.conversations.show', $conversation->id ?? 1) }}" class="btn btn-primary">
+                            <i class="fas fa-eye"></i>
+                            View Conversation
+                        </a>
+                        @if(!($conversation->is_read_by_user ?? true))
+                        <span style="background: #0ea5e9; color: white; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 500;">
+                            New Reply
+                        </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <!-- Pagination -->
+        @if(method_exists($conversations, 'links'))
+        <div style="display: flex; justify-content: center; margin-top: 2rem;">
+            {{ $conversations->links() }}
+        </div>
+        @endif
+    @else
+        <!-- Empty State -->
+        <div style="text-align: center; padding: 3rem 1rem; background: white; border-radius: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="font-size: 4rem; color: #ccc; margin-bottom: 1.5rem;">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 1rem;">
+                No Conversations Yet
+            </h3>
+            <p style="color: #666; margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+                You haven't started any conversations with our support team yet. 
+                Need help with something? Start a conversation and we'll be happy to assist you!
+            </p>
             <a href="{{ route('user.conversations.create') }}" class="btn btn-primary btn-lg">
                 <i class="fas fa-plus"></i>
-                Start New Conversation
+                Start Your First Conversation
             </a>
         </div>
-    </div>
+    @endif
+</div>
+
+<style>
+/* Simple hover effects */
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+}
+
+/* Unread conversation styling */
+.unread-conversation {
+    border-left: 4px solid #0ea5e9 !important;
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.02), white) !important;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem 0.5rem !important;
+    }
+    
+    div[style*="display: flex"] {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        text-align: center !important;
+    }
+    
+    div[style*="gap: 1.5rem"] {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+    }
+}
+</style>
+@endsection
 
     <!-- Conversations List -->
     @if($conversations && $conversations->count() > 0)
