@@ -6,15 +6,31 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EducationalCardsController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\Admin\ConversationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+
 use App\Http\Controllers\Auth\ConfirmPasswordController;
-
-use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
 use App\Http\Controllers\User\ConversationController as UserConversationController;
+use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
 
-
+// ====================================
+// REAL-TIME MESSAGING API ROUTES
+// ====================================
+Route::middleware(['auth'])->group(function () {
+    // للمستخدمين العاديين
+    Route::get('/user/conversations/{conversation}/check-new-messages', [UserConversationController::class, 'checkNewMessages'])
+        ->name('user.conversations.check-new-messages');
+    
+    // للأدمن
+    Route::get('/admin/conversations/{conversation}/check-new-messages', [AdminConversationController::class, 'checkNewMessages'])
+        ->name('admin.conversations.check-new-messages');
+    
+    // للحصول على آخر رسالة
+    Route::get('/conversations/{conversation}/latest-message', [UserConversationController::class, 'getLatestMessage'])
+        ->name('conversations.latest-message');
+});
 
 // Admin Conversation Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -79,6 +95,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('conversations/{conversation}/reply', [UserConversationController::class, 'reply'])
         ->name('conversations.reply');
 });
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -214,8 +231,15 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     Route::put('/profile', [App\Http\Controllers\User\ProfileController::class, 'update'])->name('profile.update');
     Route::get('/profile/change-password', [App\Http\Controllers\User\ProfileController::class, 'changePassword'])->name('profile.change-password');
     Route::put('/profile/password', [App\Http\Controllers\User\ProfileController::class, 'updatePassword'])->name('profile.update-password');
+  // Real-time routes - أضف هذه
+    Route::get('/conversations/{conversation}/check-new-messages', [App\Http\Controllers\User\ConversationController::class, 'checkNewMessages'])->name('conversations.check-new-messages');
+    
+    // هذا هو المفقود:
+    Route::get('/conversations/unread-count', [App\Http\Controllers\User\ConversationController::class, 'getUnreadCount'])->name('conversations.unread-count');
+    
+    // Mark as read
+    Route::patch('/conversations/{conversation}/mark-read', [App\Http\Controllers\User\ConversationController::class, 'markAsRead'])->name('conversations.mark-read');
 });
-
 // ====================================
 // ADMIN ROUTES
 // ====================================
@@ -257,7 +281,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
     
     // Conversations Management
-    Route::get('/conversations', [App\Http\Controllers\Admin\ConversationController::class, 'index'])->name('conversations.index');
+    Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/{conversation}', [App\Http\Controllers\Admin\ConversationController::class, 'show'])->name('conversations.show');
     Route::post('/conversations/{conversation}/reply', [App\Http\Controllers\Admin\ConversationController::class, 'reply'])->name('conversations.reply');
     Route::post('/conversations/mark-all-read', [AdminDashboardController::class, 'markAllConversationsRead'])->name('conversations.mark-all-read');

@@ -2,13 +2,109 @@
 
 @section('title', $conversation->title)
 
+@push('styles')
+<style>
+/* تحسينات CSS للرسائل الفورية */
+.message-sending {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.new-message-indicator {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: #0ea5e9;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
+    z-index: 1000;
+    transform: translateY(100px);
+    transition: transform 0.3s ease;
+    display: none;
+}
+
+.new-message-indicator.show {
+    display: block;
+    transform: translateY(0);
+}
+
+.typing-indicator {
+    display: none;
+    padding: 0.5rem 1rem;
+    background: #f3f4f6;
+    border-radius: 1rem;
+    margin: 0.5rem 0;
+    font-style: italic;
+    color: #6b7280;
+}
+
+.typing-indicator.show {
+    display: block;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.pulse {
+    animation: pulse 1s infinite;
+}
+
+.connection-status {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.connection-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.connection-dot.connected {
+    background: #22c55e;
+}
+
+.connection-dot.disconnected {
+    background: #ef4444;
+}
+
+.unread-count {
+    background: #ef4444;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+</style>
+@endpush
+
 @section('content')
 <div class="container" style="padding: 2rem 0; max-width: 1000px;">
+    <!-- CSRF Token for JavaScript -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <!-- Back Link -->
     <a href="{{ route('user.conversations.index') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #0ea5e9; text-decoration: none; font-weight: 500; margin-bottom: 2rem; transition: color 0.2s ease;">
         <i class="fas fa-arrow-left"></i>
         Back to Conversations
     </a>
+
+    <!-- New Message Indicator -->
+    <div id="newMessageIndicator" class="new-message-indicator" onclick="scrollToBottom()">
+        <i class="fas fa-arrow-down"></i>
+        رسائل جديدة
+    </div>
 
     <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
         <div style="display: flex; flex-direction: column; height: calc(100vh - 150px); min-height: 600px;">
@@ -17,6 +113,7 @@
                 <div style="font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
                     <i class="fas fa-comment-dots" style="color: #0ea5e9;"></i>
                     {{ $conversation->title }}
+                    <span class="unread-count" id="unreadCount" style="display: none;">0</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 1.5rem; color: #666; font-size: 0.875rem; flex-wrap: wrap;">
                     <span>
@@ -29,7 +126,11 @@
                     </span>
                     <span>
                         <i class="fas fa-comment" style="margin-right: 0.25rem;"></i>
-                        {{ $messages->count() }} messages
+                        <span id="messageCount">{{ $messages->count() }}</span> messages
+                    </span>
+                    <span id="connectionStatus" class="connection-status">
+                        <div class="connection-dot connected"></div>
+                        <span>Connected</span>
                     </span>
                 </div>
             </div>
@@ -52,7 +153,7 @@
                 <!-- Messages List -->
                 <div id="messagesList" style="flex: 1; padding: 1.5rem; overflow-y: auto; background: linear-gradient(180deg, white 0%, #f8f9fa 100%);">
                     @foreach($messages as $message)
-                    <div style="margin-bottom: 2rem; display: flex; gap: 1rem; {{ $message->is_from_admin ? '' : 'flex-direction: row-reverse;' }}">
+                    <div data-message-id="{{ $message->id }}" style="margin-bottom: 2rem; display: flex; gap: 1rem; {{ $message->is_from_admin ? '' : 'flex-direction: row-reverse;' }}">
                         <!-- Avatar -->
                         <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, #22c55e, #16a34a);' : 'background: linear-gradient(135deg, #0ea5e9, #0284c7);' }}">
                             @if($message->is_from_admin)
@@ -84,14 +185,21 @@
                         </div>
                     </div>
                     @endforeach
+                    
+                    <!-- Typing Indicator -->
+                    <div id="typingIndicator" class="typing-indicator">
+                        <i class="fas fa-pencil-alt"></i>
+                        Support team is typing...
+                    </div>
                 </div>
 
                 <!-- Reply Form -->
-                <form action="{{ route('user.conversations.reply', $conversation) }}" method="POST" style="border-top: 1px solid #e5e7eb; padding: 1.5rem; background: white;">
+                <form action="{{ route('user.conversations.reply', $conversation) }}" method="POST" id="messageForm" style="border-top: 1px solid #e5e7eb; padding: 1.5rem; background: white;">
                     @csrf
                     <div style="display: flex; gap: 1rem; align-items: flex-end;">
                         <textarea 
                             name="message" 
+                            id="messageTextarea"
                             style="flex: 1; min-height: 60px; max-height: 120px; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; background: white; color: #333; font-size: 0.875rem; font-family: inherit; resize: none; transition: all 0.2s ease;"
                             placeholder="Type your message here..."
                             required
@@ -100,7 +208,7 @@
                             onfocus="this.style.borderColor='#0ea5e9'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)';"
                             onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none';"
                         ></textarea>
-                        <button type="submit" style="padding: 1rem; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border: none; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; min-width: 50px; height: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <button type="submit" id="sendButton" style="padding: 1rem; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border: none; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; min-width: 50px; height: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
@@ -109,9 +217,9 @@
                             <i class="fas fa-info-circle"></i>
                             Press Ctrl+Enter to send quickly
                         </span>
-                        <span id="typingIndicator" style="display: none; color: #0ea5e9;">
-                            <i class="fas fa-pencil-alt"></i>
-                            Typing...
+                        <span id="sendingStatus" style="display: none; color: #0ea5e9;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Sending...
                         </span>
                     </div>
                 </form>
@@ -136,7 +244,7 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
                         <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Messages:</span>
-                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;">{{ $messages->count() }}</span>
+                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;" id="sidebarMessageCount">{{ $messages->count() }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
                         <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Created:</span>
@@ -144,7 +252,7 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
                         <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Last Reply:</span>
-                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;">{{ $conversation->updated_at->diffForHumans() }}</span>
+                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;" id="lastReplyTime">{{ $conversation->updated_at->diffForHumans() }}</span>
                     </div>
                 </div>
             </div>
@@ -164,6 +272,10 @@
                         <i class="fas fa-plus"></i>
                         Start New Conversation
                     </a>
+                    <button onclick="toggleRealTimeMessaging()" id="realTimeToggle" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: white; color: #333; font-size: 0.875rem; transition: all 0.2s ease; cursor: pointer; width: 100%;">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Disable Auto-refresh</span>
+                    </button>
                 </div>
             </div>
 
@@ -240,11 +352,445 @@ a[style*="display: flex"]:hover {
 }
 </style>
 
+@endsection
+
+@push('scripts')
 <script type="text/javascript">
+// ========================================
+// Real-time Messaging System
+// ========================================
+
+class RealTimeMessaging {
+    constructor(conversationId, isAdmin = false) {
+        this.conversationId = conversationId;
+        this.isAdmin = isAdmin;
+        this.lastMessageId = 0;
+        this.checkInterval = null;
+        this.isActive = true;
+        this.checkFrequency = 3000; // 3 ثواني
+        this.isRealTimeEnabled = true;
+        
+        this.init();
+    }
+
+    init() {
+        // الحصول على آخر معرف رسالة عند التحميل
+        this.getLatestMessageId();
+        
+        // بدء التحقق الدوري
+        this.startPolling();
+        
+        // إيقاف التحقق عند مغادرة الصفحة
+        this.setupVisibilityChange();
+        
+        // تحسين الـ form submission
+        this.setupFormSubmission();
+        
+        console.log('Real-time messaging initialized');
+    }
+
+    getLatestMessageId() {
+        const messages = document.querySelectorAll('#messagesList > div[data-message-id]');
+        if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            const messageId = lastMessage.getAttribute('data-message-id');
+            if (messageId) {
+                this.lastMessageId = parseInt(messageId);
+            }
+        }
+    }
+
+    startPolling() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+        }
+
+        if (!this.isRealTimeEnabled) return;
+
+        this.checkInterval = setInterval(() => {
+            if (this.isActive && document.hasFocus()) {
+                this.checkForNewMessages();
+            }
+        }, this.checkFrequency);
+
+        this.updateConnectionStatus(true);
+    }
+
+    stopPolling() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+            this.checkInterval = null;
+        }
+        this.updateConnectionStatus(false);
+    }
+
+    async checkForNewMessages() {
+        try {
+            const url = this.isAdmin 
+                ? `/admin/conversations/${this.conversationId}/check-new-messages?last_message_id=${this.lastMessageId}`
+                : `/user/conversations/${this.conversationId}/check-new-messages?last_message_id=${this.lastMessageId}`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.has_new_messages && data.messages.length > 0) {
+                    this.displayNewMessages(data.messages);
+                    this.updateNotifications(data.unread_count || 0);
+                    this.showNewMessageIndicator();
+                }
+                this.updateConnectionStatus(true);
+            } else {
+                this.updateConnectionStatus(false);
+            }
+        } catch (error) {
+            console.error('Error checking for new messages:', error);
+            this.updateConnectionStatus(false);
+        }
+    }
+
+    displayNewMessages(messages) {
+        const messagesList = document.getElementById('messagesList');
+        if (!messagesList) return;
+
+        messages.forEach(message => {
+            if (message.id > this.lastMessageId) {
+                const messageElement = this.createMessageElement(message);
+                messagesList.appendChild(messageElement);
+                this.lastMessageId = message.id;
+                
+                // إضافة تأثير الظهور
+                setTimeout(() => {
+                    messageElement.style.opacity = '1';
+                    messageElement.style.transform = 'translateY(0)';
+                }, 50);
+
+                // تحديث العدادات
+                this.updateMessageCount();
+            }
+        });
+
+        // تشغيل صوت إشعار (اختياري)
+        this.playNotificationSound();
+    }
+
+    createMessageElement(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.setAttribute('data-message-id', message.id);
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transform = 'translateY(20px)';
+        messageDiv.style.transition = 'all 0.3s ease';
+        messageDiv.style.marginBottom = '2rem';
+        messageDiv.style.display = 'flex';
+        messageDiv.style.gap = '1rem';
+        
+        if (!message.is_from_admin && !this.isAdmin) {
+            messageDiv.style.flexDirection = 'row-reverse';
+        } else if (message.is_from_admin && this.isAdmin) {
+            messageDiv.style.flexDirection = 'row-reverse';
+        }
+
+        // إنشاء الأفاتار
+        const avatar = document.createElement('div');
+        avatar.style.cssText = `
+            width: 40px; height: 40px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            color: white; font-weight: 600; font-size: 1rem; 
+            flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+        
+        if (message.is_from_admin) {
+            avatar.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            avatar.innerHTML = '<i class="fas fa-headset"></i>';
+        } else {
+            avatar.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
+            avatar.textContent = message.avatar;
+        }
+
+        // إنشاء محتوى الرسالة
+        const contentDiv = document.createElement('div');
+        contentDiv.style.cssText = 'flex: 1; max-width: 75%;';
+
+        // معلومات المرسل
+        const senderInfo = document.createElement('div');
+        senderInfo.style.cssText = `
+            font-size: 0.75rem; font-weight: 600; color: #666; 
+            margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;
+        `;
+        
+        if ((!message.is_from_admin && !this.isAdmin) || (message.is_from_admin && this.isAdmin)) {
+            senderInfo.style.justifyContent = 'flex-end';
+        }
+
+        const senderBadge = document.createElement('span');
+        senderBadge.style.cssText = `
+            padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; 
+            text-transform: uppercase; letter-spacing: 0.5px;
+        `;
+        
+        if (message.is_from_admin) {
+            senderBadge.style.cssText += 'background: #dcfce7; color: #166534;';
+            senderBadge.textContent = 'Support Team';
+        } else {
+            senderBadge.style.cssText += 'background: #dbeafe; color: #1e40af;';
+            senderBadge.textContent = this.isAdmin ? message.user_name : 'You';
+        }
+
+        const timeSpan = document.createElement('span');
+        timeSpan.style.cssText = 'font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 0.25rem;';
+        timeSpan.innerHTML = `<i class="fas fa-clock"></i> ${message.created_at}`;
+
+        senderInfo.appendChild(senderBadge);
+        senderInfo.appendChild(timeSpan);
+
+        // فقاعة الرسالة
+        const messageBubble = document.createElement('div');
+        messageBubble.style.cssText = `
+            padding: 1rem 1.5rem; border-radius: 1.5rem; margin-bottom: 0.25rem; 
+            word-wrap: break-word; line-height: 1.6; position: relative; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        `;
+        
+        if (message.is_from_admin && !this.isAdmin) {
+            messageBubble.style.cssText += `
+                background: white; color: #333; border: 1px solid #e5e7eb; 
+                border-bottom-left-radius: 0.375rem;
+            `;
+        } else if (!message.is_from_admin && !this.isAdmin) {
+            messageBubble.style.cssText += `
+                background: linear-gradient(135deg, #0ea5e9, #0284c7); 
+                color: white; border-bottom-right-radius: 0.375rem;
+            `;
+        } else if (message.is_from_admin && this.isAdmin) {
+            messageBubble.style.cssText += `
+                background: linear-gradient(135deg, #22c55e, #16a34a); 
+                color: white; border-bottom-right-radius: 0.375rem;
+            `;
+        } else {
+            messageBubble.style.cssText += `
+                background: white; color: #333; border: 1px solid #e5e7eb; 
+                border-bottom-left-radius: 0.375rem;
+            `;
+        }
+        
+        messageBubble.textContent = message.message;
+
+        contentDiv.appendChild(senderInfo);
+        contentDiv.appendChild(messageBubble);
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(contentDiv);
+
+        return messageDiv;
+    }
+
+    async setupFormSubmission() {
+        const form = document.getElementById('messageForm');
+        const textarea = document.getElementById('messageTextarea');
+        const submitButton = document.getElementById('sendButton');
+        const sendingStatus = document.getElementById('sendingStatus');
+        
+        if (!form || !textarea || !submitButton) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const message = textarea.value.trim();
+            if (!message) return;
+
+            // تعطيل الـ form
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            textarea.disabled = true;
+            sendingStatus.style.display = 'block';
+
+            try {
+                const formData = new FormData(form);
+                
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success && data.message) {
+                        // إضافة الرسالة فوراً
+                        this.displayNewMessages([data.message]);
+                        
+                        // مسح النص
+                        textarea.value = '';
+                        
+                        // تقليل حجم الـ textarea
+                        textarea.style.height = 'auto';
+                        
+                        // التمرير إلى أسفل
+                        this.scrollToBottom();
+                    }
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('خطأ في إرسال الرسالة. يرجى المحاولة مرة أخرى.');
+            } finally {
+                // إعادة تفعيل الـ form
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                textarea.disabled = false;
+                textarea.focus();
+                sendingStatus.style.display = 'none';
+            }
+        });
+    }
+
+    scrollToBottom() {
+        const messagesList = document.getElementById('messagesList');
+        if (messagesList) {
+            messagesList.scrollTo({
+                top: messagesList.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+        this.hideNewMessageIndicator();
+    }
+
+    showNewMessageIndicator() {
+        const indicator = document.getElementById('newMessageIndicator');
+        if (indicator) {
+            indicator.classList.add('show');
+        }
+    }
+
+    hideNewMessageIndicator() {
+        const indicator = document.getElementById('newMessageIndicator');
+        if (indicator) {
+            indicator.classList.remove('show');
+        }
+    }
+
+    updateNotifications(unreadCount) {
+        // تحديث عداد الرسائل غير المقروءة
+        const unreadCountElement = document.getElementById('unreadCount');
+        if (unreadCountElement) {
+            if (unreadCount > 0) {
+                unreadCountElement.textContent = unreadCount;
+                unreadCountElement.style.display = 'inline';
+            } else {
+                unreadCountElement.style.display = 'none';
+            }
+        }
+
+        // تحديث عنوان الصفحة
+        const title = document.title;
+        const baseName = title.replace(/^\(\d+\)\s*/, '');
+        
+        if (unreadCount > 0) {
+            document.title = `(${unreadCount}) ${baseName}`;
+        } else {
+            document.title = baseName;
+        }
+    }
+
+    updateMessageCount() {
+        const messageCountElements = document.querySelectorAll('#messageCount, #sidebarMessageCount');
+        const currentCount = document.querySelectorAll('#messagesList > div[data-message-id]').length;
+        
+        messageCountElements.forEach(element => {
+            element.textContent = currentCount;
+        });
+    }
+
+    updateConnectionStatus(connected) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (statusElement) {
+            const dot = statusElement.querySelector('.connection-dot');
+            const text = statusElement.querySelector('span');
+            
+            if (connected) {
+                dot.className = 'connection-dot connected';
+                text.textContent = 'Connected';
+            } else {
+                dot.className = 'connection-dot disconnected';
+                text.textContent = 'Disconnected';
+            }
+        }
+    }
+
+    playNotificationSound() {
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCTGa2+m1bi8EJHzK7+ORSA0PUqfk7bFlHgg2jdXzzXkpBS12wuzZkT8LElyx6+2rWBULTKLh6WNHDTGLz/fbiTAKGGm/8+CK');
+            audio.volume = 0.3;
+            audio.play().catch(() => {}); // تجاهل الأخطاء
+        } catch (e) {
+            // تجاهل أخطاء الصوت
+        }
+    }
+
+    setupVisibilityChange() {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.isActive = false;
+            } else {
+                this.isActive = true;
+                // تحقق فوري عند العودة للصفحة
+                setTimeout(() => {
+                    if (this.isRealTimeEnabled) {
+                        this.checkForNewMessages();
+                    }
+                }, 500);
+            }
+        });
+
+        // إيقاف عند مغادرة الصفحة
+        window.addEventListener('beforeunload', () => {
+            this.stopPolling();
+        });
+    }
+
+    toggle() {
+        this.isRealTimeEnabled = !this.isRealTimeEnabled;
+        
+        const toggleButton = document.getElementById('realTimeToggle');
+        if (toggleButton) {
+            const span = toggleButton.querySelector('span');
+            if (this.isRealTimeEnabled) {
+                this.startPolling();
+                span.textContent = 'Disable Auto-refresh';
+                toggleButton.style.background = 'white';
+            } else {
+                this.stopPolling();
+                span.textContent = 'Enable Auto-refresh';
+                toggleButton.style.background = '#fef3c7';
+            }
+        }
+    }
+
+    // تدمير المثيل
+    destroy() {
+        this.stopPolling();
+        this.isActive = false;
+    }
+}
+
+// ========================================
+// Helper Functions
+// ========================================
+
 function scrollToBottom() {
-    const messagesList = document.getElementById('messagesList');
-    if (messagesList) {
-        messagesList.scrollTop = messagesList.scrollHeight;
+    if (window.realTimeMessaging) {
+        window.realTimeMessaging.scrollToBottom();
     }
 }
 
@@ -260,40 +806,48 @@ function handleKeyDown(event) {
         event.preventDefault();
         const form = event.target.closest('form');
         if (form) {
-            form.submit();
+            form.dispatchEvent(new Event('submit', { cancelable: true }));
         }
     }
 }
 
-window.addEventListener('DOMContentLoaded', function() {
-    // Auto-scroll to bottom
-    scrollToBottom();
-    
-    // Focus on textarea
-    const textarea = document.querySelector('textarea[name="message"]');
-    if (textarea) {
-        textarea.focus();
+function toggleRealTimeMessaging() {
+    if (window.realTimeMessaging) {
+        window.realTimeMessaging.toggle();
     }
+}
+
+// ========================================
+// Auto-initialization
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    // استخراج معرف المحادثة من الـ URL
+    const pathParts = window.location.pathname.split('/');
+    const conversationId = pathParts[pathParts.length - 1];
     
-    // Typing indicator
-    let timer;
-    const indicator = document.getElementById('typingIndicator');
+    // تحديد ما إذا كان المستخدم أدمن أم لا
+    const isAdmin = window.location.pathname.includes('/admin/');
     
-    if (textarea && indicator) {
-        textarea.addEventListener('input', function() {
-            indicator.style.display = 'block';
-            clearTimeout(timer);
-            timer = setTimeout(function() {
-                indicator.style.display = 'none';
-            }, 2000);
-        });
+    // التحقق من وجود صفحة المحادثة
+    const messagesList = document.getElementById('messagesList');
+    
+    if (messagesList && conversationId && !isNaN(conversationId)) {
+        // إنشاء مثيل من نظام الرسائل الفورية
+        window.realTimeMessaging = new RealTimeMessaging(conversationId, isAdmin);
+        
+        console.log('Real-time messaging started for conversation:', conversationId);
+        
+        // التمرير إلى أسفل عند التحميل
+        setTimeout(() => {
+            scrollToBottom();
+        }, 500);
+        
+        // تركيز على حقل النص
+        const textarea = document.getElementById('messageTextarea');
+        if (textarea) {
+            textarea.focus();
+        }
     }
-    
-    // Auto refresh every 20 seconds
-    setInterval(function() {
-        const messages = document.querySelectorAll('#messagesList > div');
-        console.log('Current messages count:', messages.length);
-    }, 20000);
 });
 </script>
-@endsection
+@endpush

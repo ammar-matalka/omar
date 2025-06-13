@@ -7,16 +7,28 @@ use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class ConversationController extends Controller
 {
     public function index()
     {
-        $conversations = Conversation::where('user_id', Auth::id())
-            ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+        try {
+            $conversations = Conversation::where('user_id', Auth::id())
+                ->with(['lastMessage', 'messages'])
+                ->orderBy('updated_at', 'desc')
+                ->paginate(10);
+                
+            return view('user.conversations.index', compact('conversations'));
+        } catch (\Exception $e) {
+            Log::error('Error in conversations index', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
             
-        return view('user.conversations.index', compact('conversations'));
+            return redirect()->back()->with('error', 'Error loading conversations: ' . $e->getMessage());
+        }
     }
     
     public function create()
@@ -26,67 +38,348 @@ class ConversationController extends Controller
     
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'message' => 'required|string',
-        ]);
-        
-        $conversation = Conversation::create([
-            'user_id' => Auth::id(),
-            'title' => $validated['title'],
-            'is_read_by_user' => true,
-            'is_read_by_admin' => false,
-        ]);
-        
-        Message::create([
-            'conversation_id' => $conversation->id,
-            'user_id' => Auth::id(),
-            'message' => $validated['message'],
-            'is_from_admin' => false,
-        ]);
-        
-        return redirect()->route('user.conversations.show', $conversation)
-            ->with('success', 'Conversation started successfully.');
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'message' => 'required|string',
+            ]);
+            
+            DB::beginTransaction();
+            
+            $conversation = Conversation::create([
+                'user_id' => Auth::id(),
+                'title' => $validated['title'],
+                'is_read_by_user' => true,
+                'is_read_by_admin' => false,
+            ]);
+            
+            Message::create([
+                'conversation_id' => $conversation->id,
+                'user_id' => Auth::id(),
+                'message' => $validated['message'],
+                'is_from_admin' => false,
+            ]);
+            
+            DB::commit();
+            
+            return redirect()->route('user.conversations.show', $conversation)
+                ->with('success', 'Conversation started successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Error creating conversation', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id(),
+                'data' => $request->all()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating conversation: ' . $e->getMessage());
+        }
     }
     
     public function show(Conversation $conversation)
     {
-        if ($conversation->user_id !== Auth::id()) {
-            abort(403);
+        try {
+            if ($conversation->user_id !== Auth::id()) {
+                abort(403, 'Unauthorized access to conversation');
+            }
+            
+            // Mark as read
+            $conversation->update(['is_read_by_user' => true]);
+            
+            $messages = $conversation->messages()->orderBy('created_at', 'asc')->get();
+            
+            return view('user.conversations.show', compact('conversation', 'messages'));
+        } catch (\Exception $e) {
+            Log::error('Error showing conversation', [
+                'error' => $e->getMessage(),
+                'conversation_id' => $conversation->id ?? 'unknown',
+                'user_id' => Auth::id()
+            ]);
+            
+            return redirect()->route('user.conversations.index')
+                ->with('error', 'Error loading conversation: ' . $e->getMessage());
         }
-        
-        // Mark as read
-        $conversation->update(['is_read_by_user' => true]);
-        
-        $messages = $conversation->messages()->orderBy('created_at', 'asc')->get();
-        
-        return view('user.conversations.show', compact('conversation', 'messages'));
     }
     
     public function reply(Request $request, Conversation $conversation)
     {
+        // تسجيل مفصل للطلب
+        Log::info('=== REPLY ATTEMPT START ===', [
+            'timestamp' => now(),
+            'user_id' => Auth::id(),
+            'conversation_id' => $conversation->id,
+            'conversation_user_id' => $conversation->user_id,
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'is_ajax' => $request->ajax(),
+            'expects_json' => $request->expectsJson(),
+            'content_type' => $request->header('Content-Type'),
+            'accept' => $request->header('Accept'),
+            'csrf_token' => $request->header('X-CSRF-TOKEN'),
+            'all_headers' => $request->headers->all(),
+            'request_data' => $request->all(),
+            'input_message' => $request->input('message'),
+            'has_message' => $request->has('message'),
+            'conversation_exists' => !is_null($conversation),
+            'user_authenticated' => Auth::check(),
+        ]);
+
+        // تحقق من الصلاحية
         if ($conversation->user_id !== Auth::id()) {
+            Log::warning('Unauthorized reply attempt', [
+                'user_id' => Auth::id(),
+                'conversation_user_id' => $conversation->user_id,
+                'conversation_id' => $conversation->id
+            ]);
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Unauthorized access'
+                ], 403);
+            }
             abort(403);
         }
         
-        $validated = $request->validate([
-            'message' => 'required|string',
-        ]);
-        
-        Message::create([
-            'conversation_id' => $conversation->id,
-            'user_id' => Auth::id(),
-            'message' => $validated['message'],
-            'is_from_admin' => false,
-        ]);
-        
-        $conversation->update([
-            'is_read_by_user' => true,
-            'is_read_by_admin' => false,
-            'updated_at' => now(),
-        ]);
-        
-        return redirect()->route('user.conversations.show', $conversation)
-            ->with('success', 'Reply sent successfully.');
+        try {
+            // التحقق من صحة البيانات
+            Log::info('Starting validation');
+            
+            $validated = $request->validate([
+                'message' => 'required|string|max:2000',
+            ]);
+            
+            Log::info('Validation passed', ['validated_data' => $validated]);
+            
+            // بدء المعاملة
+            DB::beginTransaction();
+            Log::info('Database transaction started');
+            
+            // إنشاء الرسالة
+            $message = Message::create([
+                'conversation_id' => $conversation->id,
+                'user_id' => Auth::id(),
+                'message' => $validated['message'],
+                'is_from_admin' => false,
+            ]);
+            
+            Log::info('Message created successfully', [
+                'message_id' => $message->id,
+                'message_content' => $message->message
+            ]);
+            
+            // تحديث المحادثة
+            $conversation->update([
+                'is_read_by_user' => true,
+                'is_read_by_admin' => false,
+                'updated_at' => now(),
+            ]);
+            
+            Log::info('Conversation updated successfully');
+            
+            // تأكيد المعاملة
+            DB::commit();
+            Log::info('Database transaction committed');
+
+            // إعداد الاستجابة
+            $response_data = [
+                'success' => true,
+                'message' => [
+                    'id' => $message->id,
+                    'message' => $message->message,
+                    'is_from_admin' => false,
+                    'user_name' => Auth::user()->name,
+                    'created_at' => $message->created_at->format('M d, h:i A'),
+                    'avatar' => substr(Auth::user()->name, 0, 1)
+                ]
+            ];
+            
+            Log::info('Response data prepared', $response_data);
+
+            // إذا كان الطلب AJAX، أرجع JSON
+            if ($request->expectsJson() || $request->ajax()) {
+                Log::info('Returning JSON response');
+                Log::info('=== REPLY ATTEMPT SUCCESS ===');
+                
+                return response()->json($response_data);
+            }
+            
+            Log::info('Redirecting to conversation show');
+            Log::info('=== REPLY ATTEMPT SUCCESS ===');
+            
+            return redirect()->route('user.conversations.show', $conversation)
+                ->with('success', 'Reply sent successfully.');
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            
+            Log::error('Validation error in reply', [
+                'errors' => $e->errors(),
+                'input' => $request->all(),
+                'validator_messages' => $e->validator->messages()->toArray()
+            ]);
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                Log::info('=== REPLY ATTEMPT VALIDATION FAILED ===');
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Validation failed',
+                    'errors' => $e->errors(),
+                    'messages' => $e->validator->messages()->toArray()
+                ], 422);
+            }
+            
+            throw $e;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Unexpected error in reply method', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'conversation_id' => $conversation->id,
+                'user_id' => Auth::id()
+            ]);
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                Log::info('=== REPLY ATTEMPT FAILED ===');
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Internal server error: ' . $e->getMessage(),
+                    'debug_info' => config('app.debug') ? [
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
+                    ] : null
+                ], 500);
+            }
+            
+            Log::info('=== REPLY ATTEMPT FAILED ===');
+            throw $e;
+        }
+    }
+
+    public function checkNewMessages(Request $request, Conversation $conversation)
+    {
+        try {
+            if ($conversation->user_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Unauthorized'
+                ], 403);
+            }
+
+            $lastMessageId = $request->input('last_message_id', 0);
+            
+            $newMessages = $conversation->messages()
+                ->where('id', '>', $lastMessageId)
+                ->with('user')
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $hasNewMessages = $newMessages->count() > 0;
+            
+            // تحديث حالة القراءة إذا كانت هناك رسائل جديدة من الأدمن
+            if ($hasNewMessages && $newMessages->where('is_from_admin', true)->count() > 0) {
+                $conversation->update(['is_read_by_user' => false]);
+            }
+
+            return response()->json([
+                'has_new_messages' => $hasNewMessages,
+                'messages' => $newMessages->map(function ($message) {
+                    return [
+                        'id' => $message->id,
+                        'message' => $message->message,
+                        'is_from_admin' => $message->is_from_admin,
+                        'user_name' => $message->user->name,
+                        'created_at' => $message->created_at->format('M d, h:i A'),
+                        'avatar' => $message->is_from_admin ? 'admin' : substr($message->user->name, 0, 1)
+                    ];
+                }),
+                'unread_count' => $conversation->hasUnreadForUser() ? 1 : 0
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in checkNewMessages', [
+                'error' => $e->getMessage(),
+                'conversation_id' => $conversation->id
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Error checking messages'
+            ], 500);
+        }
+    }
+
+    public function getUnreadCount()
+    {
+        try {
+            $unreadCount = Conversation::where('user_id', Auth::id())
+                ->where('is_read_by_user', false)
+                ->count();
+
+            return response()->json([
+                'unread_count' => $unreadCount,
+                'success' => true
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error getting unread conversations count', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
+            
+            return response()->json([
+                'unread_count' => 0,
+                'success' => false,
+                'error' => 'Error getting unread count'
+            ], 500);
+        }
+    }
+
+    public function markAsRead(Conversation $conversation)
+    {
+        try {
+            if ($conversation->user_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Unauthorized'
+                ], 403);
+            }
+
+            $conversation->update(['is_read_by_user' => true]);
+
+            if (request()->expectsJson()) {
+                return response()->json(['success' => true]);
+            }
+
+            return redirect()->back()->with('success', 'Conversation marked as read.');
+            
+        } catch (\Exception $e) {
+            Log::error('Error in markAsRead', [
+                'error' => $e->getMessage(),
+                'conversation_id' => $conversation->id
+            ]);
+            
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Error marking as read'
+                ], 500);
+            }
+            
+            return redirect()->back()->with('error', 'Error marking conversation as read.');
+        }
     }
 }
+
+// ========================================
+// أضف أيضاً دالة تشخيص في routes/web.php (للتطوير فقط)
+// ========================================
+

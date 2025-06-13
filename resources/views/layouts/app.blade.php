@@ -229,6 +229,125 @@
             display: none !important;
         }
         
+        /* Real-time Messaging Styles */
+        .new-message-indicator {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: var(--primary-500);
+            color: white;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            z-index: var(--z-toast);
+            transform: translateY(100px);
+            transition: transform 0.3s ease;
+            display: none;
+        }
+
+        .new-message-indicator.show {
+            display: block;
+            transform: translateY(0);
+        }
+
+        .connection-status {
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .connection-dot.connected {
+            background: var(--success-500);
+        }
+
+        .connection-dot.disconnected {
+            background: var(--error-500);
+        }
+
+        .unread-count {
+            background: var(--error-500);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Error notification styles */
+        .error-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: var(--z-toast);
+            background: var(--error-500);
+            color: white;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-xl);
+            max-width: 350px;
+            word-wrap: break-word;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .success-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: var(--z-toast);
+            background: var(--success-500);
+            color: white;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-xl);
+            max-width: 350px;
+            word-wrap: break-word;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Message animations */
+        .message-item {
+            transition: all 0.3s ease;
+        }
+
+        .message-item:hover {
+            transform: translateY(-1px);
+        }
+
+        @keyframes messageHighlight {
+            0% { background-color: rgba(59, 130, 246, 0.1); }
+            100% { background-color: transparent; }
+        }
+
+        @keyframes connectionPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .connection-dot {
+            animation: connectionPulse 2s infinite;
+        }
+        
         /* Dark mode variables */
         @media (prefers-color-scheme: dark) {
             :root {
@@ -603,8 +722,11 @@
                             <a href="{{ route('user.conversations.index') }}" class="nav-link {{ request()->routeIs('user.conversations.*') ? 'active' : '' }}">
                                 <i class="fas fa-comments"></i>
                                 Support
-                                @if(isset($unreadConversationsCount) && $unreadConversationsCount > 0)
-                                    <span class="nav-badge">{{ $unreadConversationsCount }}</span>
+                                @php
+                                    $unreadConversationsCount = \App\Models\Conversation::where('user_id', Auth::id())->where('is_read_by_user', false)->count();
+                                @endphp
+                                @if($unreadConversationsCount > 0)
+                                    <span class="nav-badge" id="conversationsBadge">{{ $unreadConversationsCount }}</span>
                                 @endif
                             </a>
                         </li>
@@ -752,6 +874,330 @@
             </div>
         </div>
     </footer>
+
+    <!-- Real-time Messaging Scripts -->
+    <script>
+        // Global variables for real-time messaging
+        window.Laravel = {
+            csrfToken: '{{ csrf_token() }}',
+            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            userId: {{ auth()->check() ? auth()->id() : 'null' }}
+        };
+
+        // Real-time notification system for conversations
+        @auth
+        function updateConversationsBadge() {
+            fetch('/user/conversations/unread-count', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': window.Laravel.csrfToken,
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const badge = document.getElementById('conversationsBadge');
+                if (data.unread_count > 0) {
+                    if (badge) {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline';
+                    } else {
+                        // Create badge if it doesn't exist
+                        const supportLink = document.querySelector('a[href="{{ route('user.conversations.index') }}"]');
+                        if (supportLink && !supportLink.querySelector('.nav-badge')) {
+                            const newBadge = document.createElement('span');
+                            newBadge.className = 'nav-badge';
+                            newBadge.id = 'conversationsBadge';
+                            newBadge.textContent = data.unread_count;
+                            supportLink.appendChild(newBadge);
+                        }
+                    }
+                } else {
+                    if (badge) {
+                        badge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => {
+                console.log('Failed to update conversations badge:', error);
+            });
+        }
+
+        // Check for new conversations every 30 seconds
+        setInterval(updateConversationsBadge, 30000);
+
+        // Update badge on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(updateConversationsBadge, 1000);
+        });
+        @endauth
+
+        // Auto-hide flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.parentNode.removeChild(alert);
+                        }
+                    }, 500);
+                }, 5000);
+            });
+        });
+
+        // Enhanced form validation and double-submission prevention
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton && !submitButton.disabled) {
+                        // Prevent double submission
+                        setTimeout(() => {
+                            submitButton.disabled = true;
+                            const originalText = submitButton.innerHTML;
+                            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                            
+                            // Re-enable after 5 seconds as fallback
+                            setTimeout(() => {
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = originalText;
+                            }, 5000);
+                        }, 100);
+                    }
+                });
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.addEventListener('DOMContentLoaded', function() {
+            const anchorLinks = document.querySelectorAll('a[href^="#"]');
+            anchorLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+
+        // Enhanced error handling for AJAX requests
+        window.handleAjaxError = function(xhr, textStatus, errorThrown) {
+            console.error('AJAX Error:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                responseText: xhr.responseText,
+                textStatus: textStatus,
+                errorThrown: errorThrown
+            });
+
+            let errorMessage = 'An error occurred. Please try again.';
+            
+            if (xhr.status === 419) {
+                errorMessage = 'Your session has expired. Please refresh the page.';
+                // Auto-refresh after showing message
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else if (xhr.status === 403) {
+                errorMessage = 'You do not have permission to perform this action.';
+            } else if (xhr.status === 422) {
+                try {
+                    const errors = JSON.parse(xhr.responseText);
+                    if (errors.errors) {
+                        errorMessage = Object.values(errors.errors).flat().join('\n');
+                    }
+                } catch (e) {
+                    errorMessage = 'Validation error occurred.';
+                }
+            } else if (xhr.status === 500) {
+                errorMessage = 'Server error occurred. Please contact support if this persists.';
+            }
+
+            // Show error notification
+            showErrorNotification(errorMessage);
+        };
+
+        // Global error notification function
+        window.showErrorNotification = function(message) {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.error-notification');
+            existingNotifications.forEach(notification => notification.remove());
+            
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = 'error-notification';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: auto;">×</button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 7 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease-in';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, 7000);
+        };
+
+        // Global success notification function
+        window.showSuccessNotification = function(message) {
+            // Remove existing success notifications
+            const existingNotifications = document.querySelectorAll('.success-notification');
+            existingNotifications.forEach(notification => notification.remove());
+
+            const notification = document.createElement('div');
+            notification.className = 'success-notification';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                    <i class="fas fa-check-circle"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: auto;">×</button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease-in';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        };
+
+        // Auto-resize textareas
+        document.addEventListener('DOMContentLoaded', function() {
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+                });
+            });
+        });
+
+        // Enhanced keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K for search (if search exists)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                const searchInput = document.querySelector('input[type="search"], input[name="search"], #search');
+                if (searchInput) {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            }
+
+            // Escape to close modals or clear focus
+            if (e.key === 'Escape') {
+                const activeElement = document.activeElement;
+                if (activeElement && activeElement.blur) {
+                    activeElement.blur();
+                }
+                
+                // Close any open modals or dropdowns
+                const modals = document.querySelectorAll('.modal, .dropdown-open');
+                modals.forEach(modal => {
+                    modal.classList.remove('show', 'open', 'dropdown-open');
+                });
+            }
+        });
+
+        // Connection status monitoring
+        window.addEventListener('online', function() {
+            showSuccessNotification('Connection restored');
+            // Update conversations badge when back online
+            @auth
+            setTimeout(updateConversationsBadge, 1000);
+            @endauth
+        });
+
+        window.addEventListener('offline', function() {
+            showErrorNotification('You are currently offline. Some features may not work.');
+        });
+
+        // Performance monitoring (basic)
+        window.addEventListener('load', function() {
+            const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+            console.log(`🚀 Page loaded in ${loadTime}ms`);
+            
+            // Report slow loading
+            if (loadTime > 3000) {
+                console.warn('⚠️ Slow page load detected:', loadTime + 'ms');
+            }
+        });
+
+        // Debug helper functions
+        window.debugApp = function() {
+            console.log('🔧 App Debug Info:');
+            console.log('Laravel Config:', window.Laravel);
+            console.log('Current URL:', window.location.href);
+            console.log('CSRF Token:', window.Laravel.csrfToken);
+            console.log('Authenticated:', window.Laravel.isAuthenticated);
+            console.log('User ID:', window.Laravel.userId);
+            console.log('Navigation badges:', document.querySelectorAll('.nav-badge'));
+            console.log('Active real-time messaging:', window.realTimeMessaging);
+            console.log('Performance:', {
+                loadTime: window.performance.timing.loadEventEnd - window.performance.timing.navigationStart,
+                domReady: window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart,
+                online: navigator.onLine
+            });
+        };
+
+        // Global app state
+        window.app = {
+            version: '1.0.0',
+            debug: {{ config('app.debug') ? 'true' : 'false' }},
+            environment: '{{ config('app.env') }}',
+            locale: '{{ app()->getLocale() }}',
+            timezone: '{{ config('app.timezone') }}'
+        };
+
+        // Service Worker registration (if exists)
+        if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        console.log('🎉 Application initialized successfully');
+    </script>
 
     @stack('scripts')
 </body>
