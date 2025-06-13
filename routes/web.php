@@ -11,6 +11,72 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
 
+use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
+use App\Http\Controllers\User\ConversationController as UserConversationController;
+
+// Admin Conversation Routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    
+    // Conversations Management
+    Route::resource('conversations', AdminConversationController::class)->only([
+        'index', 'show'
+    ]);
+    
+    // Additional conversation routes
+    Route::post('conversations/{conversation}/reply', [AdminConversationController::class, 'reply'])
+        ->name('conversations.reply');
+    
+    Route::patch('conversations/{conversation}/mark-read', [AdminConversationController::class, 'markAsRead'])
+        ->name('conversations.mark-read');
+    
+    Route::post('conversations/mark-all-read', [AdminConversationController::class, 'markAllAsRead'])
+        ->name('conversations.mark-all-read');
+    
+    // Check for new messages (AJAX endpoint)
+    Route::get('conversations/check-new', [AdminConversationController::class, 'checkNewMessages'])
+        ->name('conversations.check-new');
+    
+    // Get conversation counts for notifications
+    Route::get('conversations/counts', [AdminConversationController::class, 'getCounts'])
+        ->name('conversations.counts');
+});
+
+// User Conversation Routes
+Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
+    
+    // User conversations
+    Route::resource('conversations', UserConversationController::class)->only([
+        'index', 'create', 'store', 'show'
+    ]);
+    
+    // Reply to conversation
+    Route::post('conversations/{conversation}/reply', [UserConversationController::class, 'reply'])
+        ->name('conversations.reply');
+    
+    // Mark conversation as read
+    Route::patch('conversations/{conversation}/mark-read', [UserConversationController::class, 'markAsRead'])
+        ->name('conversations.mark-read');
+});
+
+// Alternative routes without 'user' prefix (if needed)
+Route::middleware(['auth'])->group(function () {
+    
+    // Direct conversation routes for users
+    Route::get('my-conversations', [UserConversationController::class, 'index'])
+        ->name('conversations.index');
+    
+    Route::get('conversations/create', [UserConversationController::class, 'create'])
+        ->name('conversations.create');
+    
+    Route::post('conversations', [UserConversationController::class, 'store'])
+        ->name('conversations.store');
+    
+    Route::get('conversations/{conversation}', [UserConversationController::class, 'show'])
+        ->name('conversations.show');
+    
+    Route::post('conversations/{conversation}/reply', [UserConversationController::class, 'reply'])
+        ->name('conversations.reply');
+});
 /*
 |--------------------------------------------------------------------------
 | Web Routes

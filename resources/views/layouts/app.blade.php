@@ -509,6 +509,9 @@
             font-weight: 500;
             transition: color var(--transition-fast);
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
         }
         
         .nav-link:hover {
@@ -524,6 +527,25 @@
             height: 2px;
             background: var(--primary-500);
             border-radius: 1px;
+        }
+        
+        /* Notification badge */
+        .nav-badge {
+            background: var(--error-500);
+            color: white;
+            font-size: 0.625rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: var(--space-xs);
+            min-width: 18px;
+            text-align: center;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
         
         /* Footer styles */
@@ -576,6 +598,17 @@
                     <li><a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}">Educational Cards</a></li>
                     
                     @auth
+                        <!-- Conversations -->
+                        <li>
+                            <a href="{{ route('user.conversations.index') }}" class="nav-link {{ request()->routeIs('user.conversations.*') ? 'active' : '' }}">
+                                <i class="fas fa-comments"></i>
+                                Support
+                                @if(isset($unreadConversationsCount) && $unreadConversationsCount > 0)
+                                    <span class="nav-badge">{{ $unreadConversationsCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        
                         <!-- User Menu -->
                         <li class="dropdown">
                             <a href="{{ route('user.profile.show') }}" class="nav-link">
@@ -683,6 +716,7 @@
                         @auth
                             <li style="margin-bottom: var(--space-sm);"><a href="{{ route('user.profile.show') }}" style="color: inherit; text-decoration: none;">My Profile</a></li>
                             <li style="margin-bottom: var(--space-sm);"><a href="{{ route('orders.index') }}" style="color: inherit; text-decoration: none;">My Orders</a></li>
+                            <li style="margin-bottom: var(--space-sm);"><a href="{{ route('user.conversations.index') }}" style="color: inherit; text-decoration: none;">My Conversations</a></li>
                             <li style="margin-bottom: var(--space-sm);"><a href="{{ route('wishlist.index') }}" style="color: inherit; text-decoration: none;">Wishlist</a></li>
                         @else
                             <li style="margin-bottom: var(--space-sm);"><a href="{{ route('login') }}" style="color: inherit; text-decoration: none;">Login</a></li>
@@ -691,7 +725,7 @@
                     </ul>
                 </div>
                 <div>
-                    <h4 style="margin-bottom: var(--space-md); color: white;">Contact</h4>
+                    <h4 style="margin-bottom: var(--space-md); color: white;">Contact & Support</h4>
                     <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
                         <i class="fas fa-envelope"></i>
                         info@example.com
@@ -700,10 +734,16 @@
                         <i class="fas fa-phone"></i>
                         +962 6 123 4567
                     </p>
-                    <p style="color: var(--gray-400);">
+                    <p style="color: var(--gray-400); margin-bottom: var(--space-sm);">
                         <i class="fas fa-map-marker-alt"></i>
                         Irbid, Jordan
                     </p>
+                    @auth
+                        <p style="color: var(--gray-400);">
+                            <i class="fas fa-comments"></i>
+                            <a href="{{ route('user.conversations.create') }}" style="color: var(--primary-400); text-decoration: none;">Contact Support</a>
+                        </p>
+                    @endauth
                 </div>
             </div>
             

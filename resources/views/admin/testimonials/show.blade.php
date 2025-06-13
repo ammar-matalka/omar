@@ -21,48 +21,48 @@
 <style>
     .testimonial-header {
         background: white;
-        border-radius: var(--radius-xl);
-        padding: var(--space-xl);
-        margin-bottom: var(--space-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--admin-secondary-200);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
     }
     
     .testimonial-title {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: var(--space-lg);
+        margin-bottom: 1.5rem;
         flex-wrap: wrap;
-        gap: var(--space-md);
+        gap: 1rem;
     }
     
     .testimonial-info {
         display: flex;
         flex-direction: column;
-        gap: var(--space-sm);
+        gap: 0.5rem;
     }
     
     .testimonial-id {
         font-size: 1.75rem;
         font-weight: 800;
-        color: var(--admin-secondary-900);
+        color: #0f172a;
         display: flex;
         align-items: center;
-        gap: var(--space-sm);
+        gap: 0.5rem;
     }
     
     .testimonial-date {
-        color: var(--admin-secondary-600);
+        color: #475569;
         font-size: 0.875rem;
         display: flex;
         align-items: center;
-        gap: var(--space-sm);
+        gap: 0.5rem;
     }
     
     .testimonial-actions {
         display: flex;
-        gap: var(--space-sm);
+        gap: 0.5rem;
         align-items: flex-start;
         flex-wrap: wrap;
     }
@@ -70,89 +70,89 @@
     .status-badge {
         display: inline-flex;
         align-items: center;
-        padding: var(--space-sm) var(--space-lg);
-        border-radius: var(--radius-md);
+        padding: 0.5rem 1.5rem;
+        border-radius: 0.5rem;
         font-size: 0.875rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        gap: var(--space-sm);
-        margin-bottom: var(--space-md);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
     }
     
     .status-pending {
-        background: var(--warning-100);
-        color: var(--warning-700);
-        border: 1px solid var(--warning-200);
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
     }
     
     .status-approved {
-        background: var(--success-100);
-        color: var(--success-700);
-        border: 1px solid var(--success-200);
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
     }
     
     .status-rejected {
-        background: var(--error-100);
-        color: var(--error-700);
-        border: 1px solid var(--error-200);
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
     }
     
     .testimonial-grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        gap: var(--space-xl);
-        margin-bottom: var(--space-xl);
+        gap: 2rem;
+        margin-bottom: 2rem;
     }
     
     .testimonial-content-section {
         background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--admin-secondary-200);
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
         overflow: hidden;
     }
     
     .section-header {
-        background: var(--admin-secondary-50);
-        padding: var(--space-lg);
-        border-bottom: 1px solid var(--admin-secondary-200);
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
     }
     
     .section-title {
         font-size: 1.125rem;
         font-weight: 600;
-        color: var(--admin-secondary-900);
+        color: #0f172a;
         display: flex;
         align-items: center;
-        gap: var(--space-sm);
+        gap: 0.5rem;
         margin: 0;
     }
     
     .content-body {
-        padding: var(--space-xl);
+        padding: 2rem;
     }
     
     .testimonial-text {
         font-size: 1.125rem;
         line-height: 1.8;
-        color: var(--admin-secondary-700);
+        color: #334155;
         font-style: italic;
         position: relative;
-        margin: var(--space-xl) 0;
-        padding: var(--space-xl);
-        background: var(--admin-secondary-50);
-        border-radius: var(--radius-lg);
-        border-left: 4px solid var(--admin-primary-500);
+        margin: 2rem 0;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        border-left: 4px solid #3b82f6;
     }
     
     .testimonial-text::before {
         content: '"';
         font-size: 4rem;
-        color: var(--admin-primary-300);
+        color: #93c5fd;
         position: absolute;
         top: -10px;
-        left: var(--space-md);
+        left: 1rem;
         font-family: serif;
         line-height: 1;
     }
@@ -160,37 +160,37 @@
     .testimonial-text::after {
         content: '"';
         font-size: 4rem;
-        color: var(--admin-primary-300);
+        color: #93c5fd;
         position: absolute;
         bottom: -30px;
-        right: var(--space-md);
+        right: 1rem;
         font-family: serif;
         line-height: 1;
     }
     
     .rating-section {
-        background: var(--admin-secondary-50);
-        border-radius: var(--radius-lg);
-        padding: var(--space-lg);
-        margin: var(--space-lg) 0;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
         text-align: center;
     }
     
     .rating-stars {
         display: flex;
         justify-content: center;
-        gap: var(--space-xs);
-        margin-bottom: var(--space-md);
+        gap: 0.25rem;
+        margin-bottom: 1rem;
     }
     
     .star {
         font-size: 2rem;
         color: #fbbf24;
-        transition: all var(--transition-fast);
+        transition: all 0.15s ease;
     }
     
     .star.empty {
-        color: var(--admin-secondary-300);
+        color: #cbd5e1;
     }
     
     .star:hover {
@@ -200,25 +200,25 @@
     .rating-text {
         font-size: 1.25rem;
         font-weight: 600;
-        color: var(--admin-secondary-900);
+        color: #0f172a;
     }
     
     .rating-subtitle {
         font-size: 0.875rem;
-        color: var(--admin-secondary-600);
-        margin-top: var(--space-xs);
+        color: #475569;
+        margin-top: 0.25rem;
     }
     
     .testimonial-sidebar {
         background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--admin-secondary-200);
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
         height: fit-content;
     }
     
     .sidebar-content {
-        padding: var(--space-lg);
+        padding: 1.5rem;
     }
     
     .customer-card {
@@ -226,45 +226,45 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
-        padding: var(--space-xl);
-        background: linear-gradient(135deg, var(--admin-secondary-50), var(--admin-secondary-100));
-        border-radius: var(--radius-lg);
-        margin-bottom: var(--space-lg);
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
     }
     
     .customer-avatar {
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: 800;
         font-size: 2rem;
-        margin-bottom: var(--space-md);
-        box-shadow: var(--shadow-md);
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     
     .customer-name {
         font-size: 1.25rem;
         font-weight: 700;
-        color: var(--admin-secondary-900);
-        margin-bottom: var(--space-xs);
+        color: #0f172a;
+        margin-bottom: 0.25rem;
     }
     
     .customer-email {
-        color: var(--admin-secondary-600);
+        color: #475569;
         font-size: 0.875rem;
-        margin-bottom: var(--space-sm);
+        margin-bottom: 0.5rem;
     }
     
     .customer-role {
-        background: var(--admin-primary-100);
-        color: var(--admin-primary-700);
-        padding: var(--space-xs) var(--space-md);
-        border-radius: var(--radius-sm);
+        background: #dbeafe;
+        color: #1d4ed8;
+        padding: 0.25rem 1rem;
+        border-radius: 0.375rem;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -281,8 +281,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: var(--space-md) 0;
-        border-bottom: 1px solid var(--admin-secondary-100);
+        padding: 1rem 0;
+        border-bottom: 1px solid #f1f5f9;
     }
     
     .info-item:last-child {
@@ -290,73 +290,73 @@
     }
     
     .info-label {
-        color: var(--admin-secondary-600);
+        color: #475569;
         font-size: 0.875rem;
         font-weight: 500;
         display: flex;
         align-items: center;
-        gap: var(--space-xs);
+        gap: 0.25rem;
     }
     
     .info-value {
         font-weight: 600;
-        color: var(--admin-secondary-900);
+        color: #0f172a;
         text-align: right;
     }
     
     .order-link {
-        color: var(--admin-primary-600);
+        color: #2563eb;
         text-decoration: none;
         font-weight: 600;
-        transition: color var(--transition-fast);
+        transition: color 0.15s ease;
         display: flex;
         align-items: center;
-        gap: var(--space-xs);
+        gap: 0.25rem;
     }
     
     .order-link:hover {
-        color: var(--admin-primary-700);
+        color: #1d4ed8;
         text-decoration: underline;
     }
     
     .action-buttons {
         display: flex;
         flex-direction: column;
-        gap: var(--space-sm);
-        margin-top: var(--space-lg);
+        gap: 0.5rem;
+        margin-top: 1.5rem;
     }
     
     .btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: var(--space-sm);
-        padding: var(--space-md) var(--space-lg);
+        gap: 0.5rem;
+        padding: 1rem 1.5rem;
         border: 1px solid transparent;
-        border-radius: var(--radius-md);
+        border-radius: 0.5rem;
         font-size: 0.875rem;
         font-weight: 500;
         text-decoration: none;
         cursor: pointer;
-        transition: all var(--transition-fast);
+        transition: all 0.15s ease;
         white-space: nowrap;
         text-align: center;
     }
     
     .btn-primary {
-        background: var(--admin-primary-600);
+        background: #2563eb;
         color: white;
-        box-shadow: var(--shadow-sm);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
     
     .btn-primary:hover {
-        background: var(--admin-primary-700);
-        box-shadow: var(--shadow-md);
+        background: #1d4ed8;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         transform: translateY(-1px);
     }
     
     .btn-success {
-        background: var(--success-500);
+        background: #10b981;
         color: white;
     }
     
@@ -366,7 +366,7 @@
     }
     
     .btn-danger {
-        background: var(--error-500);
+        background: #ef4444;
         color: white;
     }
     
@@ -377,30 +377,30 @@
     
     .btn-secondary {
         background: white;
-        color: var(--admin-secondary-700);
-        border-color: var(--admin-secondary-300);
+        color: #334155;
+        border-color: #cbd5e1;
     }
     
     .btn-secondary:hover {
-        background: var(--admin-secondary-50);
-        border-color: var(--admin-secondary-400);
+        background: #f8fafc;
+        border-color: #94a3b8;
     }
     
     .timeline-section {
         background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--admin-secondary-200);
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
         overflow: hidden;
-        margin-top: var(--space-xl);
+        margin-top: 2rem;
     }
     
     .timeline-item {
         display: flex;
         align-items: center;
-        gap: var(--space-md);
-        padding: var(--space-lg);
-        border-bottom: 1px solid var(--admin-secondary-100);
+        gap: 1rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
         position: relative;
     }
     
@@ -425,88 +425,91 @@
     
     .timeline-title {
         font-weight: 600;
-        color: var(--admin-secondary-900);
-        margin-bottom: var(--space-xs);
+        color: #0f172a;
+        margin-bottom: 0.25rem;
     }
     
     .timeline-time {
-        color: var(--admin-secondary-600);
+        color: #475569;
         font-size: 0.875rem;
     }
     
     .icon-submitted {
-        background: var(--info-100);
-        color: var(--info-600);
+        background: #eff6ff;
+        color: #2563eb;
     }
     
     .icon-approved {
-        background: var(--success-100);
-        color: var(--success-600);
+        background: #dcfce7;
+        color: #059669;
     }
     
     .icon-rejected {
-        background: var(--error-100);
-        color: var(--error-600);
+        background: #fee2e2;
+        color: #dc2626;
     }
     
     .related-products {
-        background: var(--admin-secondary-50);
-        border-radius: var(--radius-lg);
-        padding: var(--space-lg);
-        margin-top: var(--space-lg);
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
     }
     
     .products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--space-md);
-        margin-top: var(--space-md);
+        gap: 1rem;
+        margin-top: 1rem;
     }
     
     .product-card {
         background: white;
-        border-radius: var(--radius-md);
-        padding: var(--space-md);
-        border: 1px solid var(--admin-secondary-200);
-        transition: all var(--transition-fast);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.15s ease;
     }
     
     .product-card:hover {
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-    
-    .product-image {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-        border-radius: var(--radius-md);
-        margin-bottom: var(--space-sm);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     
     .product-placeholder {
         width: 100%;
         height: 120px;
-        background: var(--admin-secondary-100);
-        border-radius: var(--radius-md);
+        background: #f1f5f9;
+        border-radius: 0.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--admin-secondary-500);
-        margin-bottom: var(--space-sm);
+        color: #64748b;
+        margin-bottom: 0.5rem;
     }
     
     .product-name {
         font-weight: 600;
-        color: var(--admin-secondary-900);
+        color: #0f172a;
         font-size: 0.875rem;
-        margin-bottom: var(--space-xs);
+        margin-bottom: 0.25rem;
     }
     
     .product-price {
-        color: var(--admin-primary-600);
+        color: #2563eb;
         font-weight: 700;
         font-size: 1rem;
+    }
+    
+    .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s ease-out;
+    }
+    
+    .fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
     }
     
     @media (max-width: 1024px) {
@@ -527,7 +530,7 @@
     
     @media (max-width: 768px) {
         .customer-card {
-            padding: var(--space-lg);
+            padding: 1.5rem;
         }
         
         .customer-avatar {
@@ -538,7 +541,7 @@
         
         .testimonial-text {
             font-size: 1rem;
-            padding: var(--space-lg);
+            padding: 1.5rem;
         }
         
         .testimonial-text::before,
@@ -558,154 +561,6 @@
             grid-template-columns: 1fr;
         }
     }
-    
-    .alert {
-        padding: var(--space-md);
-        border-radius: var(--radius-md);
-        border: 1px solid;
-        margin-bottom: var(--space-lg);
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-    }
-    
-    .alert-success {
-        background: var(--success-100);
-        color: var(--success-700);
-        border-color: var(--success-200);
-    }
-    
-    .alert-error {
-        background: var(--error-100);
-        color: var(--error-700);
-        border-color: var(--error-200);
-    }
-    
-    .alert-warning {
-        background: var(--warning-100);
-        color: var(--warning-700);
-        border-color: var(--warning-200);
-    }
-    
-    .alert-info {
-        background: var(--info-100);
-        color: var(--info-700);
-        border-color: var(--info-200);
-    }
-    
-    /* Animation classes */
-    .fade-in {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.6s ease-out;
-    }
-    
-    .fade-in.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    
-    /* Print styles */
-    @media print {
-        .testimonial-actions,
-        .action-buttons,
-        .btn {
-            display: none !important;
-        }
-        
-        .testimonial-grid {
-            grid-template-columns: 1fr !important;
-        }
-        
-        .testimonial-header,
-        .testimonial-content-section,
-        .testimonial-sidebar,
-        .timeline-section {
-            box-shadow: none !important;
-            border: 1px solid #ddd !important;
-        }
-        
-        body {
-            font-size: 12px !important;
-        }
-        
-        .testimonial-id {
-            font-size: 24px !important;
-        }
-        
-        .section-title {
-            font-size: 18px !important;
-        }
-    }
-    
-    /* Loading state */
-    .loading {
-        opacity: 0.6;
-        pointer-events: none;
-        position: relative;
-    }
-    
-    .loading::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 20px;
-        height: 20px;
-        margin: -10px 0 0 -10px;
-        border: 2px solid var(--admin-primary-600);
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: spin 1s ease-in-out infinite;
-    }
-    
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-    
-    /* Accessibility improvements */
-    .btn:focus,
-    .order-link:focus {
-        outline: 2px solid var(--admin-primary-500);
-        outline-offset: 2px;
-    }
-    
-    /* High contrast mode support */
-    @media (prefers-contrast: high) {
-        .status-badge {
-            border-width: 2px;
-        }
-        
-        .timeline-icon {
-            border: 2px solid currentColor;
-        }
-        
-        .star {
-            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-        }
-    }
-    
-    /* Reduced motion support */
-    @media (prefers-reduced-motion: reduce) {
-        .fade-in,
-        .btn,
-        .product-card,
-        .star {
-            transition: none;
-        }
-        
-        .fade-in {
-            opacity: 1;
-            transform: none;
-        }
-        
-        .product-card:hover,
-        .star:hover {
-            transform: none;
-        }
-    }
 </style>
 @endpush
 
@@ -716,16 +571,16 @@
         <div class="testimonial-info">
             <h1 class="testimonial-id">
                 <i class="fas fa-star"></i>
-                {{ __('Testimonial Details') }}
+                {{ __('Testimonial') }} #{{ $testimonial->id }}
             </h1>
             <div class="testimonial-date">
                 <i class="fas fa-calendar-alt"></i>
-                {{ __('Submitted on') }} March 15, 2024 at 2:30 PM
+                {{ __('Submitted on') }} {{ $testimonial->created_at->format('F d, Y \a\t g:i A') }}
             </div>
         </div>
         
         <div class="testimonial-actions">
-            <a href="#" onclick="goBack()" class="btn btn-secondary">
+            <a href="{{ route('admin.testimonials.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i>
                 {{ __('Back to Testimonials') }}
             </a>
@@ -737,9 +592,9 @@
         </div>
     </div>
     
-    <span class="status-badge status-pending">
-        <i class="fas fa-clock"></i>
-        Pending
+    <span class="status-badge status-{{ $testimonial->status }}">
+        <i class="fas fa-{{ $testimonial->status === 'pending' ? 'clock' : ($testimonial->status === 'approved' ? 'check' : 'times') }}"></i>
+        {{ ucfirst($testimonial->status) }}
     </span>
 </div>
 
@@ -758,46 +613,44 @@
             <!-- Rating Section -->
             <div class="rating-section">
                 <div class="rating-stars">
-                    <i class="fas fa-star star"></i>
-                    <i class="fas fa-star star"></i>
-                    <i class="fas fa-star star"></i>
-                    <i class="fas fa-star star"></i>
-                    <i class="fas fa-star star"></i>
+                    @for($i = 1; $i <= 5; $i++)
+                        <i class="fas fa-star {{ $i <= $testimonial->rating ? 'star' : 'star empty' }}"></i>
+                    @endfor
                 </div>
-                <div class="rating-text">5 {{ __('out of 5 stars') }}</div>
+                <div class="rating-text">{{ $testimonial->rating }} {{ __('out of 5 stars') }}</div>
                 <div class="rating-subtitle">{{ __('Customer Rating') }}</div>
             </div>
             
             <!-- Testimonial Text -->
             <div class="testimonial-text">
-                Amazing product! The quality exceeded my expectations and the customer service was outstanding. I would definitely recommend this to anyone looking for a great solution. The delivery was fast and the packaging was excellent. Very satisfied with my purchase!
+                {{ $testimonial->comment }}
             </div>
             
             <!-- Related Products -->
-            <div class="related-products">
-                <h4 style="margin: 0 0 var(--space-md) 0; color: var(--admin-secondary-900); font-weight: 600;">
-                    <i class="fas fa-shopping-bag"></i>
-                    {{ __('Products from this order') }}
-                </h4>
-                
-                <div class="products-grid">
-                    <div class="product-card">
-                        <div class="product-placeholder">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        <div class="product-name">Premium Laptop</div>
-                        <div class="product-price">$1,299.99</div>
-                    </div>
+            @if($testimonial->order && $testimonial->order->orderItems->count() > 0)
+                <div class="related-products">
+                    <h4 style="margin: 0 0 1rem 0; color: #0f172a; font-weight: 600;">
+                        <i class="fas fa-shopping-bag"></i>
+                        {{ __('Products from this order') }}
+                    </h4>
                     
-                    <div class="product-card">
-                        <div class="product-placeholder">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        <div class="product-name">Wireless Mouse</div>
-                        <div class="product-price">$49.99</div>
+                    <div class="products-grid">
+                        @foreach($testimonial->order->orderItems->take(4) as $orderItem)
+                            <div class="product-card">
+                                @if($orderItem->product && $orderItem->product->image)
+                                    <img src="{{ asset('storage/' . $orderItem->product->image) }}" alt="{{ $orderItem->product->name }}" class="product-image">
+                                @else
+                                    <div class="product-placeholder">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                @endif
+                                <div class="product-name">{{ $orderItem->product->name ?? 'Product' }}</div>
+                                <div class="product-price">${{ number_format($orderItem->price, 2) }}</div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
     
@@ -814,10 +667,10 @@
             <!-- Customer Card -->
             <div class="customer-card">
                 <div class="customer-avatar">
-                    J
+                    {{ strtoupper(substr($testimonial->user->name, 0, 1)) }}
                 </div>
-                <div class="customer-name">John Doe</div>
-                <div class="customer-email">john.doe@example.com</div>
+                <div class="customer-name">{{ $testimonial->user->name }}</div>
+                <div class="customer-email">{{ $testimonial->user->email }}</div>
                 <div class="customer-role">{{ __('Customer') }}</div>
             </div>
             
@@ -828,7 +681,7 @@
                         <i class="fas fa-envelope"></i>
                         {{ __('Email') }}
                     </span>
-                    <span class="info-value">john.doe@example.com</span>
+                    <span class="info-value">{{ $testimonial->user->email }}</span>
                 </li>
                 
                 <li class="info-item">
@@ -836,62 +689,66 @@
                         <i class="fas fa-calendar-plus"></i>
                         {{ __('Joined') }}
                     </span>
-                    <span class="info-value">Jan 2024</span>
+                    <span class="info-value">{{ $testimonial->user->created_at->format('M Y') }}</span>
                 </li>
                 
-                <li class="info-item">
-                    <span class="info-label">
-                        <i class="fas fa-shopping-cart"></i>
-                        {{ __('Order') }}
-                    </span>
-                    <span class="info-value">
-                        <a href="#" class="order-link" onclick="showOrderDetails()">
-                            #1234
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </span>
-                </li>
-                
-                <li class="info-item">
-                    <span class="info-label">
-                        <i class="fas fa-dollar-sign"></i>
-                        {{ __('Order Value') }}
-                    </span>
-                    <span class="info-value">$1,349.98</span>
-                </li>
-                
-                <li class="info-item">
-                    <span class="info-label">
-                        <i class="fas fa-truck"></i>
-                        {{ __('Order Status') }}
-                    </span>
-                    <span class="info-value">Delivered</span>
-                </li>
+                @if($testimonial->order)
+                    <li class="info-item">
+                        <span class="info-label">
+                            <i class="fas fa-shopping-cart"></i>
+                            {{ __('Order') }}
+                        </span>
+                        <span class="info-value">
+                            <a href="{{ route('admin.orders.show', $testimonial->order) }}" class="order-link">
+                                #{{ $testimonial->order->id }}
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </span>
+                    </li>
+                    
+                    <li class="info-item">
+                        <span class="info-label">
+                            <i class="fas fa-dollar-sign"></i>
+                            {{ __('Order Value') }}
+                        </span>
+                        <span class="info-value">${{ number_format($testimonial->order->total_amount, 2) }}</span>
+                    </li>
+                    
+                    <li class="info-item">
+                        <span class="info-label">
+                            <i class="fas fa-truck"></i>
+                            {{ __('Order Status') }}
+                        </span>
+                        <span class="info-value">{{ ucfirst($testimonial->order->status) }}</span>
+                    </li>
+                @endif
                 
                 <li class="info-item">
                     <span class="info-label">
                         <i class="fas fa-clock"></i>
                         {{ __('Submitted') }}
                     </span>
-                    <span class="info-value">2 days ago</span>
+                    <span class="info-value">{{ $testimonial->created_at->diffForHumans() }}</span>
                 </li>
             </ul>
             
             <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button type="button" class="btn btn-success" id="approveBtn">
-                    <i class="fas fa-check"></i>
-                    {{ __('Approve Testimonial') }}
-                </button>
-                
-                <button type="button" class="btn btn-danger" id="rejectBtn">
-                    <i class="fas fa-times"></i>
-                    {{ __('Reject Testimonial') }}
-                </button>
-            </div>
+            @if($testimonial->status === 'pending')
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-success" id="approveBtn">
+                        <i class="fas fa-check"></i>
+                        {{ __('Approve Testimonial') }}
+                    </button>
+                    
+                    <button type="button" class="btn btn-danger" id="rejectBtn">
+                        <i class="fas fa-times"></i>
+                        {{ __('Reject Testimonial') }}
+                    </button>
+                </div>
+            @endif
             
             <!-- Delete Button -->
-            <div class="action-buttons" style="margin-top: var(--space-md);">
+            <div class="action-buttons" style="margin-top: 1rem;">
                 <button type="button" class="btn btn-danger" id="deleteBtn">
                     <i class="fas fa-trash"></i>
                     {{ __('Delete Testimonial') }}
@@ -916,15 +773,26 @@
         </div>
         <div class="timeline-content">
             <div class="timeline-title">{{ __('Testimonial Submitted') }}</div>
-            <div class="timeline-time">March 15, 2024 at 2:30 PM</div>
+            <div class="timeline-time">{{ $testimonial->created_at->format('F d, Y \a\t g:i A') }}</div>
         </div>
     </div>
+    
+    @if($testimonial->status !== 'pending')
+        <div class="timeline-item">
+            <div class="timeline-icon icon-{{ $testimonial->status }}">
+                <i class="fas fa-{{ $testimonial->status === 'approved' ? 'check' : 'times' }}"></i>
+            </div>
+            <div class="timeline-content">
+                <div class="timeline-title">{{ __('Testimonial') }} {{ ucfirst($testimonial->status) }}</div>
+                <div class="timeline-time">{{ $testimonial->updated_at->format('F d, Y \a\t g:i A') }}</div>
+            </div>
+        </div>
+    @endif
 </div>
 @endsection
 
 @push('scripts')
 <script>
-    // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
         // Add event listeners to buttons
         var approveBtn = document.getElementById('approveBtn');
@@ -953,48 +821,35 @@
         initAnimations();
     });
     
-    // Navigation functions
-    function goBack() {
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = '/admin/testimonials';
-        }
-    }
-    
-    function showOrderDetails() {
-        showNotification('Order details would open here', 'info');
-        // In real implementation: window.location.href = orderUrl;
-    }
-    
     // Action functions
     function approveTestimonial() {
         if (confirm('Are you sure you want to approve this testimonial?')) {
             var button = document.getElementById('approveBtn');
             if (!button) return;
             
-            // Show loading state
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Approving...';
             button.disabled = true;
-            button.style.opacity = '0.7';
             
-            // Simulate API call
-            setTimeout(function() {
-                showNotification('Testimonial approved successfully!', 'success');
-                updateTestimonialStatus('approved');
-                
-                // Update button
-                button.innerHTML = '<i class="fas fa-check"></i> Approved';
-                button.classList.remove('btn-success');
-                button.classList.add('btn-secondary');
-                button.disabled = true;
-                
-                // Hide reject button
-                var rejectBtn = document.getElementById('rejectBtn');
-                if (rejectBtn) {
-                    rejectBtn.style.display = 'none';
+            fetch('{{ route("admin.testimonials.approve", $testimonial) }}', {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
                 }
-            }, 1500);
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Testimonial approved successfully!', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .catch(error => {
+                showNotification('Error approving testimonial', 'error');
+                button.innerHTML = '<i class="fas fa-check"></i> Approve';
+                button.disabled = false;
+            });
         }
     }
     
@@ -1005,24 +860,27 @@
             
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rejecting...';
             button.disabled = true;
-            button.style.opacity = '0.7';
             
-            setTimeout(function() {
-                showNotification('Testimonial rejected successfully!', 'success');
-                updateTestimonialStatus('rejected');
-                
-                // Update button
-                button.innerHTML = '<i class="fas fa-times"></i> Rejected';
-                button.classList.remove('btn-danger');
-                button.classList.add('btn-secondary');
-                button.disabled = true;
-                
-                // Hide approve button
-                var approveBtn = document.getElementById('approveBtn');
-                if (approveBtn) {
-                    approveBtn.style.display = 'none';
+            fetch('{{ route("admin.testimonials.reject", $testimonial) }}', {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
                 }
-            }, 1500);
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('Testimonial rejected successfully!', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .catch(error => {
+                showNotification('Error rejecting testimonial', 'error');
+                button.innerHTML = '<i class="fas fa-times"></i> Reject';
+                button.disabled = false;
+            });
         }
     }
     
@@ -1033,124 +891,40 @@
             
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
             button.disabled = true;
-            button.style.opacity = '0.7';
             
-            setTimeout(function() {
-                showNotification('Testimonial deleted successfully!', 'success');
-                setTimeout(function() {
-                    goBack();
-                }, 1000);
-            }, 1500);
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("admin.testimonials.destroy", $testimonial) }}';
+            form.innerHTML = `
+                @csrf
+                @method('DELETE')
+            `;
+            document.body.appendChild(form);
+            form.submit();
         }
     }
     
-    // Update testimonial status
-    function updateTestimonialStatus(newStatus) {
-        var statusBadge = document.querySelector('.status-badge');
-        if (!statusBadge) return;
-        
-        // Remove old classes
-        statusBadge.classList.remove('status-pending', 'status-approved', 'status-rejected');
-        
-        // Add new classes and content
-        statusBadge.classList.add('status-' + newStatus);
-        
-        if (newStatus === 'approved') {
-            statusBadge.innerHTML = '<i class="fas fa-check"></i> Approved';
-        } else if (newStatus === 'rejected') {
-            statusBadge.innerHTML = '<i class="fas fa-times"></i> Rejected';
-        }
-        
-        // Add animation
-        statusBadge.style.transform = 'scale(1.1)';
-        setTimeout(function() {
-            statusBadge.style.transform = 'scale(1)';
-        }, 200);
-        
-        // Update timeline
-        addTimelineItem(newStatus);
-    }
-    
-    // Add timeline item
-    function addTimelineItem(status) {
-        var timelineSection = document.querySelector('.timeline-section');
-        if (!timelineSection) return;
-        
-        var newItem = document.createElement('div');
-        newItem.className = 'timeline-item';
-        newItem.style.opacity = '0';
-        newItem.style.transform = 'translateX(-20px)';
-        
-        var iconClass = status === 'approved' ? 'icon-approved' : 'icon-rejected';
-        var iconName = status === 'approved' ? 'check' : 'times';
-        var title = status === 'approved' ? 'Testimonial Approved' : 'Testimonial Rejected';
-        var currentTime = new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
-        
-        newItem.innerHTML = `
-            <div class="timeline-icon ${iconClass}">
-                <i class="fas fa-${iconName}"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="timeline-title">${title}</div>
-                <div class="timeline-time">${currentTime}</div>
-            </div>
-        `;
-        
-        timelineSection.appendChild(newItem);
-        
-        // Animate in
-        setTimeout(function() {
-            newItem.style.transition = 'all 0.5s ease-out';
-            newItem.style.opacity = '1';
-            newItem.style.transform = 'translateX(0)';
-        }, 100);
-    }
-    
-    // Show notification
     function showNotification(message, type) {
-        if (type === undefined) {
-            type = 'info';
-        }
-        
-        // Remove existing notifications
-        var existingNotifications = document.querySelectorAll('.custom-notification');
-        existingNotifications.forEach(function(notif) {
-            notif.remove();
-        });
-        
         var notification = document.createElement('div');
-        notification.className = 'custom-notification alert alert-' + type;
+        notification.className = 'alert alert-' + type;
         notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 9999;
             max-width: 300px;
-            min-width: 250px;
             animation: slideInRight 0.3s ease-out;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 8px;
             padding: 12px 16px;
-            font-weight: 500;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         `;
         
-        var iconClass = 'info-circle';
-        if (type === 'success') {
-            iconClass = 'check-circle';
-        } else if (type === 'error') {
-            iconClass = 'exclamation-circle';
-        } else if (type === 'warning') {
-            iconClass = 'exclamation-triangle';
-        }
+        var iconClass = type === 'success' ? 'check-circle' : 
+                       type === 'error' ? 'exclamation-circle' : 'info-circle';
         
-        notification.innerHTML = '<i class="fas fa-' + iconClass + '" style="margin-right: 8px;"></i>' + message;
+        notification.innerHTML = '<i class="fas fa-' + iconClass + '"></i>' + message;
         
         document.body.appendChild(notification);
         
@@ -1166,7 +940,6 @@
         }, 3000);
     }
     
-    // Initialize animations
     function initAnimations() {
         var observer = new IntersectionObserver(function(entries) {
             entries.forEach(function(entry, index) {
@@ -1184,21 +957,6 @@
             observer.observe(el);
         });
     }
-    
-    // Print functionality enhancement
-    window.addEventListener('beforeprint', function() {
-        var hideElements = document.querySelectorAll('.testimonial-actions, .action-buttons, .btn');
-        hideElements.forEach(function(el) {
-            el.style.display = 'none';
-        });
-    });
-    
-    window.addEventListener('afterprint', function() {
-        var showElements = document.querySelectorAll('.testimonial-actions, .action-buttons, .btn');
-        showElements.forEach(function(el) {
-            el.style.display = '';
-        });
-    });
     
     // Enhanced star interactions
     document.querySelectorAll('.star').forEach(function(star, index) {
@@ -1223,7 +981,7 @@
         
         // Escape to go back
         if (e.key === 'Escape') {
-            goBack();
+            window.location.href = '{{ route("admin.testimonials.index") }}';
         }
     });
 </script>
@@ -1251,7 +1009,15 @@
         }
     }
     
-    /* Button states */
+    @keyframes fa-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .fa-spin {
+        animation: fa-spin 1s infinite linear;
+    }
+    
     .btn:disabled {
         cursor: not-allowed;
         opacity: 0.6;
@@ -1261,185 +1027,46 @@
         transform: none !important;
     }
     
-    /* Notification styles */
-    .custom-notification {
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid;
         display: flex;
         align-items: center;
-        font-size: 14px;
+        gap: 8px;
     }
     
-    /* Timeline animation */
-    .timeline-item {
-        transition: all 0.3s ease-out;
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+        border-color: #bbf7d0;
     }
     
-    .timeline-item:hover {
-        background: var(--admin-secondary-50);
-        border-radius: var(--radius-md);
-    }
-</style>
-@endpush
-    document.addEventListener('DOMContentLoaded', function() {
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry, index) {
-                if (entry.isIntersecting) {
-                    setTimeout(function() {
-                        entry.target.classList.add('visible');
-                    }, index * 100);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        
-        var fadeElements = document.querySelectorAll('.fade-in');
-        fadeElements.forEach(function(el) {
-            observer.observe(el);
-        });
-    });
-    
-    // Print functionality enhancement
-    window.addEventListener('beforeprint', function() {
-        // Hide non-essential elements when printing
-        var hideElements = document.querySelectorAll('.testimonial-actions, .action-buttons, .btn');
-        hideElements.forEach(function(el) {
-            el.style.display = 'none';
-        });
-    });
-    
-    window.addEventListener('afterprint', function() {
-        // Show elements back after printing
-        var showElements = document.querySelectorAll('.testimonial-actions, .action-buttons, .btn');
-        showElements.forEach(function(el) {
-            el.style.display = '';
-        });
-    });
-    
-    // Enhanced star interactions
-    document.querySelectorAll('.star').forEach(function(star, index) {
-        star.addEventListener('mouseenter', function() {
-            // Highlight stars up to current one
-            var stars = this.parentElement.querySelectorAll('.star');
-            stars.forEach(function(s, i) {
-                if (i <= index) {
-                    s.style.transform = 'scale(1.1)';
-                    s.style.filter = 'brightness(1.2)';
-                }
-            });
-        });
-        
-        star.addEventListener('mouseleave', function() {
-            // Reset all stars
-            var stars = this.parentElement.querySelectorAll('.star');
-            stars.forEach(function(s) {
-                s.style.transform = '';
-                s.style.filter = '';
-            });
-        });
-    });
-    
-    // Smooth scroll to sections
-    function scrollToSection(sectionId) {
-        document.getElementById(sectionId).scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
+    .alert-error {
+        background: #fef2f2;
+        color: #991b1b;
+        border-color: #fecaca;
     }
     
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + P for print
-        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-            e.preventDefault();
-            window.print();
-        }
-        
-        // Escape to go back
-        if (e.key === 'Escape') {
-            window.location.href = '{{ route("admin.testimonials.index") }}';
-        }
-    });
-    
-    // Auto-refresh testimonial status (every 30 seconds)
-    setInterval(function() {
-        fetch('{{ route("admin.testimonials.show", $testimonial) }}', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        }).then(function(response) {
-            return response.json();
-        }).then(function(data) {
-            if (data.status && data.status !== '{{ $testimonial->status }}') {
-                showNotification('{{ __("Testimonial status has been updated") }}', 'info');
-                setTimeout(function() {
-                    location.reload();
-                }, 2000);
-            }
-        }).catch(function(error) {
-            // Silently fail - don't show error for auto-refresh
-        });
-    }, 30000);
-    
-    // Show notification
-    function showNotification(message, type) {
-        if (type === undefined) {
-            type = 'info';
-        }
-        
-        var notification = document.createElement('div');
-        notification.className = 'alert alert-' + type;
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.zIndex = '9999';
-        notification.style.maxWidth = '300px';
-        notification.style.animation = 'slideInRight 0.3s ease-out';
-        
-        var iconClass = 'info-circle';
-        if (type === 'success') {
-            iconClass = 'check-circle';
-        } else if (type === 'error') {
-            iconClass = 'exclamation-circle';
-        } else if (type === 'warning') {
-            iconClass = 'exclamation-triangle';
-        }
-        
-        notification.innerHTML = '<i class="fas fa-' + iconClass + '"></i> ' + message;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(function() {
-            notification.style.animation = 'slideOutRight 0.3s ease-out forwards';
-            setTimeout(function() {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
-    }
-</script>
-
-<style>
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+    .alert-info {
+        background: #eff6ff;
+        color: #1e40af;
+        border-color: #bfdbfe;
     }
     
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
+    @media print {
+        .testimonial-actions,
+        .action-buttons,
+        .btn {
+            display: none !important;
         }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
+        
+        .testimonial-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        body {
+            font-size: 12px !important;
         }
     }
 </style>
