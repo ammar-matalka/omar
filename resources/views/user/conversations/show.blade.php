@@ -1,161 +1,1208 @@
 @extends('layouts.app')
 
+@section('title', $conversation->title)
+
+@push('styles')
+<style>
+.conversation-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-md);
+}
+
+.conversation-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--space-xl);
+}
+
+.conversation-main {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 150px);
+    min-height: 600px;
+}
+
+.conversation-header {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.conversation-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.conversation-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.messages-container {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.messages-header {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-variant);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.messages-list {
+    flex: 1;
+    padding: var(--space-lg);
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-variant) 100%);
+}
+
+.message-item {
+    margin-bottom: var(--space-xl);
+    display: flex;
+    gap: var(--space-md);
+    animation: fadeInMessage 0.3s ease-out;
+}
+
+.message-item.user {
+    flex-direction: row-reverse;
+}
+
+@keyframes fadeInMessage {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md);
+}
+
+.message-avatar.user {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+}
+
+.message-avatar.admin {
+    background: linear-gradient(135deg, var(--success-500), var(--success-600));
+}
+
+.message-content {
+    flex: 1;
+    max-width: 75%;
+}
+
+.message-sender {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    margin-bottom: var(--space-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.message-item.user .message-sender {
+    justify-content: flex-end;
+}
+
+.sender-badge {
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sender-badge.admin {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+.sender-badge.user {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}
+
+.message-bubble {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-xs);
+    word-wrap: break-word;
+    line-height: 1.6;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.message-bubble.user {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    border-bottom-right-radius: var(--radius-sm);
+}
+
+.message-bubble.admin {
+    background: var(--surface);
+    color: var(--on-surface);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: var(--radius-sm);
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    margin-left: var(--space-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.message-item.user .message-time {
+    justify-content: flex-end;
+    margin-left: 0;
+    margin-right: var(--space-sm);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.reply-form {
+    border-top: 1px solid var(--border-color);
+    padding: var(--space-lg);
+    background: var(--surface);
+}
+
+.reply-input-group {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-end;
+}
+
+.reply-textarea {
+    flex: 1;
+    min-height: 60px;
+    max-height: 120px;
+    padding: var(--space-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    font-family: inherit;
+    resize: none;
+    transition: all var(--transition-fast);
+}
+
+.reply-textarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.reply-textarea::placeholder {
+    color: var(--on-surface-variant);
+}
+
+.send-button {
+    padding: var(--space-md);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    height: 50px;
+    box-shadow: var(--shadow-md);
+}
+
+.send-button:hover {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+.send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.reply-help {
+    margin-top: var(--space-sm);
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.info-card {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.info-card-header {
+    padding: var(--space-md) var(--space-lg);
+    background: var(--surface-variant);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    color: var(--on-surface);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.info-card-body {
+    padding: var(--space-lg);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+}
+
+.info-value {
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-dot.active {
+    background: var(--success-500);
+    animation: pulse 2s infinite;
+}
+
+.status-dot.read {
+    background: var(--primary-500);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--on-surface);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+}
+
+.action-button:hover {
+    background: var(--surface-variant);
+    border-color: var(--primary-300);
+    transform: translateY(-1px);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--primary-600);
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: var(--space-lg);
+    transition: color var(--transition-fast);
+}
+
+.back-link:hover {
+    color: var(--primary-700);
+}
+
+@media (max-width: 768px) {
+    .conversation-container {
+        padding: var(--space-md) var(--space-sm);
+    }
+    
+    .conversation-wrapper {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar-info {
+        order: -1;
+    }
+    
+    .conversation-main {
+        height: calc(100vh - 300px);
+        min-height: 400px;
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+    
+    .conversation-meta {
+        flex-wrap: wrap;
+        gap: var(--space-md);
+    }
+    
+    .reply-input-group {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+    
+    .send-button {
+        align-self: flex-end;
+        min-width: 100px;
+    }
+}
+</style>
+@endpush
+
 @section('content')
-<div class="conversation-page py-5">
-    <div class="container">
-        <!-- Conversation Header -->
-        <div class="conversation-header mb-4">
-            <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
-                <div class="card-body p-0">
-                    <div class="row g-0">
-                        <div class="col-md-8">
-                            <div class="conversation-info p-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="conversation-avatar me-3">
-                                        <div class="avatar-outline">
-                                            <div class="avatar-inner rounded-circle d-flex align-items-center justify-content-center text-white">
-                                                {{ strtoupper(substr($conversation->title, 0, 1)) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h1 class="h2 fw-bold mb-0" style="color: #a18664;">{{ $conversation->title }}</h1>
-                                        <div class="conversation-meta d-flex align-items-center flex-wrap mt-2">
-                                           
-                                          
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+<div class="conversation-container">
+    <!-- Back Link -->
+    <a href="{{ route('user.conversations.index') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Conversations
+    </a>
+
+    <div class="conversation-wrapper">
+        <div class="conversation-main">
+            <!-- Conversation Header -->
+            <div class="conversation-header">
+                <div class="conversation-title">
+                    <i class="fas fa-comment-dots" style="color: var(--primary-500);"></i>
+                    {{ $conversation->title }}
+                </div>
+                <div class="conversation-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Started {{ $conversation->created_at->format('M d, Y') }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Last updated {{ $conversation->updated_at->diffForHumans() }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-comment"></i>
+                        <span>{{ $messages->count() }} messages</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-container">
+                <div class="messages-header">
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: var(--space-sm);">
+                        <i class="fas fa-comments"></i>
+                        Conversation with Support Team
+                    </h3>
+                    <button class="btn btn-secondary btn-sm" onclick="scrollToBottom()">
+                        <i class="fas fa-arrow-down"></i>
+                        Latest
+                    </button>
+                </div>
+
+                <div class="messages-list" id="messagesList">
+                    @foreach($messages as $message)
+                    <div class="message-item {{ $message->is_from_admin ? 'admin' : 'user' }}">
+                        <div class="message-avatar {{ $message->is_from_admin ? 'admin' : 'user' }}">
+                            @if($message->is_from_admin)
+                                <i class="fas fa-headset"></i>
+                            @else
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            @endif
                         </div>
-                        <div class="col-md-4">
-                            <div class="conversation-actions h-100 d-flex align-items-center justify-content-center justify-content-md-end p-4" style="background-color: rgba(161, 134, 100, 0.05);">
-                                <a href="{{ route('user.conversations.index') }}" class="btn btn-outline-secondary btn-icon-split rounded-pill me-2">
-                                    <span class="icon">
-                                        <i class="fas fa-arrow-left"></i>
-                                    </span>
-                                    <span class="text">Back</span>
-                                </a>
-                                <div class="dropdown">
-                                  
-                                    </ul>
-                                </div>
+                        <div class="message-content">
+                            <div class="message-sender">
+                                @if($message->is_from_admin)
+                                    <span class="sender-badge admin">Support Team</span>
+                                @else
+                                    <span class="sender-badge user">You</span>
+                                @endif
+                                <span class="message-time">
+                                    <i class="fas fa-clock"></i>
+                                    {{ $message->created_at->format('M d, h:i A') }}
+                                </span>
+                            </div>
+                            <div class="message-bubble {{ $message->is_from_admin ? 'admin' : 'user' }}">
+                                {{ $message->message }}
                             </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
+
+                <!-- Reply Form -->
+                <form action="{{ route('user.conversations.reply', $conversation) }}" method="POST" class="reply-form">
+                    @csrf
+                    <div class="reply-input-group">
+                        <textarea 
+                            name="message" 
+                            class="reply-textarea" 
+                            placeholder="Type your message here..."
+                            required
+                            onkeydown="handleKeyDown(event)"
+                            oninput="autoResize(this)"
+                        ></textarea>
+                        <button type="submit" class="send-button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="reply-help">
+                        <span>
+                            <i class="fas fa-info-circle"></i>
+                            Press Ctrl+Enter to send quickly
+                        </span>
+                        <span id="typingIndicator" style="display: none; color: var(--primary-500);">
+                            <i class="fas fa-pencil-alt"></i>
+                            Typing...
+                        </span>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <!-- Timeline & Message Content -->
-        <div class="row g-4">
-            <!-- Sidebar Timeline -->
-            <div class="col-lg-3">
-                <div class="card border-0 rounded-4 shadow-sm h-100">
-                    <div class="card-header text-white py-3 px-4 rounded-top-4" style="background-color: #a18664;">
-                        <h5 class="card-title mb-0"><i class="fas fa-history me-2"></i> Timeline</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="chat-timeline p-3">
-                            <div class="timeline-stream">
-                                @foreach($messages as $index => $message)
-                                    <div class="timeline-item {{ $loop->last ? 'last-item' : '' }}">
-                                        <div class="timeline-marker {{ $message->is_from_admin ? 'admin-marker' : 'user-marker' }}"></div>
-                                        <div class="timeline-content">
-                                            <h6 class="mb-1 fw-bold">{{ $message->is_from_admin ? 'Support Team' : 'You' }}</h6>
-                                            <p class="text-muted small mb-0">{{ $message->created_at->format('M d, h:i A') }}</p>
-                                        </div>
-                                    </div>
-                                @endforeach
+        <!-- Sidebar Info -->
+        <div class="sidebar-info">
+            <!-- Conversation Status -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-info-circle"></i>
+                    Status
+                </div>
+                <div class="info-card-body">
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value">
+                            <div class="status-indicator">
+                                <div class="status-dot active"></div>
+                                Active
                             </div>
-                        </div>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Messages:</span>
+                        <span class="info-value">{{ $messages->count() }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Created:</span>
+                        <span class="info-value">{{ $conversation->created_at->format('M d, Y') }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Reply:</span>
+                        <span class="info-value">{{ $conversation->updated_at->diffForHumans() }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Main Chat Area -->
-            <div class="col-lg-9">
-                <div class="chat-container">
-                    <!-- Messages Section -->
-                    <div class="card border-0 rounded-4 p-3 shadow-sm mb-4">
-                        <div class="card-header p-3 rounded-top-4" style="background-color: #a18664;">
-                        <ul class="nav nav-tabs card-header-tabs border-0 w-100 justify-content-center">
-                        <li class="nav-item">
-                                <a class="nav-link active text-white fw-bold rounded-top-0 bg-transparent border-0">
-                                <i class="fas fa-comment-dots me-2"></i> Messages
-                                    </a>
-                             
-                                </li>
-                            </ul>
+            <!-- Quick Actions -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </div>
+                <div class="info-card-body">
+                    <div class="quick-actions">
+                        <a href="{{ route('user.conversations.index') }}" class="action-button">
+                            <i class="fas fa-list"></i>
+                            View All@extends('layouts.app')
+
+@section('title', $conversation->title)
+
+@push('styles')
+<style>
+.conversation-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-md);
+}
+
+.conversation-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--space-xl);
+}
+
+.conversation-main {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 150px);
+    min-height: 600px;
+}
+
+.conversation-header {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.conversation-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.conversation-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.messages-container {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.messages-header {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-variant);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.messages-list {
+    flex: 1;
+    padding: var(--space-lg);
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-variant) 100%);
+}
+
+.message-item {
+    margin-bottom: var(--space-xl);
+    display: flex;
+    gap: var(--space-md);
+    animation: fadeInMessage 0.3s ease-out;
+}
+
+.message-item.user {
+    flex-direction: row-reverse;
+}
+
+@keyframes fadeInMessage {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md);
+}
+
+.message-avatar.user {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+}
+
+.message-avatar.admin {
+    background: linear-gradient(135deg, var(--success-500), var(--success-600));
+}
+
+.message-content {
+    flex: 1;
+    max-width: 75%;
+}
+
+.message-sender {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    margin-bottom: var(--space-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.message-item.user .message-sender {
+    justify-content: flex-end;
+}
+
+.sender-badge {
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sender-badge.admin {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+.sender-badge.user {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}
+
+.message-bubble {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-xs);
+    word-wrap: break-word;
+    line-height: 1.6;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.message-bubble.user {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    border-bottom-right-radius: var(--radius-sm);
+}
+
+.message-bubble.admin {
+    background: var(--surface);
+    color: var(--on-surface);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: var(--radius-sm);
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    margin-left: var(--space-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.message-item.user .message-time {
+    justify-content: flex-end;
+    margin-left: 0;
+    margin-right: var(--space-sm);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.reply-form {
+    border-top: 1px solid var(--border-color);
+    padding: var(--space-lg);
+    background: var(--surface);
+}
+
+.reply-input-group {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-end;
+}
+
+.reply-textarea {
+    flex: 1;
+    min-height: 60px;
+    max-height: 120px;
+    padding: var(--space-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    font-family: inherit;
+    resize: none;
+    transition: all var(--transition-fast);
+}
+
+.reply-textarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.reply-textarea::placeholder {
+    color: var(--on-surface-variant);
+}
+
+.send-button {
+    padding: var(--space-md);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    height: 50px;
+    box-shadow: var(--shadow-md);
+}
+
+.send-button:hover {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+.send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.reply-help {
+    margin-top: var(--space-sm);
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.info-card {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.info-card-header {
+    padding: var(--space-md) var(--space-lg);
+    background: var(--surface-variant);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    color: var(--on-surface);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.info-card-body {
+    padding: var(--space-lg);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+}
+
+.info-value {
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-dot.active {
+    background: var(--success-500);
+    animation: pulse 2s infinite;
+}
+
+.status-dot.read {
+    background: var(--primary-500);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--on-surface);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+}
+
+.action-button:hover {
+    background: var(--surface-variant);
+    border-color: var(--primary-300);
+    transform: translateY(-1px);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--primary-600);
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: var(--space-lg);
+    transition: color var(--transition-fast);
+}
+
+.back-link:hover {
+    color: var(--primary-700);
+}
+
+@media (max-width: 768px) {
+    .conversation-container {
+        padding: var(--space-md) var(--space-sm);
+    }
+    
+    .conversation-wrapper {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar-info {
+        order: -1;
+    }
+    
+    .conversation-main {
+        height: calc(100vh - 300px);
+        min-height: 400px;
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+    
+    .conversation-meta {
+        flex-wrap: wrap;
+        gap: var(--space-md);
+    }
+    
+    .reply-input-group {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+    
+    .send-button {
+        align-self: flex-end;
+        min-width: 100px;
+    }
+}
+</style>
+@endpush
+
+@section('content')
+<div class="conversation-container">
+    <!-- Back Link -->
+    <a href="{{ route('user.conversations.index') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Conversations
+    </a>
+
+    <div class="conversation-wrapper">
+        <div class="conversation-main">
+            <!-- Conversation Header -->
+            <div class="conversation-header">
+                <div class="conversation-title">
+                    <i class="fas fa-comment-dots" style="color: var(--primary-500);"></i>
+                    {{ $conversation->title }}
+                </div>
+                <div class="conversation-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Started {{ $conversation->created_at->format('M d, Y') }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Last updated {{ $conversation->updated_at->diffForHumans() }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-comment"></i>
+                        <span>{{ $messages->count() }} messages</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-container">
+                <div class="messages-header">
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: var(--space-sm);">
+                        <i class="fas fa-comments"></i>
+                        Conversation with Support Team
+                    </h3>
+                    <button class="btn btn-secondary btn-sm" onclick="scrollToBottom()">
+                        <i class="fas fa-arrow-down"></i>
+                        Latest
+                    </button>
+                </div>
+
+                <div class="messages-list" id="messagesList">
+                    @foreach($messages as $message)
+                    <div class="message-item {{ $message->is_from_admin ? 'admin' : 'user' }}">
+                        <div class="message-avatar {{ $message->is_from_admin ? 'admin' : 'user' }}">
+                            @if($message->is_from_admin)
+                                <i class="fas fa-headset"></i>
+                            @else
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            @endif
                         </div>
-                        <div class="card-body p-4" id="conversation-messages">
-                            <div class="chat-messages">
-                                @foreach($messages as $message)
-                                    <div class="message-wrapper {{ $message->is_from_admin ? 'admin-wrapper' : 'user-wrapper' }}">
-                                        <div class="message-container {{ $message->is_from_admin ? 'admin-container' : 'user-container' }}">
-                                            <div class="message-sender">
-                                                <div class="avatar {{ $message->is_from_admin ? 'admin-avatar' : 'user-avatar' }}">
-                                                    {!! $message->is_from_admin ? '<i class="fas fa-headset"></i>' : '<i class="fas fa-user"></i>' !!}
-                                                </div>
-                                            </div>
-                                            <div class="message-content">
-                                                <div class="message-header">
-                                                    <span class="sender-name">{{ $message->is_from_admin ? 'Support Team' : 'You' }}</span>
-                                                    <span class="message-time">
-                                                        <i class="far fa-clock me-1"></i>{{ $message->created_at->format('M d, Y h:i A') }}
-                                                    </span>
-                                                </div>
-                                                <div class="message-bubble {{ $message->is_from_admin ? 'admin-bubble' : 'user-bubble' }}">
-                                                    <p class="mb-0">{{ $message->message }}</p>
-                                                </div>
-                                                <div class="message-actions">
-                                                    <button type="button" class="btn btn-sm text-muted" data-bs-toggle="tooltip" title="Copy message">
-                                                        <i class="far fa-copy"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm text-muted" data-bs-toggle="tooltip" title="Quote message">
-                                                        <i class="fas fa-quote-right"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
+                        <div class="message-content">
+                            <div class="message-sender">
+                                @if($message->is_from_admin)
+                                    <span class="sender-badge admin">Support Team</span>
+                                @else
+                                    <span class="sender-badge user">You</span>
+                                @endif
+                                <span class="message-time">
+                                    <i class="fas fa-clock"></i>
+                                    {{ $message->created_at->format('M d, h:i A') }}
+                                </span>
+                            </div>
+                            <div class="message-bubble {{ $message->is_from_admin ? 'admin' : 'user' }}">
+                                {{ $message->message }}
                             </div>
                         </div>
                     </div>
+                    @endforeach
+                </div>
 
-                    <!-- Reply Section -->
-                    <div class="card border-0 rounded-4 shadow-sm">
-                        <div class="card-body p-4">
-                            <h5 class="card-title fw-bold mb-3" style="color: #a18664;"><i class="fas fa-reply me-2"></i>Your Response</h5>
-                            <form action="{{ route('user.conversations.reply', $conversation) }}" method="POST" class="reply-form">
-                                @csrf
-                                <div class="mb-3">
-                                    <div class="form-floating">
-                                        <textarea class="form-control @error('message') is-invalid @enderror" 
-                                              id="message" name="message" style="height: 120px; border-radius: 15px;" 
-                                              placeholder="Type your message here..." required>{{ old('message') }}</textarea>
-                                        <label for="message">Type your message here...</label>
-                                        @error('message')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="message-tools">
-                                        <button type="button" class="btn btn-light rounded-circle me-2" data-bs-toggle="tooltip" title="Attach file">
-                                            <i class="fas fa-paperclip"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-light rounded-circle me-2" data-bs-toggle="tooltip" title="Emoji">
-                                            <i class="far fa-smile"></i>
-                                        </button>
-                                    </div>
-                                    <button type="submit" class="btn btn-lg rounded-pill px-4" style="background-color: #a18664; color: white;">
-                                        <i class="fas fa-paper-plane me-2"></i> Send Message
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                <!-- Reply Form -->
+                <form action="{{ route('user.conversations.reply', $conversation) }}" method="POST" class="reply-form">
+                    @csrf
+                    <div class="reply-input-group">
+                        <textarea 
+                            name="message" 
+                            class="reply-textarea" 
+                            placeholder="Type your message here..."
+                            required
+                            onkeydown="handleKeyDown(event)"
+                            oninput="autoResize(this)"
+                        ></textarea>
+                        <button type="submit" class="send-button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="reply-help">
+                        <span>
+                            <i class="fas fa-info-circle"></i>
+                            Press Ctrl+Enter to send quickly
+                        </span>
+                        <span id="typingIndicator" style="display: none; color: var(--primary-500);">
+                            <i class="fas fa-pencil-alt"></i>
+                            Typing...
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="sidebar-info">
+            <!-- Conversation Status -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-info-circle"></i>
+                    Status
+                </div>
+                <div class="info-card-body">
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value">
+                            <div class="status-indicator">
+                                <div class="status-dot active"></div>
+                                Active
+                            </div>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Messages:</span>
+                        <span class="info-value">{{ $messages->count() }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Created:</span>
+                        <span class="info-value">{{ $conversation->created_at->format('M d, Y') }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Reply:</span>
+                        <span class="info-value">{{ $conversation->updated_at->diffForHumans() }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </div>
+                <div class="info-card-body">
+                    <div class="quick-actions">
+                        <a href="{{ route('user.conversations.index') }}" class="action-button">
+                            <i class="fas fa-list"></i>
+                            View All Conversations
+                        </a>
+                        <a href="{{ route('user.conversations.create') }}" class="action-button">
+                            <i class="fas fa-plus"></i>
+                            Start New Conversation
+                        </a>
+                        <a href="{{ route('user.profile.show') }}" class="action-button">
+                            <i class="fas fa-user"></i>
+                            My Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Info -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <i class="fas fa-question-circle"></i>
+                    Support Info
+                </div>
+                <div class="info-card-body">
+                    <p style="font-size: 0.875rem; color: var(--on-surface-variant); line-height: 1.6; margin-bottom: var(--space-md);">
+                        Our support team typically responds within 24 hours during business days.
+                    </p>
+                    <div class="info-item">
+                        <span class="info-label">Response Time:</span>
+                        <span class="info-value">< 24 hours</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Business Hours:</span>
+                        <span class="info-value">9 AM - 6 PM</span>
                     </div>
                 </div>
             </div>
@@ -164,306 +1211,66 @@
 </div>
 @endsection
 
-@push('styles')
-<style>
-    /* Premium Conversation Styles */
-    :root {
-        --primary: #a18664;       /* Darker brown */
-        --primary-medium: #c1a276; /* Medium brown */
-        --primary-light: #e6cfae; /* Lighter brown */
-        --primary-fade: rgba(161, 134, 100, 0.1);
-        --secondary: #858796;
-        --success: #1cc88a;
-        --info: #c1a276;         /* Using medium brown for info color */
-        --light-bg: #f8f9fc;
-        --dark-bg: #5a5c69;
-        --white: #fff;
-        --shadow: 0 .15rem 1.75rem 0 rgba(161, 134, 100, .15);
-        --border-radius: 1rem;
-    }
-    
-    /* Avatar Styling */
-    .avatar-outline {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(145deg, var(--primary), #8a7254);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 20px rgba(161, 134, 100, 0.3);
-    }
-    
-    .avatar-inner {
-        width: 50px;
-        height: 50px;
-        font-size: 1.4rem;
-        font-weight: bold;
-    }
-    
-    /* Button Styling */
-    .btn-icon-split .icon {
-        background: rgba(0, 0, 0, 0.1);
-        display: inline-block;
-        padding: .375rem .75rem;
-        border-radius: 50rem 0 0 50rem;
-        margin-right: -1px;
-    }
-    
-    .btn-icon-split .text {
-        display: inline-block;
-        padding: .375rem .75rem;
-        border-radius: 0 50rem 50rem 0;
-    }
-    
-    /* Timeline Styling */
-    .chat-timeline {
-        height: 100%;
-        max-height: 600px;
-        overflow-y: auto;
-    }
-    
-    .timeline-stream {
-        position: relative;
-        padding-left: 1.5rem;
-    }
-    
-    .timeline-stream:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 7px;
-        height: 100%;
-        width: 2px;
-        background-color: rgba(161, 134, 100, 0.2);
-    }
-    
-    .timeline-item {
-        position: relative;
-        padding-bottom: 1.5rem;
-    }
-    
-    .timeline-marker {
-        position: absolute;
-        top: 0;
-        left: -1.5rem;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        border: 2px solid var(--white);
-        box-shadow: 0 0 0 2px rgba(161, 134, 100, 0.2);
-    }
-    
-    .admin-marker {
-        background-color: var(--info);
-    }
-    
-    .user-marker {
-        background-color: var(--primary);
-    }
-    
-    .timeline-content {
-        padding-left: 0.5rem;
-    }
-    
-    .last-item .timeline-marker {
-        box-shadow: 0 0 0 4px rgba(161, 134, 100, 0.2);
-    }
-    
-    /* Message Styling */
-    .chat-messages {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-        max-height: 500px;
-        overflow-y: auto;
-        padding: 1rem 0;
-    }
-    
-    .message-wrapper {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .message-container {
-        display: flex;
-        max-width: 85%;
-    }
-    
-    .admin-wrapper {
-        align-self: flex-start;
-    }
-    
-    .user-wrapper {
-        align-self: flex-end;
-    }
-    
-    .user-container {
-        flex-direction: row-reverse;
-        margin-left: auto;
-    }
-    
-    .message-sender {
-        display: flex;
-        align-items: flex-start;
-        margin: 0 1rem;
-    }
-    
-    .avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--white);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .admin-avatar {
-        background: linear-gradient(145deg, var(--info), #a58b5e);
-    }
-    
-    .user-avatar {
-        background: linear-gradient(145deg, var(--primary), #8a7254);
-    }
-    
-    .message-content {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .message-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
-    }
-    
-    .sender-name {
-        font-weight: bold;
-        font-size: 0.9rem;
-    }
-    
-    .message-time {
-        font-size: 0.8rem;
-        color: var(--secondary);
-    }
-    
-    .message-bubble {
-        padding: 1rem;
-        border-radius: 1rem;
-        position: relative;
-        max-width: 100%;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-    
-    .admin-bubble {
-        background-color: var(--primary-light);
-        color: var(--dark-bg);
-        border-top-left-radius: 0;
-    }
-    
-    .user-bubble {
-        background: linear-gradient(145deg, var(--primary), #8a7254);
-        color: var(--white);
-        border-top-right-radius: 0;
-    }
-    
-    .message-actions {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 0.5rem;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-    }
-    
-    .message-container:hover .message-actions {
-        opacity: 1;
-    }
-    
-    /* Form Styling */
-    .form-floating > .form-control {
-        border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    
-    .form-floating > .form-control:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 0.25rem rgba(161, 134, 100, 0.25);
-    }
-    
-    /* Tooltip styling */
-    .tooltip {
-        font-size: 0.8rem;
-    }
-    
-    /* Card and buttons hover effects */
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 .3rem 3rem rgba(161, 134, 100, .175) !important;
-    }
-    
-    .btn {
-        transition: all 0.2s ease;
-    }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-    }
-    
-    .btn-brown {
-        background: linear-gradient(145deg, var(--primary), #8a7254);
-        border: none;
-        box-shadow: 0 4px 10px rgba(161, 134, 100, 0.3);
-        color: white;
-    }
-    
-    .btn-brown:hover {
-        background: linear-gradient(145deg, #b19a7a, #7e6849);
-        box-shadow: 0 6px 15px rgba(161, 134, 100, 0.4);
-        color: white;
-    }
-</style>
-@endpush
-
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-scroll to bottom of conversation
-        const messagesContainer = document.querySelector('.chat-messages');
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // Initialize tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-        
-        // Flash effect for newest message
-        const messages = document.querySelectorAll('.message-bubble');
-        if (messages.length > 0) {
-            const latestMessage = messages[messages.length - 1];
-            latestMessage.style.animation = 'flash-highlight 2s ease';
-        }
-    });
+function scrollToBottom() {
+    const messagesList = document.getElementById('messagesList');
+    messagesList.scrollTop = messagesList.scrollHeight;
+}
+
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+function handleKeyDown(event) {
+    // Send message with Ctrl+Enter
+    if (event.ctrlKey && event.key === 'Enter') {
+        event.preventDefault();
+        event.target.closest('form').submit();
+    }
+}
+
+// Auto-scroll to bottom on page load
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottom();
     
-    // Animation for new messages
-    document.querySelector('.reply-form').addEventListener('submit', function() {
-        const submitBtn = this.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Sending...';
-        submitBtn.disabled = true;
+    // Focus on the reply textarea
+    const textarea = document.querySelector('.reply-textarea');
+    if (textarea) {
+        textarea.focus();
+    }
+});
+
+// Auto-refresh for new messages every 20 seconds
+setInterval(function() {
+    // Check for new messages (you can implement AJAX here)
+    // For now, we'll just show a subtle indicator
+    const currentMessageCount = {{ $messages->count() }};
+    
+    // You can implement AJAX call here to check for new messages
+    // and update the conversation in real-time
+}, 20000);
+
+// Typing indicator (placeholder for real-time features)
+let typingTimer;
+const textarea = document.querySelector('.reply-textarea');
+const typingIndicator = document.getElementById('typingIndicator');
+
+if (textarea) {
+    textarea.addEventListener('input', function() {
+        // Show typing indicator
+        typingIndicator.style.display = 'block';
+        
+        // Clear existing timer
+        clearTimeout(typingTimer);
+        
+        // Hide indicator after 2 seconds of no typing
+        typingTimer = setTimeout(function() {
+            typingIndicator.style.display = 'none';
+        }, 2000);
     });
+}
 </script>
 
-<style>
-    @keyframes flash-highlight {
-        0% { box-shadow: 0 0 0 0 rgba(161, 134, 100, 0.7); }
-        70% { box-shadow: 0 0 0 10px rgba(161, 134, 100, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(161, 134, 100, 0); }
-    }
-</style>
 @endpush
