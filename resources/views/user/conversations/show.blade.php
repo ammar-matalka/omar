@@ -1,999 +1,469 @@
-        @extends('layouts.app')
+@extends('layouts.app')
 
-        @section('title', $conversation->title . ' - ' . config('app.name'))
-
-        @push('styles')
-        <style>
-            .conversation-hero {
-                background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
-                color: white;
-                padding: var(--space-xl) 0;
-                position: relative;
-                overflow: hidden;
-            }
-            
-            .conversation-hero::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,0 1000,0 1000,80 0,100"/></svg>');
-                background-size: cover;
-                background-position: bottom;
-            }
-            
-            .hero-content {
-                position: relative;
-                z-index: 1;
-            }
-            
-            .conversation-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                gap: var(--space-lg);
-                flex-wrap: wrap;
-            }
-            
-            .conversation-info {
-                flex: 1;
-            }
-            
-            .conversation-title {
-                font-size: 2rem;
-                font-weight: 900;
-                margin-bottom: var(--space-sm);
-                text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                line-height: 1.2;
-            }
-            
-            .conversation-meta {
-                display: flex;
-                align-items: center;
-                gap: var(--space-lg);
-                font-size: 0.875rem;
-                opacity: 0.9;
-                flex-wrap: wrap;
-                margin-bottom: var(--space-md);
-            }
-            
-            .meta-item {
-                display: flex;
-                align-items: center;
-                gap: var(--space-xs);
-            }
-            
-            .breadcrumb {
-                display: flex;
-                align-items: center;
-                gap: var(--space-sm);
-                font-size: 0.75rem;
-                opacity: 0.8;
-                flex-wrap: wrap;
-            }
-            
-            .breadcrumb-link {
-                color: white;
-                text-decoration: none;
-                transition: opacity var(--transition-fast);
-            }
-            
-            .breadcrumb-link:hover {
-                opacity: 0.9;
-                text-decoration: underline;
-            }
-            
-            .breadcrumb-separator {
-                opacity: 0.6;
-            }
-            
-            .conversation-status {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: var(--space-sm);
-            }
-            
-            .status-badge {
-                padding: var(--space-sm) var(--space-md);
-                border-radius: var(--radius-xl);
-                font-size: 0.75rem;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                border: 2px solid rgba(255, 255, 255, 0.3);
-                background: rgba(255, 255, 255, 0.1);
-            }
-            
-            .conversation-actions {
-                display: flex;
-                gap: var(--space-sm);
-                flex-wrap: wrap;
-            }
-            
-            .hero-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: var(--space-sm);
-                padding: var(--space-sm) var(--space-md);
-                background: rgba(255, 255, 255, 0.2);
-                color: white;
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                border-radius: var(--radius-md);
-                text-decoration: none;
-                font-size: 0.875rem;
-                font-weight: 500;
-                transition: all var(--transition-fast);
-            }
-            
-            .hero-btn:hover {
-                background: rgba(255, 255, 255, 0.3);
-                border-color: rgba(255, 255, 255, 0.5);
-                transform: translateY(-1px);
-            }
-            
-            .conversation-container {
-                padding: var(--space-3xl) 0;
-                background: var(--background);
-                min-height: 60vh;
-            }
-            
-            .back-button {
-                display: inline-flex;
-                align-items: center;
-                gap: var(--space-sm);
-                padding: var(--space-md) var(--space-lg);
-                background: var(--surface);
-                color: var(--primary-600);
-                border: 2px solid var(--primary-200);
-                border-radius: var(--radius-lg);
-                text-decoration: none;
-                font-weight: 600;
-                transition: all var(--transition-fast);
-                margin-bottom: var(--space-xl);
-            }
-            
-            .back-button:hover {
-                background: var(--primary-50);
-                border-color: var(--primary-300);
-                transform: translateY(-2px);
-                box-shadow: var(--shadow-md);
-            }
-            
-            .conversation-content {
-                max-width: 800px;
-                margin: 0 auto;
-                display: grid;
-                gap: var(--space-xl);
-            }
-            
-            .messages-container {
-                background: var(--surface);
-                border: 1px solid var(--border-color);
-                border-radius: var(--radius-xl);
-                overflow: hidden;
-                box-shadow: var(--shadow-sm);
-            }
-            
-            .messages-header {
-                background: linear-gradient(135deg, var(--primary-50), var(--secondary-50));
-                border-bottom: 1px solid var(--border-color);
-                padding: var(--space-lg);
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            
-            .messages-title {
-                font-size: 1.125rem;
-                font-weight: 600;
-                color: var(--on-surface);
-                display: flex;
-                align-items: center;
-                gap: var(--space-sm);
-            }
-            
-            .messages-count {
-                color: var(--on-surface-variant);
-                font-size: 0.875rem;
-            }
-            
-            .messages-list {
-                max-height: 500px;
-                overflow-y: auto;
-                padding: var(--space-lg);
-                display: flex;
-                flex-direction: column;
-                gap: var(--space-lg);
-            }
-            
-            .message {
-                display: flex;
-                gap: var(--space-md);
-                animation: messageSlideIn 0.3s ease-out;
-            }
-            
-            .message.from-admin {
-                flex-direction: row;
-            }
-            
-            .message.from-user {
-                flex-direction: row-reverse;
-            }
-            
-            @keyframes messageSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            .message-avatar {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1rem;
-                font-weight: 600;
-                flex-shrink: 0;
-                color: white;
-                position: relative;
-            }
-            
-            .message.from-admin .message-avatar {
-                background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-            }
-            
-            .message.from-user .message-avatar {
-                background: linear-gradient(135deg, var(--secondary-500), var(--secondary-600));
-            }
-            
-            .message-avatar img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                border-radius: 50%;
-            }
-            
-            .admin-badge {
-                position: absolute;
-                bottom: -2px;
-                right: -2px;
-                width: 16px;
-                height: 16px;
-                background: var(--success-500);
-                border: 2px solid var(--surface);
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 8px;
-                color: white;
-            }
-            
-            .message-content {
-                flex: 1;
-                max-width: 70%;
-            }
-            
-            .message-bubble {
-                padding: var(--space-md);
-                border-radius: var(--radius-lg);
-                position: relative;
-                word-wrap: break-word;
-                line-height: 1.5;
-                cursor: pointer;
-                transition: transform var(--transition-fast);
-            }
-            
-            .message-bubble:hover {
-                transform: scale(1.02);
-            }
-            
-            .message.from-admin .message-bubble {
-                background: var(--surface-variant);
-                color: var(--on-surface);
-                border-bottom-left-radius: var(--radius-sm);
-            }
-            
-            .message.from-user .message-bubble {
-                background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-                color: white;
-                border-bottom-right-radius: var(--radius-sm);
-            }
-            
-            .message-info {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: var(--space-xs);
-                font-size: 0.75rem;
-                color: var(--on-surface-variant);
-            }
-            
-            .message.from-user .message-info {
-                justify-content: flex-end;
-            }
-            
-            .message-sender {
-                font-weight: 500;
-            }
-            
-            .message-time {
-                opacity: 0.8;
-            }
-            
-            .empty-messages {
-                text-align: center;
-                padding: var(--space-3xl);
-                color: var(--on-surface-variant);
-            }
-            
-            .empty-icon {
-                font-size: 3rem;
-                margin-bottom: var(--space-md);
-                opacity: 0.5;
-            }
-            
-            .reply-form {
-                background: var(--surface);
-                border: 1px solid var(--border-color);
-                border-radius: var(--radius-xl);
-                padding: var(--space-xl);
-                box-shadow: var(--shadow-sm);
-                position: relative;
-                overflow: hidden;
-            }
-            
-            .reply-form::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
-            }
-            
-            .reply-title {
-                font-size: 1.25rem;
-                font-weight: 700;
-                margin-bottom: var(--space-lg);
-                color: var(--on-surface);
-                display: flex;
-                align-items: center;
-                gap: var(--space-sm);
-            }
-            
-            .reply-textarea {
-                width: 100%;
-                min-height: 120px;
-                padding: var(--space-md);
-                border: 2px solid var(--border-color);
-                border-radius: var(--radius-lg);
-                background: var(--surface);
-                color: var(--on-surface);
-                font-size: 1rem;
-                font-family: inherit;
-                resize: vertical;
-                transition: all var(--transition-fast);
-                line-height: 1.6;
-            }
-            
-            .reply-textarea:focus {
-                outline: none;
-                border-color: var(--primary-500);
-                box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-            }
-            
-            .reply-textarea.error {
-                border-color: var(--error-500);
-            }
-            
-            .reply-actions {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-top: var(--space-lg);
-                flex-wrap: wrap;
-                gap: var(--space-md);
-            }
-            
-            .character-count {
-                font-size: 0.75rem;
-                color: var(--on-surface-variant);
-            }
-            
-            .character-count.warning {
-                color: var(--warning-600);
-            }
-            
-            .character-count.error {
-                color: var(--error-600);
-            }
-            
-            .reply-buttons {
-                display: flex;
-                gap: var(--space-md);
-            }
-            
-            .btn {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: var(--space-sm);
-                padding: var(--space-md) var(--space-xl);
-                border: 2px solid transparent;
-                border-radius: var(--radius-lg);
-                font-size: 0.875rem;
-                font-weight: 600;
-                text-decoration: none;
-                cursor: pointer;
-                transition: all var(--transition-fast);
-            }
-            
-            .btn:focus {
-                outline: 2px solid var(--primary-500);
-                outline-offset: 2px;
-            }
-            
-            .btn-primary {
-                background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-                color: white;
-                box-shadow: var(--shadow-sm);
-            }
-            
-            .btn-primary:hover:not(:disabled) {
-                background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
-                transform: translateY(-1px);
-                box-shadow: var(--shadow-md);
-            }
-            
-            .btn-primary:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-                transform: none;
-            }
-            
-            .btn-secondary {
-                background: var(--surface);
-                color: var(--on-surface-variant);
-                border-color: var(--border-color);
-            }
-            
-            .btn-secondary:hover {
-                background: var(--surface-variant);
-                border-color: var(--border-hover);
-                color: var(--on-surface);
-            }
-            
-            .loading-spinner {
-                width: 16px;
-                height: 16px;
-                border: 2px solid transparent;
-                border-top: 2px solid currentColor;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            }
-            
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-            
-            .conversation-closed {
-                background: linear-gradient(135deg, var(--warning-50), var(--warning-100));
-                border: 2px solid var(--warning-200);
-                border-radius: var(--radius-xl);
-                padding: var(--space-lg);
-                text-align: center;
-                color: var(--warning-700);
-            }
-            
-            .closed-icon {
-                font-size: 2rem;
-                margin-bottom: var(--space-md);
-            }
-            
-            .closed-title {
-                font-weight: 600;
-                margin-bottom: var(--space-sm);
-            }
-            
-            .closed-text {
-                font-size: 0.875rem;
-                line-height: 1.5;
-            }
-            
-            .messages-list::-webkit-scrollbar {
-                width: 6px;
-            }
-            
-            .messages-list::-webkit-scrollbar-track {
-                background: var(--surface-variant);
-                border-radius: 3px;
-            }
-            
-            .messages-list::-webkit-scrollbar-thumb {
-                background: var(--primary-300);
-                border-radius: 3px;
-            }
-            
-            .messages-list::-webkit-scrollbar-thumb:hover {
-                background: var(--primary-500);
-            }
-            
-            @media (max-width: 768px) {
-                .conversation-title {
-                    font-size: 1.5rem;
-                }
-                
-                .conversation-header {
-                    flex-direction: column;
-                    gap: var(--space-md);
-                }
-                
-                .conversation-status {
-                    align-items: flex-start;
-                }
-                
-                .conversation-actions {
-                    width: 100%;
-                    justify-content: stretch;
-                }
-                
-                .hero-btn {
-                    flex: 1;
-                    justify-content: center;
-                }
-                
-                .message-content {
-                    max-width: 85%;
-                }
-                
-                .conversation-meta {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: var(--space-sm);
-                }
-                
-                .reply-actions {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-                
-                .reply-buttons {
-                    width: 100%;
-                }
-                
-                .btn {
-                    flex: 1;
-                    justify-content: center;
-                }
-                
-                .messages-list {
-                    max-height: 400px;
-                }
-            }
-        </style>
-        @endpush
-
-        @section('content')
-        <!-- Conversation Hero -->
-        <section class="conversation-hero">
-            <div class="container">
-                <div class="hero-content fade-in">
-                    <!-- Breadcrumb -->
-                    <nav class="breadcrumb">
-                        <a href="{{ route('home') }}" class="breadcrumb-link">
-                            <i class="fas fa-home"></i>
-                            {{ __('Home') }}
-                        </a>
-                        <span class="breadcrumb-separator">/</span>
-                        <a href="{{ route('user.profile.show') }}" class="breadcrumb-link">
-                            {{ __('Profile') }}
-                        </a>
-                        <span class="breadcrumb-separator">/</span>
-                        <a href="{{ route('user.conversations.index') }}" class="breadcrumb-link">
-                            {{ __('Messages') }}
-                        </a>
-                        <span class="breadcrumb-separator">/</span>
-                        <span>{{ __('Conversation') }}</span>
-                    </nav>
-                    
-                    <div class="conversation-header">
-                        <div class="conversation-info">
-                            <h1 class="conversation-title">{{ $conversation->title }}</h1>
-                            
-                            <div class="conversation-meta">
-                                <div class="meta-item">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    {{ __('Started') }} {{ $conversation->created_at->format('M d, Y') }}
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-clock"></i>
-                                    {{ __('Last updated') }} {{ $conversation->updated_at->diffForHumans() }}
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-comment-dots"></i>
-                                    {{ $messages->count() }} {{ __('messages') }}
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-user"></i>
-                                    {{ $conversation->user->name }}
+@section('content')
+<div class="conversation-page py-5">
+    <div class="container">
+        <!-- Conversation Header -->
+        <div class="conversation-header mb-4">
+            <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <div class="col-md-8">
+                            <div class="conversation-info p-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="conversation-avatar me-3">
+                                        <div class="avatar-outline">
+                                            <div class="avatar-inner rounded-circle d-flex align-items-center justify-content-center text-white">
+                                                {{ strtoupper(substr($conversation->title, 0, 1)) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h1 class="h2 fw-bold mb-0" style="color: #a18664;">{{ $conversation->title }}</h1>
+                                        <div class="conversation-meta d-flex align-items-center flex-wrap mt-2">
+                                           
+                                          
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="conversation-status">
-                            <span class="status-badge">
-                                <i class="fas fa-{{ ($conversation->status ?? 'open') === 'open' ? 'envelope-open' : 'archive' }}"></i>
-                                {{ ucfirst($conversation->status ?? 'open') }}
-                            </span>
-                            
-                            <div class="conversation-actions">
-                                <a href="{{ route('user.conversations.index') }}" class="hero-btn">
-                                    <i class="fas fa-list"></i>
-                                    {{ __('All Messages') }}
+                        <div class="col-md-4">
+                            <div class="conversation-actions h-100 d-flex align-items-center justify-content-center justify-content-md-end p-4" style="background-color: rgba(161, 134, 100, 0.05);">
+                                <a href="{{ route('user.conversations.index') }}" class="btn btn-outline-secondary btn-icon-split rounded-pill me-2">
+                                    <span class="icon">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </span>
+                                    <span class="text">Back</span>
                                 </a>
+                                <div class="dropdown">
+                                  
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Conversation Container -->
-        <section class="conversation-container">
-            <div class="container">
-                <!-- Back Button -->
-                <a href="{{ route('user.conversations.index') }}" class="back-button fade-in">
-                    <i class="fas fa-arrow-left"></i>
-                    {{ __('Back to Messages') }}
-                </a>
-                
-                <div class="conversation-content">
-                    <!-- Messages Container -->
-                    <div class="messages-container fade-in">
-                        <div class="messages-header">
-                            <div class="messages-title">
-                                <i class="fas fa-comments"></i>
-                                {{ __('Conversation') }}
-                            </div>
-                            <div class="messages-count">
-                                {{ $messages->count() }} {{ __('messages') }}
+        <!-- Timeline & Message Content -->
+        <div class="row g-4">
+            <!-- Sidebar Timeline -->
+            <div class="col-lg-3">
+                <div class="card border-0 rounded-4 shadow-sm h-100">
+                    <div class="card-header text-white py-3 px-4 rounded-top-4" style="background-color: #a18664;">
+                        <h5 class="card-title mb-0"><i class="fas fa-history me-2"></i> Timeline</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="chat-timeline p-3">
+                            <div class="timeline-stream">
+                                @foreach($messages as $index => $message)
+                                    <div class="timeline-item {{ $loop->last ? 'last-item' : '' }}">
+                                        <div class="timeline-marker {{ $message->is_from_admin ? 'admin-marker' : 'user-marker' }}"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1 fw-bold">{{ $message->is_from_admin ? 'Support Team' : 'You' }}</h6>
+                                            <p class="text-muted small mb-0">{{ $message->created_at->format('M d, h:i A') }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
-                        
-                        <div class="messages-list" id="messages-list">
-                            @if($messages->count() > 0)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="col-lg-9">
+                <div class="chat-container">
+                    <!-- Messages Section -->
+                    <div class="card border-0 rounded-4 p-3 shadow-sm mb-4">
+                        <div class="card-header p-3 rounded-top-4" style="background-color: #a18664;">
+                        <ul class="nav nav-tabs card-header-tabs border-0 w-100 justify-content-center">
+                        <li class="nav-item">
+                                <a class="nav-link active text-white fw-bold rounded-top-0 bg-transparent border-0">
+                                <i class="fas fa-comment-dots me-2"></i> Messages
+                                    </a>
+                             
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body p-4" id="conversation-messages">
+                            <div class="chat-messages">
                                 @foreach($messages as $message)
-                                    <div class="message {{ $message->is_from_admin ? 'from-admin' : 'from-user' }}">
-                                        <div class="message-avatar">
-                                            @if($message->is_from_admin)
-                                                @if($message->user && $message->user->profile_image)
-                                                    <img src="{{ $message->user->profile_image_url }}" alt="Admin">
-                                                @else
-                                                    <i class="fas fa-user-tie"></i>
-                                                @endif
-                                                <span class="admin-badge">
-                                                    <i class="fas fa-check"></i>
-                                                </span>
-                                            @else
-                                                @if($conversation->user->profile_image)
-                                                    <img src="{{ $conversation->user->profile_image_url }}" alt="{{ $conversation->user->name }}">
-                                                @else
-                                                    {{ $conversation->user->initials }}
-                                                @endif
-                                            @endif
-                                        </div>
-                                        
-                                        <div class="message-content">
-                                            <div class="message-bubble">
-                                                {{ $message->message }}
+                                    <div class="message-wrapper {{ $message->is_from_admin ? 'admin-wrapper' : 'user-wrapper' }}">
+                                        <div class="message-container {{ $message->is_from_admin ? 'admin-container' : 'user-container' }}">
+                                            <div class="message-sender">
+                                                <div class="avatar {{ $message->is_from_admin ? 'admin-avatar' : 'user-avatar' }}">
+                                                    {!! $message->is_from_admin ? '<i class="fas fa-headset"></i>' : '<i class="fas fa-user"></i>' !!}
+                                                </div>
                                             </div>
-                                            <div class="message-info">
-                                                <span class="message-sender">
-                                                    {{ $message->is_from_admin ? __('Support Team') : $conversation->user->name }}
-                                                </span>
-                                                <span class="message-time">
-                                                    {{ $message->created_at->format('M d, Y h:i A') }}
-                                                </span>
+                                            <div class="message-content">
+                                                <div class="message-header">
+                                                    <span class="sender-name">{{ $message->is_from_admin ? 'Support Team' : 'You' }}</span>
+                                                    <span class="message-time">
+                                                        <i class="far fa-clock me-1"></i>{{ $message->created_at->format('M d, Y h:i A') }}
+                                                    </span>
+                                                </div>
+                                                <div class="message-bubble {{ $message->is_from_admin ? 'admin-bubble' : 'user-bubble' }}">
+                                                    <p class="mb-0">{{ $message->message }}</p>
+                                                </div>
+                                                <div class="message-actions">
+                                                    <button type="button" class="btn btn-sm text-muted" data-bs-toggle="tooltip" title="Copy message">
+                                                        <i class="far fa-copy"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm text-muted" data-bs-toggle="tooltip" title="Quote message">
+                                                        <i class="fas fa-quote-right"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 @endforeach
-                            @else
-                                <div class="empty-messages">
-                                    <div class="empty-icon">
-                                        <i class="fas fa-comment-slash"></i>
-                                    </div>
-                                    <p>{{ __('No messages in this conversation yet.') }}</p>
-                                </div>
-                            @endif
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- Reply Form -->
-                    @if(($conversation->status ?? 'open') === 'open')
-                        <div class="reply-form fade-in">
-                            <form action="{{ route('user.conversations.reply', $conversation) }}" method="POST" id="reply-form">
+
+                    <!-- Reply Section -->
+                    <div class="card border-0 rounded-4 shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold mb-3" style="color: #a18664;"><i class="fas fa-reply me-2"></i>Your Response</h5>
+                            <form action="{{ route('user.conversations.reply', $conversation) }}" method="POST" class="reply-form">
                                 @csrf
-                                
-                                <h3 class="reply-title">
-                                    <i class="fas fa-reply"></i>
-                                    {{ __('Send Reply') }}
-                                </h3>
-                                
-                                <textarea 
-                                    name="message" 
-                                    id="reply-message"
-                                    class="reply-textarea {{ $errors->has('message') ? 'error' : '' }}"
-                                    placeholder="{{ __('Type your reply here...') }}"
-                                    required
-                                    maxlength="2000"
-                                    oninput="updateCharacterCount()"
-                                >{{ old('message') }}</textarea>
-                                
-                                @error('message')
-                                    <div style="margin-top: var(--space-sm); font-size: 0.75rem; color: var(--error-600);">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        {{ $message }}
+                                <div class="mb-3">
+                                    <div class="form-floating">
+                                        <textarea class="form-control @error('message') is-invalid @enderror" 
+                                              id="message" name="message" style="height: 120px; border-radius: 15px;" 
+                                              placeholder="Type your message here..." required>{{ old('message') }}</textarea>
+                                        <label for="message">Type your message here...</label>
+                                        @error('message')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
-                                @enderror
-                                
-                                <div class="reply-actions">
-                                    <div class="character-count" id="character-count">0 / 2000</div>
-                                    
-                                    <div class="reply-buttons">
-                                        <button type="button" class="btn btn-secondary" onclick="clearMessage()">
-                                            <i class="fas fa-eraser"></i>
-                                            {{ __('Clear') }}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="message-tools">
+                                        <button type="button" class="btn btn-light rounded-circle me-2" data-bs-toggle="tooltip" title="Attach file">
+                                            <i class="fas fa-paperclip"></i>
                                         </button>
-                                        <button type="submit" class="btn btn-primary" id="reply-btn">
-                                            <i class="fas fa-paper-plane"></i>
-                                            {{ __('Send Reply') }}
+                                        <button type="button" class="btn btn-light rounded-circle me-2" data-bs-toggle="tooltip" title="Emoji">
+                                            <i class="far fa-smile"></i>
                                         </button>
                                     </div>
+                                    <button type="submit" class="btn btn-lg rounded-pill px-4" style="background-color: #a18664; color: white;">
+                                        <i class="fas fa-paper-plane me-2"></i> Send Message
+                                    </button>
                                 </div>
                             </form>
                         </div>
-                    @else
-                        <!-- Conversation Closed -->
-                        <div class="conversation-closed fade-in">
-                            <div class="closed-icon">
-                                <i class="fas fa-archive"></i>
-                            </div>
-                            <div class="closed-title">{{ __('Conversation Closed') }}</div>
-                            <div class="closed-text">
-                                {{ __('This conversation has been closed. If you need further assistance, please start a new conversation.') }}
-                            </div>
-                        </div>
-                    @endif
+                    </div>
                 </div>
             </div>
-        </section>
-        @endsection
+        </div>
+    </div>
+</div>
+@endsection
 
-        @push('scripts')
-        <script>
-            // Initialize animations
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach((entry, index) => {
-                    if (entry.isIntersecting) {
-                        setTimeout(() => {
-                            entry.target.style.opacity = '1';
-                            entry.target.style.transform = 'translateY(0)';
-                        }, index * 100);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-            
-            document.querySelectorAll('.fade-in').forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(30px)';
-                el.style.transition = 'all 0.6s ease-out';
-                observer.observe(el);
-            });
-            
-            // Character count functionality
-            function updateCharacterCount() {
-                const textarea = document.getElementById('reply-message');
-                const counter = document.getElementById('character-count');
-                
-                if (textarea && counter) {
-                    const currentLength = textarea.value.length;
-                    const maxLength = 2000;
-                    
-                    counter.textContent = `${currentLength} / ${maxLength}`;
-                    
-                    // Update counter color
-                    counter.classList.remove('warning', 'error');
-                    if (currentLength > maxLength * 0.9) {
-                        counter.classList.add('error');
-                    } else if (currentLength > maxLength * 0.75) {
-                        counter.classList.add('warning');
-                    }
-                    
-                    // Update button state
-                    const replyBtn = document.getElementById('reply-btn');
-                    if (replyBtn) {
-                        const isValid = currentLength > 0 && currentLength <= maxLength;
-                        replyBtn.disabled = !isValid;
-                        replyBtn.style.opacity = isValid ? '1' : '0.6';
-                    }
-                }
-            }
-            
-            // Clear message
-            function clearMessage() {
-                const textarea = document.getElementById('reply-message');
-                if (textarea) {
-                    textarea.value = '';
-                    updateCharacterCount();
-                    textarea.focus();
-                }
-            }
-            
-            // Auto-resize textarea
-            const textarea = document.getElementById('reply-message');
-            if (textarea) {
-                textarea.addEventListener('input', function() {
-                    this.style.height = 'auto';
-                    this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-                    updateCharacterCount();
-                });
-            }
-            
-            // Form submission with loading state
-            const replyForm = document.getElementById('reply-form');
-            if (replyForm) {
-                replyForm.addEventListener('submit', function(e) {
-                    const replyBtn = document.getElementById('reply-btn');
-                    const messageTextarea = document.getElementById('reply-message');
-                    
-                    if (messageTextarea && replyBtn) {
-                        const message = messageTextarea.value.trim();
-                        
-                        if (!message) {
-                            e.preventDefault();
-                            showNotification('{{ __("Please enter a message") }}', 'error');
-                            return;
-                        }
-                        
-                        if (message.length > 2000) {
-                            e.preventDefault();
-                            showNotification('{{ __("Message is too long") }}', 'error');
-                            return;
-                        }
-                        
-                        // Show loading state
-                        replyBtn.innerHTML = '<div class="loading-spinner"></div> {{ __("Sending...") }}';
-                        replyBtn.disabled = true;
-                    }
-                });
-            }
-            
-            // Scroll to bottom of messages
-            function scrollToBottom() {
-                const messagesList = document.getElementById('messages-list');
-                if (messagesList) {
-                    messagesList.scrollTop = messagesList.scrollHeight;
-                }
-            }
-            
-            // Initialize features
-            document.addEventListener('DOMContentLoaded', function() {
-                updateCharacterCount();
-                scrollToBottom();
-                
-                // Add click event to message bubbles for copying
-                document.querySelectorAll('.message-bubble').forEach(bubble => {
-                    bubble.addEventListener('click', function() {
-                        const text = this.textContent;
-                        if (navigator.clipboard) {
-                            navigator.clipboard.writeText(text).then(() => {
-                                showNotification('{{ __("Message copied to clipboard") }}', 'success');
-                            });
-                        } else {
-                            // Fallback for older browsers
-                            const textarea = document.createElement('textarea');
-                            textarea.value = text;
-                            document.body.appendChild(textarea);
-                            textarea.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(textarea);
-                            showNotification('{{ __("Message copied to clipboard") }}', 'success');
-                        }
-                    });
-                });
-            });
-            
-            // Keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
-                // Send with Ctrl+Enter
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                    e.preventDefault();
-                    const replyBtn = document.getElementById('reply-btn');
-                    if (replyBtn && !replyBtn.disabled) {
-                        document.getElementById('reply-form').submit();
-                    }
-                }
-                
-                // Focus textarea with Ctrl+R
-                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-                    e.preventDefault();
-                    const textarea = document.getElementById('reply-message');
-                    if (textarea) {
-                        textarea.focus();
-                    }
-                }
-            });
-            
-            // Show notification
-            function showNotification(message, type = 'info') {
-                const notification = document.createElement('div');
-                notification.className = `alert alert-${type} slide-in`;
-                notification.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    z-index: 9999;
-                    max-width: 300px;
-                    padding: var(--space-md);
-                    background: var(--${type === 'success' ? 'success' : type === 'error' ? 'error' : 'info'}-100);
-                    color: var(--${type === 'success' ? 'success' : type === 'error' ? 'error' : 'info'}-700);
-                    border: 1px solid var(--${type === 'success' ? 'success' : type === 'error' ? 'error' : 'info'}-200);
-                    border-radius: var(--radius-lg);
-                    box-shadow: var(--shadow-xl);
-                    animation: slideIn 0.3s ease-out;
-                    display: flex;
-                    align-items: center;
-                    gap: var(--space-sm);
-                `;
-                notification.innerHTML = `
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                    ${message}
-                `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.style.animation = 'slideOut 0.3s ease-out forwards';
-                    setTimeout(() => {
-                        if (document.body.contains(notification)) {
-                            document.body.removeChild(notification);
-                        }
-                    }, 300);
-                }, 3000);
-            }
-        </script>
+@push('styles')
+<style>
+    /* Premium Conversation Styles */
+    :root {
+        --primary: #a18664;       /* Darker brown */
+        --primary-medium: #c1a276; /* Medium brown */
+        --primary-light: #e6cfae; /* Lighter brown */
+        --primary-fade: rgba(161, 134, 100, 0.1);
+        --secondary: #858796;
+        --success: #1cc88a;
+        --info: #c1a276;         /* Using medium brown for info color */
+        --light-bg: #f8f9fc;
+        --dark-bg: #5a5c69;
+        --white: #fff;
+        --shadow: 0 .15rem 1.75rem 0 rgba(161, 134, 100, .15);
+        --border-radius: 1rem;
+    }
+    
+    /* Avatar Styling */
+    .avatar-outline {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, var(--primary), #8a7254);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(161, 134, 100, 0.3);
+    }
+    
+    .avatar-inner {
+        width: 50px;
+        height: 50px;
+        font-size: 1.4rem;
+        font-weight: bold;
+    }
+    
+    /* Button Styling */
+    .btn-icon-split .icon {
+        background: rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        padding: .375rem .75rem;
+        border-radius: 50rem 0 0 50rem;
+        margin-right: -1px;
+    }
+    
+    .btn-icon-split .text {
+        display: inline-block;
+        padding: .375rem .75rem;
+        border-radius: 0 50rem 50rem 0;
+    }
+    
+    /* Timeline Styling */
+    .chat-timeline {
+        height: 100%;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .timeline-stream {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    
+    .timeline-stream:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 7px;
+        height: 100%;
+        width: 2px;
+        background-color: rgba(161, 134, 100, 0.2);
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        top: 0;
+        left: -1.5rem;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid var(--white);
+        box-shadow: 0 0 0 2px rgba(161, 134, 100, 0.2);
+    }
+    
+    .admin-marker {
+        background-color: var(--info);
+    }
+    
+    .user-marker {
+        background-color: var(--primary);
+    }
+    
+    .timeline-content {
+        padding-left: 0.5rem;
+    }
+    
+    .last-item .timeline-marker {
+        box-shadow: 0 0 0 4px rgba(161, 134, 100, 0.2);
+    }
+    
+    /* Message Styling */
+    .chat-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        max-height: 500px;
+        overflow-y: auto;
+        padding: 1rem 0;
+    }
+    
+    .message-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .message-container {
+        display: flex;
+        max-width: 85%;
+    }
+    
+    .admin-wrapper {
+        align-self: flex-start;
+    }
+    
+    .user-wrapper {
+        align-self: flex-end;
+    }
+    
+    .user-container {
+        flex-direction: row-reverse;
+        margin-left: auto;
+    }
+    
+    .message-sender {
+        display: flex;
+        align-items: flex-start;
+        margin: 0 1rem;
+    }
+    
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .admin-avatar {
+        background: linear-gradient(145deg, var(--info), #a58b5e);
+    }
+    
+    .user-avatar {
+        background: linear-gradient(145deg, var(--primary), #8a7254);
+    }
+    
+    .message-content {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sender-name {
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .message-time {
+        font-size: 0.8rem;
+        color: var(--secondary);
+    }
+    
+    .message-bubble {
+        padding: 1rem;
+        border-radius: 1rem;
+        position: relative;
+        max-width: 100%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .admin-bubble {
+        background-color: var(--primary-light);
+        color: var(--dark-bg);
+        border-top-left-radius: 0;
+    }
+    
+    .user-bubble {
+        background: linear-gradient(145deg, var(--primary), #8a7254);
+        color: var(--white);
+        border-top-right-radius: 0;
+    }
+    
+    .message-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    
+    .message-container:hover .message-actions {
+        opacity: 1;
+    }
+    
+    /* Form Styling */
+    .form-floating > .form-control {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-floating > .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(161, 134, 100, 0.25);
+    }
+    
+    /* Tooltip styling */
+    .tooltip {
+        font-size: 0.8rem;
+    }
+    
+    /* Card and buttons hover effects */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .3rem 3rem rgba(161, 134, 100, .175) !important;
+    }
+    
+    .btn {
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn-brown {
+        background: linear-gradient(145deg, var(--primary), #8a7254);
+        border: none;
+        box-shadow: 0 4px 10px rgba(161, 134, 100, 0.3);
+        color: white;
+    }
+    
+    .btn-brown:hover {
+        background: linear-gradient(145deg, #b19a7a, #7e6849);
+        box-shadow: 0 6px 15px rgba(161, 134, 100, 0.4);
+        color: white;
+    }
+</style>
+@endpush
 
-        <style>
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            @keyframes slideOut {
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        </style>
-        @endpush
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-scroll to bottom of conversation
+        const messagesContainer = document.querySelector('.chat-messages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Flash effect for newest message
+        const messages = document.querySelectorAll('.message-bubble');
+        if (messages.length > 0) {
+            const latestMessage = messages[messages.length - 1];
+            latestMessage.style.animation = 'flash-highlight 2s ease';
+        }
+    });
+    
+    // Animation for new messages
+    document.querySelector('.reply-form').addEventListener('submit', function() {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Sending...';
+        submitBtn.disabled = true;
+    });
+</script>
+
+<style>
+    @keyframes flash-highlight {
+        0% { box-shadow: 0 0 0 0 rgba(161, 134, 100, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(161, 134, 100, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(161, 134, 100, 0); }
+    }
+</style>
+@endpush
