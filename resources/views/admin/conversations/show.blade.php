@@ -148,6 +148,41 @@
     text-align: center;
 }
 
+/* تأثير التمرير السلس المحسن */
+.smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+.auto-scroll-indicator {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: var(--admin-primary-500);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.auto-scroll-indicator.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auto-scroll-indicator:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
 /* Base Styles */
 .btn {
     display: inline-flex;
@@ -385,7 +420,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
         <div style="display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 600px;">
             
             <!-- Messages Container -->
-            <div class="card" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+            <div class="card" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-comments"></i>
@@ -398,7 +433,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                 </div>
                 
                 <!-- Messages List -->
-                <div id="messagesList" style="flex: 1; padding: var(--space-lg); overflow-y: auto; background: linear-gradient(180deg, white 0%, var(--admin-secondary-50) 100%);">
+                <div id="messagesList" class="smooth-scroll" style="flex: 1; padding: var(--space-lg); overflow-y: auto; background: linear-gradient(180deg, white 0%, var(--admin-secondary-50) 100%); position: relative;">
                     @foreach($messages as $message)
                     <div data-message-id="{{ $message->id }}" style="margin-bottom: var(--space-xl); display: flex; gap: var(--space-md); {{ $message->is_from_admin ? 'flex-direction: row-reverse;' : '' }}">
                         <!-- Avatar -->
@@ -438,6 +473,11 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                         <i class="fas fa-pencil-alt"></i>
                         Customer is typing...
                     </div>
+                </div>
+                
+                <!-- Auto Scroll Indicator -->
+                <div id="autoScrollIndicator" class="auto-scroll-indicator" onclick="scrollToBottom()">
+                    <i class="fas fa-arrow-down"></i>
                 </div>
                 
                 <!-- Reply Form - FIXED VERSION -->
@@ -645,7 +685,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
 @push('scripts')
 <script type="text/javascript">
 // ========================================
-// Real-time Messaging System for Admin
+// Real-time Messaging System for Admin (مُحسن مع التمرير التلقائي)
 // ========================================
 
 class RealTimeMessaging {
@@ -657,6 +697,8 @@ class RealTimeMessaging {
         this.isActive = true;
         this.checkFrequency = 3000; // 3 ثواني
         this.isRealTimeEnabled = true;
+        this.autoScroll = true; // التمرير التلقائي
+        this.isUserScrolledUp = false; // تتبع إذا كان المستخدم مرر لأعلى
         
         this.init();
     }
@@ -674,6 +716,9 @@ class RealTimeMessaging {
         // تحسين الـ form submission
         this.setupFormSubmission();
         
+        // إعداد مراقبة التمرير
+        this.setupScrollDetection();
+        
         console.log('Real-time messaging initialized for admin');
     }
 
@@ -686,6 +731,34 @@ class RealTimeMessaging {
                 this.lastMessageId = parseInt(messageId);
             }
         }
+    }
+
+    setupScrollDetection() {
+        const messagesList = document.getElementById('messagesList');
+        const autoScrollIndicator = document.getElementById('autoScrollIndicator');
+        
+        if (!messagesList) return;
+
+        messagesList.addEventListener('scroll', () => {
+            const scrollTop = messagesList.scrollTop;
+            const scrollHeight = messagesList.scrollHeight;
+            const clientHeight = messagesList.clientHeight;
+            
+            // تحقق إذا كان المستخدم قريب من الأسفل (ضمن 100px)
+            const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
+            
+            this.isUserScrolledUp = !isNearBottom;
+            this.autoScroll = isNearBottom;
+            
+            // إظهار/إخفاء مؤشر التمرير التلقائي
+            if (autoScrollIndicator) {
+                if (this.isUserScrolledUp) {
+                    autoScrollIndicator.classList.add('show');
+                } else {
+                    autoScrollIndicator.classList.remove('show');
+                }
+            }
+        });
     }
 
     startPolling() {
@@ -727,8 +800,19 @@ class RealTimeMessaging {
                 const data = await response.json();
                 
                 if (data.has_new_messages && data.messages.length > 0) {
-                    this.displayNewMessages(data.messages);
-                    this.showNewMessageIndicator();
+                    // عرض الرسائل الجديدة من العميل فقط (ليس من الأدمن)
+                    const customerMessages = data.messages.filter(msg => !msg.is_from_admin);
+                    if (customerMessages.length > 0) {
+                        this.displayNewMessages(customerMessages);
+                        this.showNewMessageIndicator();
+                    }
+                    
+                    // تحديث آخر معرف رسالة
+                    data.messages.forEach(msg => {
+                        if (msg.id > this.lastMessageId) {
+                            this.lastMessageId = msg.id;
+                        }
+                    });
                 }
                 this.updateConnectionStatus(true);
             } else {
@@ -745,32 +829,42 @@ class RealTimeMessaging {
         if (!messagesList) return;
 
         messages.forEach(message => {
-            if (message.id > this.lastMessageId) {
-                const messageElement = this.createMessageElement(message);
-                
-                // إدراج قبل typing indicator إذا وجد
-                const typingIndicator = document.getElementById('typingIndicator');
-                if (typingIndicator) {
-                    messagesList.insertBefore(messageElement, typingIndicator);
-                } else {
-                    messagesList.appendChild(messageElement);
-                }
-                
-                this.lastMessageId = message.id;
-                
-                // إضافة تأثير الظهور
-                setTimeout(() => {
-                    messageElement.style.opacity = '1';
-                    messageElement.style.transform = 'translateY(0)';
-                }, 50);
-
-                // تحديث العدادات
-                this.updateMessageCount();
+            // تحقق من عدم وجود الرسالة مسبقاً
+            const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
+            if (existingMessage) {
+                console.log('Message already exists, skipping:', message.id);
+                return;
             }
+
+            const messageElement = this.createMessageElement(message);
+            
+            // إدراج قبل typing indicator إذا وجد
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                messagesList.insertBefore(messageElement, typingIndicator);
+            } else {
+                messagesList.appendChild(messageElement);
+            }
+            
+            // إضافة تأثير الظهور
+            setTimeout(() => {
+                messageElement.style.opacity = '1';
+                messageElement.style.transform = 'translateY(0)';
+            }, 50);
+
+            // تحديث العدادات
+            this.updateMessageCount();
         });
 
         // تشغيل صوت إشعار
         this.playNotificationSound();
+        
+        // التمرير التلقائي إذا كان المستخدم لم يمرر لأعلى
+        if (this.autoScroll) {
+            setTimeout(() => {
+                this.scrollToBottom(true); // تمرير سلس
+            }, 100);
+        }
     }
 
     createMessageElement(message) {
@@ -878,8 +972,12 @@ class RealTimeMessaging {
         
         if (!form || !textarea || !submitButton) return;
 
+        let isSubmitting = false;
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            if (isSubmitting) return;
             
             const message = textarea.value.trim();
             if (!message) {
@@ -887,6 +985,8 @@ class RealTimeMessaging {
                 return;
             }
 
+            isSubmitting = true;
+            
             // تعطيل الـ form
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -920,14 +1020,19 @@ class RealTimeMessaging {
                         // إضافة الرسالة فوراً
                         this.displayNewMessages([data.message]);
                         
+                        // تحديث آخر معرف رسالة
+                        this.lastMessageId = data.message.id;
+                        
                         // مسح النص
                         textarea.value = '';
                         
                         // تقليل حجم الـ textarea
                         textarea.style.height = 'auto';
                         
-                        // التمرير إلى أسفل
-                        this.scrollToBottom();
+                        // التمرير إلى أسفل (فوري للرسائل المرسلة)
+                        setTimeout(() => {
+                            this.scrollToBottom(true);
+                        }, 100);
                     } else {
                         throw new Error(data.error || 'Failed to send message');
                     }
@@ -941,6 +1046,7 @@ class RealTimeMessaging {
                 alert('خطأ في إرسال الرسالة: ' + error.message + '. يرجى المحاولة مرة أخرى.');
             } finally {
                 // إعادة تفعيل الـ form
+                isSubmitting = false;
                 submitButton.disabled = false;
                 submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reply';
                 textarea.disabled = false;
@@ -950,20 +1056,35 @@ class RealTimeMessaging {
         });
     }
 
-    scrollToBottom() {
+    scrollToBottom(smooth = true) {
         const messagesList = document.getElementById('messagesList');
+        const autoScrollIndicator = document.getElementById('autoScrollIndicator');
+        
         if (messagesList) {
-            messagesList.scrollTo({
-                top: messagesList.scrollHeight,
-                behavior: 'smooth'
-            });
+            if (smooth) {
+                messagesList.scrollTo({
+                    top: messagesList.scrollHeight,
+                    behavior: 'smooth'
+                });
+            } else {
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+            
+            // إخفاء مؤشر التمرير
+            if (autoScrollIndicator) {
+                autoScrollIndicator.classList.remove('show');
+            }
+            
+            // تحديث حالة التمرير
+            this.isUserScrolledUp = false;
+            this.autoScroll = true;
         }
         this.hideNewMessageIndicator();
     }
 
     showNewMessageIndicator() {
         const indicator = document.getElementById('newMessageIndicator');
-        if (indicator) {
+        if (indicator && this.isUserScrolledUp) {
             indicator.classList.add('show');
         }
     }
@@ -1060,9 +1181,9 @@ class RealTimeMessaging {
 // Helper Functions
 // ========================================
 
-function scrollToBottom() {
+function scrollToBottom(smooth = true) {
     if (window.realTimeMessaging) {
-        window.realTimeMessaging.scrollToBottom();
+        window.realTimeMessaging.scrollToBottom(smooth);
     }
 }
 
@@ -1113,7 +1234,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // التمرير إلى أسفل عند التحميل
         setTimeout(() => {
-            scrollToBottom();
+            scrollToBottom(false); // تمرير فوري عند التحميل
         }, 500);
         
         // تركيز على حقل النص

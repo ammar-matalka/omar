@@ -4,7 +4,7 @@
 
 @push('styles')
 <style>
-/* تحسينات CSS للرسائل الفورية */
+/* تحسينات CSS للرسائل الفورية مع تحسين التمرير */
 .message-sending {
     opacity: 0.7;
     pointer-events: none;
@@ -121,6 +121,61 @@
     transform: translateX(0);
 }
 
+/* تحسينات التمرير المحسنة */
+.conversation-container {
+    height: calc(100vh - 100px) !important; /* تقليل المساحة المحجوزة */
+    min-height: 700px !important; /* زيادة الحد الأدنى للارتفاع */
+}
+
+.messages-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+#messagesList {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: linear-gradient(180deg, white 0%, #f8f9fa 100%);
+    max-height: calc(100vh - 320px) !important; /* تحسين الارتفاع */
+    min-height: 450px !important;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+
+#messagesList::-webkit-scrollbar {
+    width: 8px;
+}
+
+#messagesList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#messagesList::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}
+
+#messagesList::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.3);
+}
+
+/* إضافة مساحة إضافية في الأسفل */
+#messagesList::after {
+    content: '';
+    display: block;
+    height: 20px;
+    width: 100%;
+}
+
+/* تحسين التمرير السلس */
+.smooth-scroll {
+    scroll-behavior: smooth;
+}
+
 /* Hover effects */
 button:hover {
     transform: translateY(-1px);
@@ -133,19 +188,24 @@ a[style*="display: flex"]:hover {
     transform: translateY(-1px);
 }
 
-/* Mobile responsiveness */
+/* Mobile responsiveness محسنة */
 @media (max-width: 768px) {
     .container {
         padding: 1rem 0.5rem !important;
+    }
+    
+    .conversation-container {
+        height: calc(100vh - 60px) !important;
+        min-height: 500px !important;
     }
     
     div[style*="grid-template-columns: 1fr 300px"] {
         grid-template-columns: 1fr !important;
     }
     
-    div[style*="height: calc(100vh - 150px)"] {
-        height: calc(100vh - 300px) !important;
-        min-height: 400px !important;
+    #messagesList {
+        max-height: calc(100vh - 250px) !important;
+        min-height: 350px !important;
     }
     
     div[style*="max-width: 75%"] {
@@ -167,6 +227,23 @@ a[style*="display: flex"]:hover {
         min-width: 100px !important;
     }
 }
+
+/* تحسين عرض الرسائل */
+.message-bubble {
+    margin-bottom: 1rem;
+    animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 </style>
 @endpush
 
@@ -182,7 +259,7 @@ a[style*="display: flex"]:hover {
     </a>
 
     <!-- New Message Indicator -->
-    <div id="newMessageIndicator" class="new-message-indicator" onclick="scrollToBottom()">
+    <div id="newMessageIndicator" class="new-message-indicator" onclick="scrollToBottom(true, true)">
         <i class="fas fa-arrow-down"></i>
         رسائل جديدة
     </div>
@@ -198,7 +275,7 @@ a[style*="display: flex"]:hover {
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
-        <div style="display: flex; flex-direction: column; height: calc(100vh - 150px); min-height: 600px;">
+        <div class="conversation-container">
             <!-- Conversation Header -->
             <div style="background: white; border: 1px solid #e5e7eb; border-radius: 1rem; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <div style="font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -227,7 +304,7 @@ a[style*="display: flex"]:hover {
             </div>
 
             <!-- Messages Container -->
-            <div style="flex: 1; background: white; border: 1px solid #e5e7eb; border-radius: 1rem; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div class="messages-container" style="background: white; border: 1px solid #e5e7eb; border-radius: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 
                 <!-- Messages Header -->
                 <div style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center;">
@@ -235,16 +312,16 @@ a[style*="display: flex"]:hover {
                         <i class="fas fa-comments"></i>
                         Conversation with Support Team
                     </h3>
-                    <button onclick="scrollToBottom()" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer;">
+                    <button onclick="scrollToBottom(true, true)" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer;">
                         <i class="fas fa-arrow-down"></i>
                         Latest
                     </button>
                 </div>
 
                 <!-- Messages List -->
-                <div id="messagesList" style="flex: 1; padding: 1.5rem; overflow-y: auto; background: linear-gradient(180deg, white 0%, #f8f9fa 100%);">
+                <div id="messagesList" class="smooth-scroll">
                     @foreach($messages as $message)
-                    <div data-message-id="{{ $message->id }}" style="margin-bottom: 2rem; display: flex; gap: 1rem; {{ $message->is_from_admin ? '' : 'flex-direction: row-reverse;' }}">
+                    <div data-message-id="{{ $message->id }}" class="message-bubble" style="margin-bottom: 2rem; display: flex; gap: 1rem; {{ $message->is_from_admin ? '' : 'flex-direction: row-reverse;' }}">
                         <!-- Avatar -->
                         <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, #22c55e, #16a34a);' : 'background: linear-gradient(135deg, #0ea5e9, #0284c7);' }}">
                             @if($message->is_from_admin)
@@ -407,348 +484,359 @@ a[style*="display: flex"]:hover {
 
 @push('scripts')
 <script type="text/javascript">
-// منع التكرار - إذا كان مُحمل من قبل، لا تحمل مرة أخرى
-if (window.messageFormInitialized) {
-    console.log('Message form already initialized, skipping...');
-} else {
-    window.messageFormInitialized = true;
+// ========================================
+// Real-time Messaging System (مُحدث مع تحسين التمرير)
+// ========================================
 
-    // ========================================
-    // Real-time Messaging System
-    // ========================================
+class RealTimeMessaging {
+    constructor(conversationId, isAdmin = false) {
+        this.conversationId = conversationId;
+        this.isAdmin = isAdmin;
+        this.lastMessageId = 0;
+        this.checkInterval = null;
+        this.isActive = true;
+        this.checkFrequency = 3000; // 3 ثواني
+        this.isRealTimeEnabled = true;
+        
+        this.init();
+    }
 
-    class RealTimeMessaging {
-        constructor(conversationId, isAdmin = false) {
-            this.conversationId = conversationId;
-            this.isAdmin = isAdmin;
-            this.lastMessageId = 0;
-            this.checkInterval = null;
-            this.isActive = true;
-            this.checkFrequency = 3000; // 3 ثواني
-            this.isRealTimeEnabled = true;
-            
-            this.init();
-        }
+    init() {
+        this.getLatestMessageId();
+        this.startPolling();
+        this.setupVisibilityChange();
+        console.log('Real-time messaging initialized');
+    }
 
-        init() {
-            this.getLatestMessageId();
-            this.startPolling();
-            this.setupVisibilityChange();
-            console.log('Real-time messaging initialized');
-        }
-
-        getLatestMessageId() {
-            const messages = document.querySelectorAll('#messagesList > div[data-message-id]');
-            if (messages.length > 0) {
-                const lastMessage = messages[messages.length - 1];
-                const messageId = lastMessage.getAttribute('data-message-id');
-                if (messageId) {
-                    this.lastMessageId = parseInt(messageId);
-                }
+    getLatestMessageId() {
+        const messages = document.querySelectorAll('#messagesList > div[data-message-id]');
+        if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            const messageId = lastMessage.getAttribute('data-message-id');
+            if (messageId) {
+                this.lastMessageId = parseInt(messageId);
             }
-        }
-
-        startPolling() {
-            if (this.checkInterval) {
-                clearInterval(this.checkInterval);
-            }
-
-            if (!this.isRealTimeEnabled) return;
-
-            this.checkInterval = setInterval(() => {
-                if (this.isActive && document.hasFocus()) {
-                    this.checkForNewMessages();
-                }
-            }, this.checkFrequency);
-
-            this.updateConnectionStatus(true);
-        }
-
-        stopPolling() {
-            if (this.checkInterval) {
-                clearInterval(this.checkInterval);
-                this.checkInterval = null;
-            }
-            this.updateConnectionStatus(false);
-        }
-
-        async checkForNewMessages() {
-            try {
-                const url = `/user/conversations/${this.conversationId}/check-new-messages?last_message_id=${this.lastMessageId}`;
-
-                const response = await fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.has_new_messages && data.messages.length > 0) {
-                        this.displayNewMessages(data.messages);
-                        this.updateNotifications(data.unread_count || 0);
-                        this.showNewMessageIndicator();
-                    }
-                    this.updateConnectionStatus(true);
-                } else {
-                    this.updateConnectionStatus(false);
-                }
-            } catch (error) {
-                console.error('Error checking for new messages:', error);
-                this.updateConnectionStatus(false);
-            }
-        }
-
-        displayNewMessages(messages) {
-            const messagesList = document.getElementById('messagesList');
-            if (!messagesList) return;
-
-            messages.forEach(message => {
-                if (message.id > this.lastMessageId) {
-                    const messageElement = this.createMessageElement(message);
-                    
-                    const typingIndicator = document.getElementById('typingIndicator');
-                    if (typingIndicator) {
-                        messagesList.insertBefore(messageElement, typingIndicator);
-                    } else {
-                        messagesList.appendChild(messageElement);
-                    }
-                    
-                    this.lastMessageId = message.id;
-                    
-                    setTimeout(() => {
-                        messageElement.style.opacity = '1';
-                        messageElement.style.transform = 'translateY(0)';
-                    }, 50);
-
-                    this.updateMessageCount();
-                }
-            });
-
-            this.playNotificationSound();
-        }
-
-        createMessageElement(message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.setAttribute('data-message-id', message.id);
-            messageDiv.style.cssText = `
-                margin-bottom: 2rem; display: flex; gap: 1rem;
-                opacity: 0; transform: translateY(20px); transition: all 0.3s ease;
-            `;
-            
-            if (!message.is_from_admin) {
-                messageDiv.style.flexDirection = 'row-reverse';
-            }
-
-            const avatar = document.createElement('div');
-            avatar.style.cssText = `
-                width: 40px; height: 40px; border-radius: 50%; 
-                display: flex; align-items: center; justify-content: center; 
-                color: white; font-weight: 600; font-size: 1rem; 
-                flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            `;
-            
-            if (message.is_from_admin) {
-                avatar.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-                avatar.innerHTML = '<i class="fas fa-headset"></i>';
-            } else {
-                avatar.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
-                avatar.textContent = message.avatar;
-            }
-
-            const contentDiv = document.createElement('div');
-            contentDiv.style.cssText = 'flex: 1; max-width: 75%;';
-
-            const senderInfo = document.createElement('div');
-            senderInfo.style.cssText = `
-                font-size: 0.75rem; font-weight: 600; color: #666; 
-                margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;
-            `;
-            
-            if (!message.is_from_admin) {
-                senderInfo.style.justifyContent = 'flex-end';
-            }
-
-            const senderBadge = document.createElement('span');
-            senderBadge.style.cssText = `
-                padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; 
-                text-transform: uppercase; letter-spacing: 0.5px;
-            `;
-            
-            if (message.is_from_admin) {
-                senderBadge.style.cssText += 'background: #dcfce7; color: #166534;';
-                senderBadge.textContent = 'Support Team';
-            } else {
-                senderBadge.style.cssText += 'background: #dbeafe; color: #1e40af;';
-                senderBadge.textContent = 'You';
-            }
-
-            const timeSpan = document.createElement('span');
-            timeSpan.style.cssText = 'font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 0.25rem;';
-            timeSpan.innerHTML = `<i class="fas fa-clock"></i> ${message.created_at}`;
-
-            senderInfo.appendChild(senderBadge);
-            senderInfo.appendChild(timeSpan);
-
-            const messageBubble = document.createElement('div');
-            messageBubble.style.cssText = `
-                padding: 1rem 1.5rem; border-radius: 1.5rem; margin-bottom: 0.25rem; 
-                word-wrap: break-word; line-height: 1.6; position: relative; 
-                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            `;
-            
-            if (message.is_from_admin) {
-                messageBubble.style.cssText += `
-                    background: white; color: #333; border: 1px solid #e5e7eb; 
-                    border-bottom-left-radius: 0.375rem;
-                `;
-            } else {
-                messageBubble.style.cssText += `
-                    background: linear-gradient(135deg, #0ea5e9, #0284c7); 
-                    color: white; border-bottom-right-radius: 0.375rem;
-                `;
-            }
-            
-            messageBubble.textContent = message.message;
-
-            contentDiv.appendChild(senderInfo);
-            contentDiv.appendChild(messageBubble);
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-
-            return messageDiv;
-        }
-
-        scrollToBottom() {
-            const messagesList = document.getElementById('messagesList');
-            if (messagesList) {
-                messagesList.scrollTo({
-                    top: messagesList.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }
-            this.hideNewMessageIndicator();
-        }
-
-        showNewMessageIndicator() {
-            const indicator = document.getElementById('newMessageIndicator');
-            if (indicator) {
-                indicator.classList.add('show');
-            }
-        }
-
-        hideNewMessageIndicator() {
-            const indicator = document.getElementById('newMessageIndicator');
-            if (indicator) {
-                indicator.classList.remove('show');
-            }
-        }
-
-        updateNotifications(unreadCount) {
-            const unreadCountElement = document.getElementById('unreadCount');
-            if (unreadCountElement) {
-                if (unreadCount > 0) {
-                    unreadCountElement.textContent = unreadCount;
-                    unreadCountElement.style.display = 'inline';
-                } else {
-                    unreadCountElement.style.display = 'none';
-                }
-            }
-
-            const title = document.title;
-            const baseName = title.replace(/^\(\d+\)\s*/, '');
-            
-            if (unreadCount > 0) {
-                document.title = `(${unreadCount}) ${baseName}`;
-            } else {
-                document.title = baseName;
-            }
-        }
-
-        updateMessageCount() {
-            const messageCountElements = document.querySelectorAll('#messageCount, #sidebarMessageCount');
-            const currentCount = document.querySelectorAll('#messagesList > div[data-message-id]').length;
-            
-            messageCountElements.forEach(element => {
-                element.textContent = currentCount;
-            });
-        }
-
-        updateConnectionStatus(connected) {
-            const statusElement = document.getElementById('connectionStatus');
-            if (statusElement) {
-                const dot = statusElement.querySelector('.connection-dot');
-                const text = statusElement.querySelector('span');
-                
-                if (connected) {
-                    dot.className = 'connection-dot connected';
-                    text.textContent = 'Connected';
-                } else {
-                    dot.className = 'connection-dot disconnected';
-                    text.textContent = 'Disconnected';
-                }
-            }
-        }
-
-        playNotificationSound() {
-            try {
-                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCTGa2+m1bi8EJHzK7+ORSA0PUqfk7bFlHgg2jdXzzXkpBS12wuzZkT8LElyx6+2rWBULTKLh6WNHDTGLz/fbiTAKGGm/8+CK');
-                audio.volume = 0.3;
-                audio.play().catch(() => {});
-            } catch (e) {
-                // تجاهل أخطاء الصوت
-            }
-        }
-
-        setupVisibilityChange() {
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    this.isActive = false;
-                } else {
-                    this.isActive = true;
-                    setTimeout(() => {
-                        if (this.isRealTimeEnabled) {
-                            this.checkForNewMessages();
-                        }
-                    }, 500);
-                }
-            });
-
-            window.addEventListener('beforeunload', () => {
-                this.stopPolling();
-            });
-        }
-
-        toggle() {
-            this.isRealTimeEnabled = !this.isRealTimeEnabled;
-            
-            const toggleButton = document.getElementById('realTimeToggle');
-            if (toggleButton) {
-                const span = toggleButton.querySelector('span');
-                if (this.isRealTimeEnabled) {
-                    this.startPolling();
-                    span.textContent = 'Disable Auto-refresh';
-                    toggleButton.style.background = 'white';
-                } else {
-                    this.stopPolling();
-                    span.textContent = 'Enable Auto-refresh';
-                    toggleButton.style.background = '#fef3c7';
-                }
-            }
-        }
-
-        destroy() {
-            this.stopPolling();
-            this.isActive = false;
         }
     }
 
-    // ========================================
-    // Message Form Handler (محمي من التكرار)
-    // ========================================
+    startPolling() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+        }
+
+        if (!this.isRealTimeEnabled) return;
+
+        this.checkInterval = setInterval(() => {
+            if (this.isActive && document.hasFocus()) {
+                this.checkForNewMessages();
+            }
+        }, this.checkFrequency);
+
+        this.updateConnectionStatus(true);
+    }
+
+    stopPolling() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+            this.checkInterval = null;
+        }
+        this.updateConnectionStatus(false);
+    }
+
+    async checkForNewMessages() {
+        try {
+            const url = `/user/conversations/${this.conversationId}/check-new-messages?last_message_id=${this.lastMessageId}`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.has_new_messages && data.messages.length > 0) {
+                    // فقط عرض الرسائل من الأدمن (ليس من المستخدم نفسه)
+                    const adminMessages = data.messages.filter(msg => msg.is_from_admin);
+                    if (adminMessages.length > 0) {
+                        this.displayNewMessages(adminMessages);
+                        this.updateNotifications(data.unread_count || 0);
+                        this.showNewMessageIndicator();
+                    }
+                    
+                    // تحديث آخر معرف رسالة للرسائل الجديدة كلها
+                    data.messages.forEach(msg => {
+                        if (msg.id > this.lastMessageId) {
+                            this.lastMessageId = msg.id;
+                        }
+                    });
+                }
+                this.updateConnectionStatus(true);
+            } else {
+                this.updateConnectionStatus(false);
+            }
+        } catch (error) {
+            console.error('Error checking for new messages:', error);
+            this.updateConnectionStatus(false);
+        }
+    }
+
+    displayNewMessages(messages) {
+        const messagesList = document.getElementById('messagesList');
+        if (!messagesList) return;
+
+        messages.forEach(message => {
+            // تحقق من عدم وجود الرسالة مسبقاً
+            const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
+            if (existingMessage) {
+                console.log('Message already exists, skipping:', message.id);
+                return;
+            }
+
+            const messageElement = this.createMessageElement(message);
+            
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                messagesList.insertBefore(messageElement, typingIndicator);
+            } else {
+                messagesList.appendChild(messageElement);
+            }
+            
+            setTimeout(() => {
+                messageElement.style.opacity = '1';
+                messageElement.style.transform = 'translateY(0)';
+            }, 50);
+
+            this.updateMessageCount();
+        });
+
+        this.playNotificationSound();
+        
+        // التمرير التلقائي للرسائل الجديدة
+        setTimeout(() => {
+            scrollToBottom(true, false);
+        }, 200);
+    }
+
+    createMessageElement(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.setAttribute('data-message-id', message.id);
+        messageDiv.className = 'message-bubble';
+        messageDiv.style.cssText = `
+            margin-bottom: 2rem; display: flex; gap: 1rem;
+            opacity: 0; transform: translateY(20px); transition: all 0.3s ease;
+        `;
+        
+        if (!message.is_from_admin) {
+            messageDiv.style.flexDirection = 'row-reverse';
+        }
+
+        const avatar = document.createElement('div');
+        avatar.style.cssText = `
+            width: 40px; height: 40px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            color: white; font-weight: 600; font-size: 1rem; 
+            flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+        
+        if (message.is_from_admin) {
+            avatar.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            avatar.innerHTML = '<i class="fas fa-headset"></i>';
+        } else {
+            avatar.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
+            avatar.textContent = message.avatar;
+        }
+
+        const contentDiv = document.createElement('div');
+        contentDiv.style.cssText = 'flex: 1; max-width: 75%;';
+
+        const senderInfo = document.createElement('div');
+        senderInfo.style.cssText = `
+            font-size: 0.75rem; font-weight: 600; color: #666; 
+            margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;
+        `;
+        
+        if (!message.is_from_admin) {
+            senderInfo.style.justifyContent = 'flex-end';
+        }
+
+        const senderBadge = document.createElement('span');
+        senderBadge.style.cssText = `
+            padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; 
+            text-transform: uppercase; letter-spacing: 0.5px;
+        `;
+        
+        if (message.is_from_admin) {
+            senderBadge.style.cssText += 'background: #dcfce7; color: #166534;';
+            senderBadge.textContent = 'Support Team';
+        } else {
+            senderBadge.style.cssText += 'background: #dbeafe; color: #1e40af;';
+            senderBadge.textContent = 'You';
+        }
+
+        const timeSpan = document.createElement('span');
+        timeSpan.style.cssText = 'font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 0.25rem;';
+        timeSpan.innerHTML = `<i class="fas fa-clock"></i> ${message.created_at}`;
+
+        senderInfo.appendChild(senderBadge);
+        senderInfo.appendChild(timeSpan);
+
+        const messageBubble = document.createElement('div');
+        messageBubble.style.cssText = `
+            padding: 1rem 1.5rem; border-radius: 1.5rem; margin-bottom: 0.25rem; 
+            word-wrap: break-word; line-height: 1.6; position: relative; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        `;
+        
+        if (message.is_from_admin) {
+            messageBubble.style.cssText += `
+                background: white; color: #333; border: 1px solid #e5e7eb; 
+                border-bottom-left-radius: 0.375rem;
+            `;
+        } else {
+            messageBubble.style.cssText += `
+                background: linear-gradient(135deg, #0ea5e9, #0284c7); 
+                color: white; border-bottom-right-radius: 0.375rem;
+            `;
+        }
+        
+        messageBubble.textContent = message.message;
+
+        contentDiv.appendChild(senderInfo);
+        contentDiv.appendChild(messageBubble);
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(contentDiv);
+
+        return messageDiv;
+    }
+
+    scrollToBottom(smooth = true) {
+        scrollToBottom(smooth, false);
+    }
+
+    showNewMessageIndicator() {
+        const indicator = document.getElementById('newMessageIndicator');
+        if (indicator) {
+            indicator.classList.add('show');
+        }
+    }
+
+    hideNewMessageIndicator() {
+        const indicator = document.getElementById('newMessageIndicator');
+        if (indicator) {
+            indicator.classList.remove('show');
+        }
+    }
+
+    updateNotifications(unreadCount) {
+        const unreadCountElement = document.getElementById('unreadCount');
+        if (unreadCountElement) {
+            if (unreadCount > 0) {
+                unreadCountElement.textContent = unreadCount;
+                unreadCountElement.style.display = 'inline';
+            } else {
+                unreadCountElement.style.display = 'none';
+            }
+        }
+
+        const title = document.title;
+        const baseName = title.replace(/^\(\d+\)\s*/, '');
+        
+        if (unreadCount > 0) {
+            document.title = `(${unreadCount}) ${baseName}`;
+        } else {
+            document.title = baseName;
+        }
+    }
+
+    updateMessageCount() {
+        const messageCountElements = document.querySelectorAll('#messageCount, #sidebarMessageCount');
+        const currentCount = document.querySelectorAll('#messagesList > div[data-message-id]').length;
+        
+        messageCountElements.forEach(element => {
+            element.textContent = currentCount;
+        });
+    }
+
+    updateConnectionStatus(connected) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (statusElement) {
+            const dot = statusElement.querySelector('.connection-dot');
+            const text = statusElement.querySelector('span');
+            
+            if (connected) {
+                dot.className = 'connection-dot connected';
+                text.textContent = 'Connected';
+            } else {
+                dot.className = 'connection-dot disconnected';
+                text.textContent = 'Disconnected';
+            }
+        }
+    }
+
+    playNotificationSound() {
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCTGa2+m1bi8EJHzK7+ORSA0PUqfk7bFlHgg2jdXzzXkpBS12wuzZkT8LElyx6+2rWBULTKLh6WNHDTGLz/fbiTAKGGm/8+CK');
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+        } catch (e) {
+            // تجاهل أخطاء الصوت
+        }
+    }
+
+    setupVisibilityChange() {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.isActive = false;
+            } else {
+                this.isActive = true;
+                setTimeout(() => {
+                    if (this.isRealTimeEnabled) {
+                        this.checkForNewMessages();
+                    }
+                }, 500);
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            this.stopPolling();
+        });
+    }
+
+    toggle() {
+        this.isRealTimeEnabled = !this.isRealTimeEnabled;
+        
+        const toggleButton = document.getElementById('realTimeToggle');
+        if (toggleButton) {
+            const span = toggleButton.querySelector('span');
+            if (this.isRealTimeEnabled) {
+                this.startPolling();
+                span.textContent = 'Disable Auto-refresh';
+                toggleButton.style.background = 'white';
+            } else {
+                this.stopPolling();
+                span.textContent = 'Enable Auto-refresh';
+                toggleButton.style.background = '#fef3c7';
+            }
+        }
+    }
+
+    destroy() {
+        this.stopPolling();
+        this.isActive = false;
+    }
+}
+
+// ========================================
+// Message Form Handler (محمي من التكرار والازدواجية)
+// ========================================
+
+// منع إعادة التهيئة
+if (!window.messageFormInitialized) {
+    window.messageFormInitialized = true;
 
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('messageForm');
@@ -763,25 +851,16 @@ if (window.messageFormInitialized) {
 
         let isSubmitting = false; // منع الإرسال المتعدد
 
-        // إزالة أي event listeners سابقة
-        const newForm = form.cloneNode(true);
-        form.parentNode.replaceChild(newForm, form);
-        
-        // إعادة تعيين المراجع
-        const cleanForm = document.getElementById('messageForm');
-        const cleanTextarea = document.getElementById('messageTextarea');
-        const cleanSubmitButton = document.getElementById('sendButton');
-
         // منع الإرسال التقليدي للفورم
-        cleanForm.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
             if (!isSubmitting) {
                 sendMessage();
             }
         });
 
-        // معالجة ضغط Enter (مرة واحدة فقط)
-        cleanTextarea.addEventListener('keydown', function(e) {
+        // معالجة ضغط Enter
+        textarea.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 if (e.ctrlKey || e.shiftKey) {
                     // Ctrl+Enter أو Shift+Enter = سطر جديد
@@ -803,7 +882,7 @@ if (window.messageFormInitialized) {
                 return;
             }
 
-            const message = cleanTextarea.value.trim();
+            const message = textarea.value.trim();
             if (!message) {
                 showErrorMessage('الرجاء كتابة رسالة قبل الإرسال');
                 return;
@@ -811,25 +890,22 @@ if (window.messageFormInitialized) {
 
             isSubmitting = true; // قفل الإرسال
             
-            // حفظ النص الأصلي للزر
-            const originalButtonText = cleanSubmitButton.innerHTML;
+            const originalButtonText = submitButton.innerHTML;
             
             // تعطيل الـ form
-            cleanSubmitButton.disabled = true;
-            cleanSubmitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            cleanTextarea.disabled = true;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            textarea.disabled = true;
             if (sendingStatus) sendingStatus.style.display = 'inline';
 
             try {
-                // تحضير البيانات
                 const formData = new FormData();
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                 formData.append('message', message);
                 
                 console.log('Sending message:', message);
 
-                // إرسال الطلب
-                const response = await fetch(cleanForm.action, {
+                const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -848,14 +924,21 @@ if (window.messageFormInitialized) {
                         // إضافة الرسالة إلى المحادثة
                         if (data.message) {
                             addMessageToChat(data.message);
+                            
+                            // تحديث آخر معرف رسالة في النظام
+                            if (window.realTimeMessaging) {
+                                window.realTimeMessaging.lastMessageId = data.message.id;
+                            }
                         }
                         
                         // مسح النص
-                        cleanTextarea.value = '';
-                        cleanTextarea.style.height = 'auto';
+                        textarea.value = '';
+                        textarea.style.height = 'auto';
                         
-                        // التمرير إلى أسفل
-                        scrollToBottom();
+                        // التمرير إلى أسفل مع قوة إضافية
+                        setTimeout(() => {
+                            scrollToBottom(true, true);
+                        }, 100);
                         
                         showSuccessMessage('تم إرسال الرسالة بنجاح');
                         console.log('Message sent successfully');
@@ -882,20 +965,20 @@ if (window.messageFormInitialized) {
             } finally {
                 // إعادة تفعيل الـ form دائماً
                 isSubmitting = false; // إلغاء القفل
-                cleanSubmitButton.disabled = false;
-                cleanSubmitButton.innerHTML = originalButtonText;
-                cleanTextarea.disabled = false;
-                cleanTextarea.focus();
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+                textarea.disabled = false;
+                textarea.focus();
                 if (sendingStatus) sendingStatus.style.display = 'none';
             }
         }
 
-        // دالة إضافة رسالة جديدة للمحادثة
+        // دالة إضافة رسالة جديدة للمحادثة (بدون ازدواجية)
         function addMessageToChat(message) {
             const messagesList = document.getElementById('messagesList');
             if (!messagesList) return;
 
-            // تحقق من عدم وجود الرسالة مسبقاً
+            // تحقق من عدم وجود الرسالة مسبقاً (إضافة مهمة)
             const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
             if (existingMessage) {
                 console.log('Message already exists, skipping...');
@@ -904,6 +987,7 @@ if (window.messageFormInitialized) {
 
             const messageDiv = document.createElement('div');
             messageDiv.setAttribute('data-message-id', message.id);
+            messageDiv.className = 'message-bubble';
             messageDiv.style.cssText = `
                 margin-bottom: 2rem; display: flex; gap: 1rem; flex-direction: row-reverse;
                 opacity: 0; transform: translateY(20px); transition: all 0.3s ease;
@@ -946,121 +1030,167 @@ if (window.messageFormInitialized) {
         }
 
         // دالة تغيير حجم textarea تلقائياً
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }
-
-        // ربط دالة autoResize بـ textarea
-        cleanTextarea.addEventListener('input', function() {
-            autoResize(this);
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
         });
 
-        console.log('Message form initialized successfully (single instance)');
-    });
-
-    // ========================================
-    // Helper Functions (محمية من التكرار)
-    // ========================================
-
-    function scrollToBottom() {
-        if (window.realTimeMessaging) {
-            window.realTimeMessaging.scrollToBottom();
-        } else {
-            const messagesList = document.getElementById('messagesList');
-            if (messagesList) {
-                messagesList.scrollTo({
-                    top: messagesList.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }
-        }
-    }
-
-    function updateMessageCount() {
-        const messageCountElements = document.querySelectorAll('#messageCount, #sidebarMessageCount');
-        const currentCount = document.querySelectorAll('#messagesList > div[data-message-id]').length;
-        
-        messageCountElements.forEach(element => {
-            element.textContent = currentCount;
-        });
-    }
-
-    function toggleRealTimeMessaging() {
-        if (window.realTimeMessaging) {
-            window.realTimeMessaging.toggle();
-        }
-    }
-
-    function showSuccessMessage(message) {
-        const successElement = document.getElementById('successMessage');
-        const successText = document.getElementById('successText');
-        
-        if (successElement && successText) {
-            successText.textContent = message;
-            successElement.classList.add('show');
-            
-            setTimeout(() => {
-                successElement.classList.remove('show');
-            }, 3000);
-        }
-    }
-
-    function showErrorMessage(message) {
-        const errorElement = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        
-        if (errorElement && errorText) {
-            errorText.textContent = message;
-            errorElement.classList.add('show');
-            
-            setTimeout(() => {
-                errorElement.classList.remove('show');
-            }, 5000);
-        }
-    }
-
-    // ========================================
-    // Auto-initialization (مرة واحدة فقط)
-    // ========================================
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded, initializing real-time messaging...');
-        
-        // استخراج معرف المحادثة من الـ URL
-        const pathParts = window.location.pathname.split('/');
-        const conversationId = pathParts[pathParts.length - 1];
-        
-        // التحقق من وجود صفحة المحادثة
-        const messagesList = document.getElementById('messagesList');
-        
-        console.log('Conversation ID:', conversationId);
-        console.log('Messages list found:', !!messagesList);
-        
-        if (messagesList && conversationId && !isNaN(conversationId)) {
-            // إنشاء مثيل من نظام الرسائل الفورية (مرة واحدة فقط)
-            if (!window.realTimeMessaging) {
-                window.realTimeMessaging = new RealTimeMessaging(conversationId, false);
-                console.log('Real-time messaging started for conversation:', conversationId);
-            }
-            
-            // التمرير إلى أسفل عند التحميل
-            setTimeout(() => {
-                scrollToBottom();
-            }, 500);
-            
-            // تركيز على حقل النص
-            const textarea = document.getElementById('messageTextarea');
-            if (textarea) {
-                textarea.focus();
-            }
-        } else {
-            console.error('Failed to initialize real-time messaging:', {
-                messagesList: !!messagesList,
-                conversationId,
-                isValidId: !isNaN(conversationId)
-            });
-        }
+        console.log('Message form initialized successfully');
     });
 }
+
+// ========================================
+// Helper Functions (محسنة مع التمرير القوي)
+// ========================================
+
+function scrollToBottom(smooth = true, force = false) {
+    const messagesList = document.getElementById('messagesList');
+    if (!messagesList) return;
+    
+    // حساب الارتفاع الكامل مع إضافة مساحة إضافية قوية
+    const scrollHeight = messagesList.scrollHeight;
+    const extraSpace = force ? 200 : 50; // مساحة إضافية أكبر عند الإرسال
+    
+    console.log('Scrolling to bottom:', {
+        scrollHeight,
+        extraSpace,
+        total: scrollHeight + extraSpace,
+        force,
+        smooth
+    });
+    
+    if (smooth) {
+        messagesList.scrollTo({
+            top: scrollHeight + extraSpace,
+            behavior: 'smooth'
+        });
+        
+        // تأكيد إضافي للتمرير بعد انتهاء الحركة السلسة
+        setTimeout(() => {
+            messagesList.scrollTop = messagesList.scrollHeight + extraSpace;
+        }, 300);
+    } else {
+        // تمرير فوري
+        messagesList.scrollTop = scrollHeight + extraSpace;
+    }
+    
+    // إخفاء مؤشر الرسائل الجديدة
+    const indicator = document.getElementById('newMessageIndicator');
+    if (indicator) {
+        indicator.classList.remove('show');
+    }
+}
+
+function ensureScrollToBottom() {
+    const messagesList = document.getElementById('messagesList');
+    if (!messagesList) return;
+    
+    // انتظار تحميل أي محتوى إضافي
+    setTimeout(() => {
+        scrollToBottom(false, true); // تمرير فوري وقوي
+    }, 50);
+    
+    // تأكيد إضافي
+    setTimeout(() => {
+        scrollToBottom(false, true);
+    }, 200);
+}
+
+function updateMessageCount() {
+    const messageCountElements = document.querySelectorAll('#messageCount, #sidebarMessageCount');
+    const currentCount = document.querySelectorAll('#messagesList > div[data-message-id]').length;
+    
+    messageCountElements.forEach(element => {
+        element.textContent = currentCount;
+    });
+}
+
+function toggleRealTimeMessaging() {
+    if (window.realTimeMessaging) {
+        window.realTimeMessaging.toggle();
+    }
+}
+
+function showSuccessMessage(message) {
+    const successElement = document.getElementById('successMessage');
+    const successText = document.getElementById('successText');
+    
+    if (successElement && successText) {
+        successText.textContent = message;
+        successElement.classList.add('show');
+        
+        setTimeout(() => {
+            successElement.classList.remove('show');
+        }, 3000);
+    }
+}
+
+function showErrorMessage(message) {
+    const errorElement = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    
+    if (errorElement && errorText) {
+        errorText.textContent = message;
+        errorElement.classList.add('show');
+        
+        setTimeout(() => {
+            errorElement.classList.remove('show');
+        }, 5000);
+    }
+}
+
+// ========================================
+// Auto-initialization مع تحسين التمرير
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing real-time messaging...');
+    
+    // استخراج معرف المحادثة من الـ URL
+    const pathParts = window.location.pathname.split('/');
+    const conversationId = pathParts[pathParts.length - 1];
+    
+    // التحقق من وجود صفحة المحادثة
+    const messagesList = document.getElementById('messagesList');
+    
+    console.log('Conversation ID:', conversationId);
+    console.log('Messages list found:', !!messagesList);
+    
+    if (messagesList && conversationId && !isNaN(conversationId)) {
+        // إنشاء مثيل من نظام الرسائل الفورية (مرة واحدة فقط)
+        if (!window.realTimeMessaging) {
+            window.realTimeMessaging = new RealTimeMessaging(conversationId, false);
+            console.log('Real-time messaging started for conversation:', conversationId);
+        }
+        
+        // التمرير إلى أسفل عند التحميل مع تحسينات
+        setTimeout(() => {
+            scrollToBottom(false, true); // تمرير فوري وقوي عند التحميل
+        }, 100);
+        
+        // تأكيد إضافي للتمرير
+        setTimeout(() => {
+            ensureScrollToBottom();
+        }, 500);
+        
+        // تأكيد نهائي بعد تحميل كامل
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                ensureScrollToBottom();
+            }, 200);
+        });
+        
+        // تركيز على حقل النص
+        const textarea = document.getElementById('messageTextarea');
+        if (textarea) {
+            textarea.focus();
+        }
+    } else {
+        console.error('Failed to initialize real-time messaging:', {
+            messagesList: !!messagesList,
+            conversationId,
+            isValidId: !isNaN(conversationId)
+        });
+    }
+});
 </script>
 @endpush
