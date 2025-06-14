@@ -6,69 +6,37 @@ use App\Models\Platform;
 use App\Models\Grade;
 use App\Models\Subject;
 use App\Models\EducationalCard;
+use App\Models\EducationalCardOrder;
 use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EducationalCardsController extends Controller
 {
     /**
-     * Display the main educational cards page with platforms
+     * Display the main educational cards page with everything
      */
     public function index()
     {
-        $platforms = Platform::where('is_active', true)->orderBy('name')->get();
+        $platforms = Platform::where('is_active', true)
+            ->with(['grades' => function($query) {
+                $query->where('is_active', true)
+                    ->orderBy('grade_number')
+                    ->with(['subjects' => function($query) {
+                        $query->where('is_active', true)
+                            ->orderBy('name')
+                            ->with(['educationalCards' => function($query) {
+                                $query->where('is_active', true)
+                                    ->orderBy('title');
+                            }]);
+                    }]);
+            }])
+            ->orderBy('name')
+            ->get();
+
         return view('educational-cards.index', compact('platforms'));
-    }
-    
-    /**
-     * Show grades for selected platform
-     */
-    public function showGrades(Platform $platform)
-    {
-        $grades = Grade::where('platform_id', $platform->id)
-                      ->where('is_active', true)
-                      ->orderBy('grade_number')
-                      ->get();
-                      
-        return view('educational-cards.grades', compact('platform', 'grades'));
-    }
-    
-    /**
-     * Show subjects for selected platform and grade
-     */
-    public function showSubjects(Platform $platform, Grade $grade)
-    {
-        // Ensure grade belongs to platform
-        if ($grade->platform_id !== $platform->id) {
-            abort(404);
-        }
-        
-        $subjects = Subject::where('grade_id', $grade->id)
-                          ->where('is_active', true)
-                          ->orderBy('name')
-                          ->get();
-                          
-        return view('educational-cards.subjects', compact('platform', 'grade', 'subjects'));
-    }
-    
-    /**
-     * Show educational cards for selected subject
-     */
-    public function showCards(Platform $platform, Grade $grade, Subject $subject)
-    {
-        // Ensure relationships are correct
-        if ($grade->platform_id !== $platform->id || $subject->grade_id !== $grade->id) {
-            abort(404);
-        }
-        
-        $cards = EducationalCard::where('subject_id', $subject->id)
-                               ->where('is_active', true)
-                               ->orderBy('title')
-                               ->paginate(12);
-                               
-        return view('educational-cards.cards', compact('platform', 'grade', 'subject', 'cards'));
     }
     
     /**
@@ -90,6 +58,80 @@ class EducationalCardsController extends Controller
                                       ->get();
         
         return view('educational-cards.show', compact('card', 'relatedCards'));
+    }
+    
+    /**
+     * Submit educational card order
+     */
+    public function submitOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'academic_year' => 'required|string|max:10',
+            'generation' => 'required|string|max:50',
+            'subject' => 'required|string|max:100',
+            'teacher' => 'required|string|max:100',
+            'semester' => 'required|in:first,second,full_year',
+            'platform' => 'required|string|max:100',
+            'notebook_type' => 'required|in:digital,physical,both',
+            'quantity' => 'required|integer|min:1|max:10',
+            'notes' => 'nullable|string|max:500'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Calculate total amount (you can set your own pricing logic)
+            $basePrice = 25.00; // Base price per card
+            $typeMultiplier = [
+                'digital' => 1.0,
+                'physical' => 1.2,
+                'both' => 1.5
+            ];
+            
+            $totalAmount = $basePrice * $validated['quantity'] * $typeMultiplier[$validated['notebook_type']];
+
+            // Create the order
+            $order = EducationalCardOrder::create([
+                'user_id' => Auth::id(),
+                'academic_year' => $validated['academic_year'],
+                'generation' => $validated['generation'],
+                'subject' => $validated['subject'],
+                'teacher' => $validated['teacher'],
+                'semester' => $validated['semester'],
+                'platform' => $validated['platform'],
+                'notebook_type' => $validated['notebook_type'],
+                'quantity' => $validated['quantity'],
+                'notes' => $validated['notes'],
+                'total_amount' => $totalAmount,
+                'status' => 'pending'
+            ]);
+
+            DB::commit();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('Order submitted successfully!'),
+                    'order_id' => $order->id,
+                    'total_amount' => $order->formatted_total
+                ]);
+            }
+
+            return redirect()->route('educational-cards.index')
+                ->with('success', __('Order submitted successfully! Order #:id', ['id' => $order->id]));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Error submitting order. Please try again.')
+                ], 500);
+            }
+
+            return back()->with('error', __('Error submitting order. Please try again.'));
+        }
     }
     
     /**

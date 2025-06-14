@@ -431,39 +431,41 @@
     }
 }
 </style>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Define all translations and messages at the top
-    var messages = {
-        selectedUsersLabel: {!! json_encode(__('Selected Users:')) !!},
-        couponsPerUserLabel: {!! json_encode(__('Coupons per User:')) !!},
-        discountAmountLabel: {!! json_encode(__('Discount Amount:')) !!},
-        validityPeriodLabel: {!! json_encode(__('Validity Period:')) !!},
-        totalCouponsLabel: {!! json_encode(__('Total Coupons')) !!},
-        totalPotentialDiscountLabel: {!! json_encode(__('Total Potential Discount')) !!},
-        couponTypeLabel: {!! json_encode(__('Coupon Type:')) !!},
-        generalText: {!! json_encode(__('General')) !!},
-        specificUsersText: {!! json_encode(__('Specific Users')) !!},
-        monthText: {!! json_encode(__('month')) !!},
-        monthsText: {!! json_encode(__('months')) !!},
-        minPurchaseText: {!! json_encode(__('Min purchase: $')) !!},
-        noMinPurchaseText: {!! json_encode(__('No minimum purchase')) !!},
-        validForText: {!! json_encode(__('Valid for:')) !!},
-        validForNotSetText: {!! json_encode(__('Valid for: Not set')) !!},
-        oneUserSelectedText: {!! json_encode(__('1 user selected')) !!},
-        usersSelectedText: {!! json_encode(__('users selected')) !!},
-        configureSummaryText: {!! json_encode(__('Configure the options above to see the generation summary')) !!},
-        numberCouponsUserText: {!! json_encode(__('Number of coupons to create for each selected user')) !!},
-        numberGeneralCouponsText: {!! json_encode(__('Number of general coupons to create')) !!},
-        validDiscountAmountText: {!! json_encode(__('Please enter a valid discount amount')) !!},
-        selectValidityPeriodText: {!! json_encode(__('Please select a validity period')) !!},
-        validQuantityText: {!! json_encode(__('Please enter a valid quantity')) !!},
-        selectUserText: {!! json_encode(__('Please select at least one user')) !!},
-        generatingText: {!! json_encode(__('Generating...')) !!},
-        copySuccessText: {!! json_encode(__('Coupon code copied to clipboard!')) !!},
-        copyErrorText: {!! json_encode(__('Failed to copy coupon code')) !!}
-    };
+document.addEventListener('DOMContentLoaded', function () {
+    const messages = @json([
+        'selectedUsersLabel' => __('Selected Users:'),
+        'couponsPerUserLabel' => __('Coupons per User:'),
+        'discountAmountLabel' => __('Discount Amount:'),
+        'validityPeriodLabel' => __('Validity Period:'),
+        'totalCouponsLabel' => __('Total Coupons'),
+        'totalPotentialDiscountLabel' => __('Total Potential Discount'),
+        'couponTypeLabel' => __('Coupon Type:'),
+        'generalText' => __('General'),
+        'specificUsersText' => __('Specific Users'),
+        'monthText' => __('month'),
+        'monthsText' => __('months'),
+        'minPurchaseText' => __('Min purchase: $'),
+        'noMinPurchaseText' => __('No minimum purchase'),
+        'validForText' => __('Valid for:'),
+        'validForNotSetText' => __('Valid for: Not set'),
+        'oneUserSelectedText' => __('1 user selected'),
+        'usersSelectedText' => __('users selected'),
+        'configureSummaryText' => __('Configure the options above to see the generation summary'),
+        'numberCouponsUserText' => __('Number of coupons to create for each selected user'),
+        'numberGeneralCouponsText' => __('Number of general coupons to create'),
+        'validDiscountAmountText' => __('Please enter a valid discount amount'),
+        'selectValidityPeriodText' => __('Please select a validity period'),
+        'validQuantityText' => __('Please enter a valid quantity'),
+        'selectUserText' => __('Please select at least one user'),
+        'generatingText' => __('Generating...'),
+        'copySuccessText' => __('Coupon code copied to clipboard!'),
+        'copyErrorText' => __('Failed to copy coupon code'),
+    ]);
+    
+    // بإمكانك الآن استخدام المتغير messages بكل سهولة
+    // console.log(messages.selectedUsersLabel);
+});
 
     // Elements
     var specificRadio = document.getElementById('specific_users');

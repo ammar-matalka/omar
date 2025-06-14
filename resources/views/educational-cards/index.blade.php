@@ -57,41 +57,17 @@
         margin-bottom: var(--space-xl);
         line-height: 1.6;
     }
-    
-    .hero-stats {
-        display: flex;
-        justify-content: center;
-        gap: var(--space-2xl);
-        flex-wrap: wrap;
-    }
-    
-    .stat-item {
-        text-align: center;
-    }
-    
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 900;
-        margin-bottom: var(--space-xs);
-    }
-    
-    .stat-label {
-        font-size: 0.875rem;
-        opacity: 0.8;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .platforms-container {
+
+    .cards-container {
         padding: var(--space-3xl) 0;
         background: var(--background);
     }
-    
+
     .section-header {
         text-align: center;
         margin-bottom: var(--space-2xl);
     }
-    
+
     .section-title {
         font-size: 2.5rem;
         font-weight: 800;
@@ -101,7 +77,7 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-    
+
     .section-subtitle {
         font-size: 1.125rem;
         color: var(--on-surface-variant);
@@ -109,27 +85,26 @@
         margin: 0 auto;
         line-height: 1.7;
     }
-    
-    .platforms-grid {
+
+    .year-cards-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--space-2xl);
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--space-xl);
         margin-bottom: var(--space-2xl);
     }
-    
-    .platform-card {
+
+    .year-card {
         background: var(--surface);
         border: 1px solid var(--border-color);
-        border-radius: var(--radius-2xl);
+        border-radius: var(--radius-xl);
         overflow: hidden;
         transition: all var(--transition-normal);
         position: relative;
-        text-decoration: none;
-        color: inherit;
-        box-shadow: var(--shadow-md);
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
     }
-    
-    .platform-card::before {
+
+    .year-card::before {
         content: '';
         position: absolute;
         top: 0;
@@ -140,68 +115,73 @@
         transform: scaleX(0);
         transition: transform var(--transition-normal);
     }
-    
-    .platform-card:hover {
+
+    .year-card:hover {
         transform: translateY(-8px);
         box-shadow: var(--shadow-xl);
         border-color: var(--primary-200);
     }
-    
-    .platform-card:hover::before {
+
+    .year-card:hover::before {
         transform: scaleX(1);
     }
-    
-    .platform-image {
-        width: 100%;
-        height: 200px;
+
+    .year-card-header {
         background: linear-gradient(135deg, var(--primary-100), var(--secondary-100));
+        padding: var(--space-xl);
+        text-align: center;
         position: relative;
+        overflow: hidden;
+    }
+
+    .year-card-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="white" opacity="0.1"><circle cx="30" cy="30" r="20"/><circle cx="70" cy="70" r="15"/></svg>');
+        animation: float 20s ease-in-out infinite;
+    }
+
+    .year-number {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        color: white;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
+        margin: 0 auto var(--space-md);
+        font-size: 1.5rem;
+        font-weight: 900;
+        position: relative;
+        z-index: 1;
+        box-shadow: var(--shadow-md);
     }
-    
-    .platform-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform var(--transition-slow);
+
+    .year-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-700);
+        position: relative;
+        z-index: 1;
     }
-    
-    .platform-card:hover .platform-image img {
-        transform: scale(1.05);
-    }
-    
-    .platform-icon {
-        font-size: 3rem;
-        color: var(--primary-500);
-        opacity: 0.3;
-    }
-    
-    .platform-content {
+
+    .year-card-content {
         padding: var(--space-xl);
     }
-    
-    .platform-name {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: var(--space-sm);
-        color: var(--on-surface);
-        line-height: 1.3;
-    }
-    
-    .platform-description {
+
+    .year-description {
         color: var(--on-surface-variant);
         margin-bottom: var(--space-lg);
         line-height: 1.6;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        text-align: center;
     }
-    
-    .platform-stats {
+
+    .year-stats {
         display: flex;
         justify-content: space-between;
         margin-bottom: var(--space-lg);
@@ -209,220 +189,289 @@
         background: var(--surface-variant);
         border-radius: var(--radius-lg);
     }
-    
-    .platform-stat {
+
+    .year-stat {
         text-align: center;
         flex: 1;
     }
-    
-    .platform-stat-number {
-        font-size: 1.25rem;
+
+    .year-stat-number {
+        font-size: 1.125rem;
         font-weight: 700;
         color: var(--primary-600);
         display: block;
     }
-    
-    .platform-stat-label {
+
+    .year-stat-label {
         font-size: 0.75rem;
         color: var(--on-surface-variant);
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-top: var(--space-xs);
     }
-    
-    .platform-cta {
+
+    .year-cta {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
         background: linear-gradient(135deg, var(--primary-50), var(--secondary-50));
         padding: var(--space-md);
         border-radius: var(--radius-lg);
         transition: all var(--transition-fast);
+        gap: var(--space-sm);
     }
-    
+
     .cta-text {
         font-weight: 600;
         color: var(--primary-700);
     }
-    
+
     .cta-icon {
         color: var(--primary-600);
         font-size: 1.125rem;
         transition: transform var(--transition-fast);
     }
-    
-    .platform-card:hover .cta-icon {
+
+    .year-card:hover .cta-icon {
         transform: translateX(4px);
     }
-    
-    .features-section {
-        background: var(--surface);
-        padding: var(--space-3xl) 0;
-        border-top: 1px solid var(--border-color);
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
     }
-    
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--space-xl);
-    }
-    
-    .feature-card {
-        text-align: center;
-        padding: var(--space-xl);
-        border-radius: var(--radius-xl);
-        background: var(--background);
-        border: 1px solid var(--border-color);
-        transition: all var(--transition-normal);
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-lg);
-        border-color: var(--primary-200);
-    }
-    
-    .feature-icon {
-        width: 64px;
-        height: 64px;
-        background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
-        border-radius: 50%;
+
+    .modal.active {
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto var(--space-lg);
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-content {
+        background: var(--surface);
+        border-radius: var(--radius-2xl);
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: var(--shadow-2xl);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
         color: white;
-        font-size: 1.5rem;
-        transition: all var(--transition-normal);
-    }
-    
-    .feature-card:hover .feature-icon {
-        transform: scale(1.1);
-    }
-    
-    .feature-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: var(--space-sm);
-        color: var(--on-surface);
-    }
-    
-    .feature-description {
-        color: var(--on-surface-variant);
-        line-height: 1.6;
-    }
-    
-    .search-section {
-        background: linear-gradient(135deg, var(--gray-900), var(--gray-800));
-        color: white;
-        padding: var(--space-3xl) 0;
+        padding: var(--space-xl);
+        border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        position: relative;
         text-align: center;
     }
-    
-    .search-title {
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: var(--space-md);
-    }
-    
-    .search-subtitle {
-        font-size: 1.125rem;
-        opacity: 0.9;
-        margin-bottom: var(--space-xl);
-    }
-    
-    .search-form {
-        max-width: 600px;
-        margin: 0 auto;
-        display: flex;
-        gap: var(--space-md);
-        background: white;
-        padding: var(--space-sm);
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-    }
-    
-    .search-input {
-        flex: 1;
+
+    .modal-close {
+        position: absolute;
+        top: var(--space-md);
+        right: var(--space-md);
+        background: rgba(255, 255, 255, 0.2);
         border: none;
-        padding: var(--space-md) var(--space-lg);
-        border-radius: var(--radius-lg);
-        font-size: 1rem;
-        color: var(--on-surface);
-        background: transparent;
-    }
-    
-    .search-input:focus {
-        outline: none;
-    }
-    
-    .search-button {
-        padding: var(--space-md) var(--space-xl);
-        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
         color: white;
-        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        transition: all var(--transition-fast);
+    }
+
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: var(--space-sm);
+    }
+
+    .modal-subtitle {
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
+    .modal-body {
+        padding: var(--space-2xl);
+    }
+
+    .order-form {
+        display: grid;
+        gap: var(--space-lg);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-lg);
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--on-surface);
+        font-size: 0.875rem;
+        text-align: right;
+    }
+
+    .form-control {
+        padding: var(--space-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--on-surface);
+        font-size: 0.875rem;
+        transition: all var(--transition-fast);
+        text-align: right;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .form-control:disabled {
+        background: var(--surface-variant);
+        color: var(--on-surface-variant);
+        cursor: not-allowed;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: var(--space-xl);
+        padding-top: var(--space-lg);
+        border-top: 1px solid var(--border-color);
+        gap: var(--space-md);
+    }
+
+    .btn {
+        padding: var(--space-md) var(--space-xl);
         border-radius: var(--radius-lg);
         font-weight: 600;
         cursor: pointer;
         transition: all var(--transition-fast);
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: var(--space-sm);
+        text-decoration: none;
+        border: none;
+        font-size: 1rem;
     }
-    
-    .search-button:hover {
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
         background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
         transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
     }
-    
-    .empty-state {
-        text-align: center;
-        padding: var(--space-3xl);
+
+    .btn-secondary {
+        background: var(--surface-variant);
         color: var(--on-surface-variant);
+        border: 1px solid var(--border-color);
     }
-    
-    .empty-icon {
-        font-size: 4rem;
-        margin-bottom: var(--space-lg);
-        opacity: 0.5;
-    }
-    
-    .empty-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: var(--space-sm);
+
+    .btn-secondary:hover {
+        background: var(--surface);
         color: var(--on-surface);
     }
-    
-    .empty-text {
-        margin-bottom: var(--space-lg);
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
     }
-    
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from { 
+            opacity: 0;
+            transform: translateY(-50px) scale(0.9);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
     @media (max-width: 768px) {
         .hero-title {
             font-size: 2rem;
         }
-        
-        .hero-stats {
-            gap: var(--space-lg);
-        }
-        
-        .platforms-grid {
+
+        .year-cards-grid {
             grid-template-columns: 1fr;
             gap: var(--space-lg);
         }
-        
-        .features-grid {
-            grid-template-columns: 1fr;
-            gap: var(--space-lg);
+
+        .modal-content {
+            width: 95%;
+            margin: var(--space-md);
         }
-        
-        .search-form {
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: var(--space-md);
+        }
+
+        .form-actions {
             flex-direction: column;
-            gap: var(--space-sm);
+            gap: var(--space-md);
         }
-        
-        .search-button {
+
+        .form-actions .btn {
+            width: 100%;
             justify-content: center;
         }
     }
@@ -438,197 +487,362 @@
                 <i class="fas fa-graduation-cap"></i>
             </div>
             <h1 class="hero-title">{{ __('Educational Cards') }}</h1>
-            <p class="hero-subtitle">{{ __('Discover a world of learning with our comprehensive collection of educational cards designed to enhance your knowledge across different platforms and subjects.') }}</p>
-            
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <div class="stat-number">{{ $platforms->count() }}+</div>
-                    <div class="stat-label">{{ __('Platforms') }}</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">100+</div>
-                    <div class="stat-label">{{ __('Subjects') }}</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">1000+</div>
-                    <div class="stat-label">{{ __('Cards') }}</div>
-                </div>
-            </div>
+            <p class="hero-subtitle">{{ __('Choose your academic year to access educational cards') }}</p>
         </div>
     </div>
 </section>
 
-<!-- Platforms Section -->
-<section class="platforms-container">
+<!-- Cards Container -->
+<section class="cards-container">
     <div class="container">
         <div class="section-header fade-in">
-            <h2 class="section-title">{{ __('Choose Your Learning Platform') }}</h2>
-            <p class="section-subtitle">{{ __('Select from our diverse range of educational platforms, each offering specialized content tailored to different learning objectives and academic levels.') }}</p>
+            <h2 class="section-title">{{ __('Select Your Academic Year') }}</h2>
+            <p class="section-subtitle">{{ __('Browse educational cards by academic year. Each year contains comprehensive study materials designed by expert educators.') }}</p>
         </div>
         
-        @if($platforms->count() > 0)
-            <div class="platforms-grid">
-                @foreach($platforms as $platform)
-                    <a href="{{ route('educational-cards.grades', $platform) }}" class="platform-card fade-in">
-                        <div class="platform-image">
-                            @if($platform->image)
-                                <img src="{{ $platform->image_url }}" alt="{{ $platform->name }}" loading="lazy">
-                            @else
-                                <i class="platform-icon fas fa-graduation-cap"></i>
-                            @endif
+        <div class="year-cards-grid">
+            @php
+                $years = [
+                    ['year' => '2024', 'description' => 'Latest curriculum with updated content', 'subjects' => 12, 'cards' => 150],
+                    ['year' => '2023', 'description' => 'Comprehensive study materials', 'subjects' => 11, 'cards' => 140],
+                    ['year' => '2022', 'description' => 'Well-structured educational content', 'subjects' => 10, 'cards' => 130],
+                    ['year' => '2021', 'description' => 'Quality learning resources', 'subjects' => 9, 'cards' => 120],
+                    ['year' => '2020', 'description' => 'Proven educational methods', 'subjects' => 8, 'cards' => 110],
+                    ['year' => '2019', 'description' => 'Time-tested curriculum', 'subjects' => 8, 'cards' => 100],
+                    ['year' => '2018', 'description' => 'Classic educational approach', 'subjects' => 7, 'cards' => 90],
+                    ['year' => '2017', 'description' => 'Traditional learning methods', 'subjects' => 7, 'cards' => 85],
+                    ['year' => '2016', 'description' => 'Established curriculum', 'subjects' => 6, 'cards' => 80],
+                    ['year' => '2015', 'description' => 'Fundamental learning', 'subjects' => 6, 'cards' => 75],
+                    ['year' => '2014', 'description' => 'Core educational content', 'subjects' => 5, 'cards' => 70],
+                    ['year' => '2013', 'description' => 'Basic study materials', 'subjects' => 5, 'cards' => 65],
+                ];
+            @endphp
+
+            @foreach($years as $index => $yearData)
+                <div class="year-card fade-in" onclick="openOrderModal('{{ $yearData['year'] }}')" style="animation-delay: {{ $index * 0.1 }}s">
+                    <div class="year-card-header">
+                        <div class="year-number">{{ $yearData['year'] }}</div>
+                        <h3 class="year-title">{{ __('Year') }} {{ $yearData['year'] }}</h3>
+                    </div>
+                    
+                    <div class="year-card-content">
+                        <p class="year-description">{{ $yearData['description'] }}</p>
+                        
+                        <div class="year-stats">
+                            <div class="year-stat">
+                                <span class="year-stat-number">{{ $yearData['subjects'] }}</span>
+                                <div class="year-stat-label">{{ __('Subjects') }}</div>
+                            </div>
+                            <div class="year-stat">
+                                <span class="year-stat-number">{{ $yearData['cards'] }}</span>
+                                <div class="year-stat-label">{{ __('Cards') }}</div>
+                            </div>
                         </div>
                         
-                        <div class="platform-content">
-                            <h3 class="platform-name">
-                                {{ app()->getLocale() === 'ar' && $platform->name_ar ? $platform->name_ar : $platform->name }}
-                            </h3>
-                            
-                            <p class="platform-description">
-                                {{ app()->getLocale() === 'ar' && $platform->description_ar ? $platform->description_ar : $platform->description }}
-                            </p>
-                            
-                            <div class="platform-stats">
-                                <div class="platform-stat">
-                                    <span class="platform-stat-number">{{ $platform->grades->count() }}</span>
-                                    <div class="platform-stat-label">{{ __('Grades') }}</div>
-                                </div>
-                                <div class="platform-stat">
-                                    <span class="platform-stat-number">{{ $platform->grades->sum(function($grade) { return $grade->subjects->count(); }) }}</span>
-                                    <div class="platform-stat-label">{{ __('Subjects') }}</div>
-                                </div>
-                                <div class="platform-stat">
-                                    <span class="platform-stat-number">{{ $platform->grades->sum(function($grade) { return $grade->subjects->sum(function($subject) { return $subject->educationalCards->count(); }); }) }}</span>
-                                    <div class="platform-stat-label">{{ __('Cards') }}</div>
-                                </div>
-                            </div>
-                            
-                            <div class="platform-cta">
-                                <span class="cta-text">{{ __('Explore Grades') }}</span>
-                                <i class="cta-icon fas fa-arrow-right"></i>
-                            </div>
+                        <div class="year-cta">
+                            <span class="cta-text">{{ __('Order Card') }}</span>
+                            <i class="cta-icon fas fa-shopping-cart"></i>
                         </div>
-                    </a>
-                @endforeach
-            </div>
-        @else
-            <div class="empty-state fade-in">
-                <div class="empty-icon">
-                    <i class="fas fa-graduation-cap"></i>
+                    </div>
                 </div>
-                <h3 class="empty-title">{{ __('No Platforms Available') }}</h3>
-                <p class="empty-text">{{ __('Educational platforms are being prepared. Please check back soon!') }}</p>
-            </div>
-        @endif
+            @endforeach
+        </div>
     </div>
 </section>
 
-<!-- Features Section -->
-<section class="features-section">
-    <div class="container">
-        <div class="section-header fade-in">
-            <h2 class="section-title">{{ __('Why Choose Our Educational Cards?') }}</h2>
-            <p class="section-subtitle">{{ __('Our educational cards are designed with modern learning principles to provide an engaging and effective study experience.') }}</p>
+<!-- Order Modal -->
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button class="modal-close" onclick="closeOrderModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">{{ __('Educational Card Order') }}</h2>
+            <p class="modal-subtitle" id="selectedYear"></p>
         </div>
         
-        <div class="features-grid">
-            <div class="feature-card fade-in">
-                <div class="feature-icon">
-                    <i class="fas fa-brain"></i>
+        <div class="modal-body">
+            <form id="orderForm" class="order-form">
+                @csrf
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="generation">{{ __('Generation') }}</label>
+                        <select id="generation" name="generation" class="form-control" required>
+                            <option value="">-- {{ __('Select Generation') }} --</option>
+                            <option value="2024">{{ __('Generation 2024') }}</option>
+                            <option value="2023">{{ __('Generation 2023') }}</option>
+                            <option value="2022">{{ __('Generation 2022') }}</option>
+                        </select>
+                    </div>
                 </div>
-                <h3 class="feature-title">{{ __('Interactive Learning') }}</h3>
-                <p class="feature-description">{{ __('Engage with dynamic content that adapts to your learning style and pace for maximum retention.') }}</p>
-            </div>
-            
-            <div class="feature-card fade-in">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3 class="feature-title">{{ __('Progress Tracking') }}</h3>
-                <p class="feature-description">{{ __('Monitor your learning progress with detailed analytics and personalized recommendations.') }}</p>
-            </div>
-            
-            <div class="feature-card fade-in">
-                <div class="feature-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3 class="feature-title">{{ __('Expert Content') }}</h3>
-                <p class="feature-description">{{ __('All content is created and reviewed by subject matter experts and experienced educators.') }}</p>
-            </div>
-            
-            <div class="feature-card fade-in">
-                <div class="feature-icon">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-                <h3 class="feature-title">{{ __('Mobile Friendly') }}</h3>
-                <p class="feature-description">{{ __('Access your educational cards anytime, anywhere with our responsive design.') }}</p>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Search Section -->
-<section class="search-section">
-    <div class="container">
-        <div class="fade-in">
-            <h2 class="search-title">{{ __('Looking for Something Specific?') }}</h2>
-            <p class="search-subtitle">{{ __('Search through our extensive library of educational cards') }}</p>
-            
-            <form action="{{ route('educational-cards.search') }}" method="GET" class="search-form">
-                <input 
-                    type="text" 
-                    name="q" 
-                    class="search-input" 
-                    placeholder="{{ __('Search educational cards...') }}"
-                    value="{{ request('q') }}"
-                >
-                <button type="submit" class="search-button">
-                    <i class="fas fa-search"></i>
-                    {{ __('Search') }}
-                </button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subject">{{ __('Subject') }}</label>
+                        <select id="subject" name="subject" class="form-control" required>
+                            <option value="">-- {{ __('Select Subject') }} --</option>
+                            <option value="math">{{ __('Mathematics') }}</option>
+                            <option value="science">{{ __('Science') }}</option>
+                            <option value="english">{{ __('English') }}</option>
+                            <option value="arabic">{{ __('Arabic') }}</option>
+                            <option value="history">{{ __('History') }}</option>
+                            <option value="geography">{{ __('Geography') }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="teacher">{{ __('Teacher') }}</label>
+                        <select id="teacher" name="teacher" class="form-control" required>
+                            <option value="">-- {{ __('Select Teacher') }} --</option>
+                            <option value="teacher1">{{ __('Teacher A') }}</option>
+                            <option value="teacher2">{{ __('Teacher B') }}</option>
+                            <option value="teacher3">{{ __('Teacher C') }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="semester">{{ __('Semester') }}</label>
+                        <select id="semester" name="semester" class="form-control" required>
+                            <option value="">-- {{ __('Select Semester') }} --</option>
+                            <option value="first">{{ __('First Semester') }}</option>
+                            <option value="second">{{ __('Second Semester') }}</option>
+                            <option value="full_year">{{ __('Full Year') }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="platform">{{ __('Platform') }}</label>
+                        <select id="platform" name="platform" class="form-control" required>
+                            <option value="">-- {{ __('Select Platform') }} --</option>
+                            <option value="platform1">{{ __('Platform A') }}</option>
+                            <option value="platform2">{{ __('Platform B') }}</option>
+                            <option value="platform3">{{ __('Platform C') }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="notebook_type">{{ __('Notebook Type') }}</label>
+                        <select id="notebook_type" name="notebook_type" class="form-control" required>
+                            <option value="">-- {{ __('Select Notebook Type') }} --</option>
+                            <option value="digital">{{ __('Digital') }}</option>
+                            <option value="physical">{{ __('Physical') }}</option>
+                            <option value="both">{{ __('Both') }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quantity">{{ __('Quantity') }}</label>
+                        <input type="number" id="quantity" name="quantity" class="form-control" min="1" max="10" value="1" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="notes">{{ __('Notes') }}</label>
+                        <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="{{ __('Any additional notes or requirements...') }}"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeOrderModal()">
+                        <i class="fas fa-times"></i>
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i>
+                        {{ __('Confirm Order') }}
+                    </button>
+                </div>
             </form>
         </div>
     </div>
-</section>
+</div>
 @endsection
 
 @push('scripts')
 <script>
-    // Initialize animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation for cards
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
+        entries.forEach((entry) => {
             if (entry.isIntersecting) {
-                setTimeout(() => {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }, index * 100);
-                observer.unobserve(entry.target);
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
             }
         });
-    }, { threshold: 0.1 });
-    
+    });
+
     document.querySelectorAll('.fade-in').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
         el.style.transition = 'all 0.6s ease-out';
         observer.observe(el);
     });
-    
-    // Add hover effects to platform cards
-    document.querySelectorAll('.platform-card').forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px) scale(1.02)';
-        });
+
+    // Form submission
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        // Show loading
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("Processing...") }}';
+        submitBtn.disabled = true;
+        
+        // Get form data
+        const formData = new FormData(this);
+        
+        // Submit via AJAX
+        fetch('{{ route("educational-cards.submit-order") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
+            if (data.success) {
+                // Close modal
+                closeOrderModal();
+                
+                // Show success message with order details
+                showNotification(
+                    `{{ __("Order submitted successfully!") }}<br>
+                    {{ __("Order ID:") }} #${data.order_id}<br>
+                    {{ __("Total:") }} ${data.total_amount}`, 
+                    'success'
+                );
+                
+                // Reset form
+                this.reset();
+            } else {
+                showNotification(data.message || '{{ __("Error submitting order") }}', 'error');
+            }
+        })
+        .catch(error => {
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
+            showNotification('{{ __("Error submitting order. Please try again.") }}', 'error');
         });
     });
+});
+
+function openOrderModal(year) {
+    const modal = document.getElementById('orderModal');
+    const selectedYearEl = document.getElementById('selectedYear');
     
-    // Smooth scroll to platforms section when coming from navigation
-    if (window.location.hash === '#platforms') {
-        document.querySelector('.platforms-container').scrollIntoView({
-            behavior: 'smooth'
-        });
+    selectedYearEl.textContent = `{{ __('Academic Year') }} ${year}`;
+    modal.classList.add('active');
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+}
+
+function closeOrderModal() {
+    const modal = document.getElementById('orderModal');
+    modal.classList.remove('active');
+    
+    // Restore body scroll
+    document.body.style.overflow = '';
+}
+
+// Close modal when clicking outside
+document.getElementById('orderModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeOrderModal();
     }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeOrderModal();
+    }
+});
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        max-width: 300px;
+        padding: 1rem;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideInNotification 0.3s ease-out;
+    `;
+    
+    if (type === 'success') {
+        notification.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+    } else if (type === 'error') {
+        notification.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+    } else {
+        notification.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+    }
+    
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOutNotification 0.3s ease-out forwards';
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Add notification animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInNotification {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutNotification {
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 </script>
 @endpush

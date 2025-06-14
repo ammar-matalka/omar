@@ -1,4 +1,15 @@
-<?php
+// ====================================
+// EDUCATIONAL CARDS ROUTES (الجديد - مبسط)
+// ====================================
+Route::prefix('educational-cards')->name('educational-cards.')->group(function () {
+    // الصفحة الرئيسية الجديدة مع كل شيء
+    Route::get('/', [EducationalCardsController::class, 'index'])->name('index');
+    
+    // البحث
+    Route::get('/search', [EducationalCardsController::class, 'search'])->name('search');
+    
+    // عرض كارت معين
+    Route::get('/card/{card}', [EducationalCardsController::class, 'showCard'])->name<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
@@ -167,14 +178,28 @@ Route::get('/shop', [App\Http\Controllers\ProductController::class, 'index'])->n
 Route::get('/categories', [HomeController::class, 'allCategories'])->name('categories.all');
 Route::get('/products/all', [HomeController::class, 'allProducts'])->name('products.all');
 
-// Educational Cards Routes (Public)
+// ====================================
+// EDUCATIONAL CARDS ROUTES (الجديد - مبسط)
+// ====================================
 Route::prefix('educational-cards')->name('educational-cards.')->group(function () {
+    // الصفحة الرئيسية الجديدة مع كل شيء
     Route::get('/', [EducationalCardsController::class, 'index'])->name('index');
+    
+    // البحث
     Route::get('/search', [EducationalCardsController::class, 'search'])->name('search');
-    Route::get('/{platform}', [EducationalCardsController::class, 'showGrades'])->name('grades');
-    Route::get('/{platform}/{grade}', [EducationalCardsController::class, 'showSubjects'])->name('subjects');
-    Route::get('/{platform}/{grade}/{subject}', [EducationalCardsController::class, 'showCards'])->name('cards');
+    
+    // عرض كارت معين
     Route::get('/card/{card}', [EducationalCardsController::class, 'showCard'])->name('show');
+    
+    // إضافة للسلة (للمستخدمين المسجلين)
+    Route::post('/add-to-cart', [EducationalCardsController::class, 'addToCart'])
+        ->name('add-to-cart')
+        ->middleware('auth');
+    
+    // إرسال طلب الدوسية (جديد)
+    Route::post('/submit-order', [EducationalCardsController::class, 'submitOrder'])
+        ->name('submit-order')
+        ->middleware('auth');
 });
 
 // Public Testimonials
@@ -192,9 +217,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/cart/{cartItem}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
     Route::delete('/cart/clear', [App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
     Route::get('/cart/count', [App\Http\Controllers\CartController::class, 'getCartCount'])->name('cart.count');
-    
-    // Educational Cards Cart
-    Route::post('/educational-cards/add-to-cart', [EducationalCardsController::class, 'addToCart'])->name('educational-cards.add-to-cart');
     
     // Checkout Routes
     Route::get('/checkout', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
@@ -239,7 +261,8 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     Route::put('/profile', [App\Http\Controllers\User\ProfileController::class, 'update'])->name('profile.update');
     Route::get('/profile/change-password', [App\Http\Controllers\User\ProfileController::class, 'changePassword'])->name('profile.change-password');
     Route::put('/profile/password', [App\Http\Controllers\User\ProfileController::class, 'updatePassword'])->name('profile.update-password');
-  // Real-time routes - أضف هذه
+    
+    // Real-time routes - أضف هذه
     Route::get('/conversations/{conversation}/check-new-messages', [App\Http\Controllers\User\ConversationController::class, 'checkNewMessages'])->name('conversations.check-new-messages');
     
     // هذا هو المفقود:
@@ -248,6 +271,7 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     // Mark as read
     Route::patch('/conversations/{conversation}/mark-read', [App\Http\Controllers\User\ConversationController::class, 'markAsRead'])->name('conversations.mark-read');
 });
+
 // ====================================
 // ADMIN ROUTES
 // ====================================
@@ -276,6 +300,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('grades', App\Http\Controllers\Admin\GradeController::class);
     Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);
     Route::resource('educational-cards', App\Http\Controllers\Admin\EducationalCardController::class);
+    
+    // Educational Card Orders Management (جديد)
+    Route::resource('educational-card-orders', App\Http\Controllers\Admin\EducationalCardOrderController::class)->only([
+        'index', 'show', 'destroy'
+    ]);
+    Route::patch('/educational-card-orders/{educationalCardOrder}/status', [App\Http\Controllers\Admin\EducationalCardOrderController::class, 'updateStatus'])
+        ->name('educational-card-orders.update-status');
+    Route::post('/educational-card-orders/bulk-update', [App\Http\Controllers\Admin\EducationalCardOrderController::class, 'bulkUpdate'])
+        ->name('educational-card-orders.bulk-update');
+    Route::get('/educational-card-orders/export', [App\Http\Controllers\Admin\EducationalCardOrderController::class, 'export'])
+        ->name('educational-card-orders.export');
     
     // AJAX Routes for Educational Cards
     Route::get('/platforms/{platform}/grades', [App\Http\Controllers\Admin\SubjectController::class, 'getGradesByPlatform'])->name('platforms.grades');

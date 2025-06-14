@@ -272,4 +272,21 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $query->where('updated_at', '>=', now()->subDays($days));
     }
+    // أضف هذه العلاقة في User Model
+
+/**
+ * Educational card orders relationship
+ */
+public function educationalCardOrders()
+{
+    return $this->hasMany(EducationalCardOrder::class);
+}
+
+/**
+ * Get pending educational card orders
+ */
+public function pendingEducationalCardOrders()
+{
+    return $this->educationalCardOrders()->where('status', 'pending');
+}
 }
