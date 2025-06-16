@@ -715,7 +715,11 @@
                     <li><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
                     <li><a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">Products</a></li>
                     <li><a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}">Educational Cards</a></li>
-                    
+                        <li class="dropdown" style="position: relative;">
+        <a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}">
+            <i class="fas fa-graduation-cap"></i>
+            Education
+        </a>        
                     @auth
                         <!-- Conversations -->
                         <li>

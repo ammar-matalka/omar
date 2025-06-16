@@ -2,218 +2,186 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Platform;
-use App\Models\Grade;
-use App\Models\Subject;
-use App\Models\EducationalCard;
-use App\Models\EducationalCardOrder;
-use App\Models\Cart;
-use App\Models\CartItem;
 use Illuminate\Http\Request;
+use App\Models\EducationalGeneration;
+use App\Models\EducationalSubject;
+use App\Models\EducationalCardOrder;
+use App\Models\EducationalCardOrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EducationalCardsController extends Controller
 {
     /**
-     * Display the main educational cards page with everything
+     * Display educational cards page with generations
      */
     public function index()
     {
-        $platforms = Platform::where('is_active', true)
-            ->with(['grades' => function($query) {
-                $query->where('is_active', true)
-                    ->orderBy('grade_number')
-                    ->with(['subjects' => function($query) {
-                        $query->where('is_active', true)
-                            ->orderBy('name')
-                            ->with(['educationalCards' => function($query) {
-                                $query->where('is_active', true)
-                                    ->orderBy('title');
-                            }]);
-                    }]);
-            }])
-            ->orderBy('name')
+        $generations = EducationalGeneration::active()
+            ->ordered()
+            ->withCount('subjects')
             ->get();
 
-        return view('educational-cards.index', compact('platforms'));
+        return view('educational-cards.index', compact('generations'));
     }
-    
+
     /**
-     * Show individual educational card details
+     * Get subjects for a specific generation (AJAX)
      */
-    public function showCard(EducationalCard $card)
+    public function getSubjects(Request $request, $generationId)
     {
-        if (!$card->is_active) {
-            abort(404);
+        $subjects = EducationalSubject::active()
+            ->forGeneration($generationId)
+            ->ordered()
+            ->get();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'subjects' => $subjects->map(function ($subject) {
+                    return [
+                        'id' => $subject->id,
+                        'name' => $subject->name,
+                        'price' => $subject->price,
+                        'formatted_price' => $subject->formatted_price
+                    ];
+                })
+            ]);
         }
-        
-        $card->load(['subject.grade.platform', 'images']);
-        
-        // Get related cards from same subject
-        $relatedCards = EducationalCard::where('subject_id', $card->subject_id)
-                                      ->where('id', '!=', $card->id)
-                                      ->where('is_active', true)
-                                      ->take(4)
-                                      ->get();
-        
-        return view('educational-cards.show', compact('card', 'relatedCards'));
+
+        return response()->json(['error' => 'Invalid request'], 400);
     }
-    
+
     /**
      * Submit educational card order
      */
     public function submitOrder(Request $request)
     {
-        $validated = $request->validate([
-            'academic_year' => 'required|string|max:10',
-            'generation' => 'required|string|max:50',
-            'subject' => 'required|string|max:100',
-            'teacher' => 'required|string|max:100',
-            'semester' => 'required|in:first,second,full_year',
-            'platform' => 'required|string|max:100',
-            'notebook_type' => 'required|in:digital,physical,both',
+        $request->validate([
+            'generation_id' => 'required|exists:educational_generations,id',
+            'student_name' => 'required|string|max:255',
+            'semester' => 'required|in:first,second,both',
             'quantity' => 'required|integer|min:1|max:10',
-            'notes' => 'nullable|string|max:500'
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:1000',
+            'subjects' => 'required|array|min:1',
+            'subjects.*' => 'exists:educational_subjects,id'
+        ], [
+            'generation_id.required' => 'يرجى اختيار الجيل',
+            'generation_id.exists' => 'الجيل المحدد غير موجود',
+            'student_name.required' => 'يرجى إدخال اسم الطالب',
+            'student_name.max' => 'اسم الطالب لا يجب أن يتجاوز 255 حرف',
+            'semester.required' => 'يرجى اختيار الفصل',
+            'semester.in' => 'قيمة الفصل غير صحيحة',
+            'quantity.required' => 'يرجى إدخال الكمية',
+            'quantity.integer' => 'الكمية يجب أن تكون رقم صحيح',
+            'quantity.min' => 'الكمية يجب أن تكون على الأقل 1',
+            'quantity.max' => 'الكمية لا يجب أن تتجاوز 10',
+            'subjects.required' => 'يرجى اختيار مادة واحدة على الأقل',
+            'subjects.min' => 'يرجى اختيار مادة واحدة على الأقل',
+            'subjects.*.exists' => 'إحدى المواد المحددة غير موجودة'
         ]);
 
         try {
-            DB::beginTransaction();
+            return DB::transaction(function () use ($request) {
+                // Get selected subjects with their prices
+                $subjects = EducationalSubject::whereIn('id', $request->subjects)
+                    ->where('is_active', true)
+                    ->get();
 
-            // Calculate total amount (you can set your own pricing logic)
-            $basePrice = 25.00; // Base price per card
-            $typeMultiplier = [
-                'digital' => 1.0,
-                'physical' => 1.2,
-                'both' => 1.5
-            ];
-            
-            $totalAmount = $basePrice * $validated['quantity'] * $typeMultiplier[$validated['notebook_type']];
+                if ($subjects->isEmpty()) {
+                    return back()->withErrors(['subjects' => 'لم يتم العثور على المواد المحددة']);
+                }
 
-            // Create the order
-            $order = EducationalCardOrder::create([
-                'user_id' => Auth::id(),
-                'academic_year' => $validated['academic_year'],
-                'generation' => $validated['generation'],
-                'subject' => $validated['subject'],
-                'teacher' => $validated['teacher'],
-                'semester' => $validated['semester'],
-                'platform' => $validated['platform'],
-                'notebook_type' => $validated['notebook_type'],
-                'quantity' => $validated['quantity'],
-                'notes' => $validated['notes'],
-                'total_amount' => $totalAmount,
-                'status' => 'pending'
-            ]);
+                // Calculate total amount
+                $totalAmount = $subjects->sum('price') * $request->quantity;
 
-            DB::commit();
-
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => __('Order submitted successfully!'),
-                    'order_id' => $order->id,
-                    'total_amount' => $order->formatted_total
+                // Create the order
+                $order = EducationalCardOrder::create([
+                    'user_id' => Auth::id(),
+                    'generation_id' => $request->generation_id,
+                    'student_name' => $request->student_name,
+                    'semester' => $request->semester,
+                    'quantity' => $request->quantity,
+                    'total_amount' => $totalAmount,
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'notes' => $request->notes,
+                    'status' => 'pending'
                 ]);
-            }
 
-            return redirect()->route('educational-cards.index')
-                ->with('success', __('Order submitted successfully! Order #:id', ['id' => $order->id]));
+                // Create order items
+                foreach ($subjects as $subject) {
+                    EducationalCardOrderItem::create([
+                        'order_id' => $order->id,
+                        'subject_id' => $subject->id,
+                        'subject_name' => $subject->name,
+                        'price' => $subject->price,
+                        'quantity' => $request->quantity
+                    ]);
+                }
+
+                return redirect()->route('educational-cards.index')
+                    ->with('success', 'تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً.');
+            });
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('Error submitting order. Please try again.')
-                ], 500);
-            }
+            return back()->withErrors(['error' => 'حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.'])
+                ->withInput();
+        }
+    }
 
-            return back()->with('error', __('Error submitting order. Please try again.'));
-        }
-    }
-    
     /**
-     * Add educational card to cart
+     * Show user's educational card orders
      */
-    public function addToCart(Request $request)
+    public function myOrders()
     {
-        $validated = $request->validate([
-            'card_id' => 'required|exists:educational_cards,id',
-            'quantity' => 'required|integer|min:1|max:10'
-        ]);
-        
-        $card = EducationalCard::findOrFail($validated['card_id']);
-        
-        if (!$card->is_active) {
-            return back()->with('error', __('This educational card is not available.'));
-        }
-        
-        // Check stock
-        if ($card->stock < $validated['quantity']) {
-            return back()->with('error', __('Not enough stock available.'));
-        }
-        
-        // Get or create cart using private method
-        $cart = $this->getOrCreateCart();
-        
-        // Check if card is already in cart
-        $cartItem = $cart->cartItems()->where('educational_card_id', $card->id)->first();
-        
-        if ($cartItem) {
-            $newQuantity = $cartItem->quantity + $validated['quantity'];
-            if ($newQuantity > $card->stock) {
-                return back()->with('error', __('Not enough stock available.'));
-            }
-            $cartItem->update(['quantity' => $newQuantity]);
-        } else {
-            $cart->cartItems()->create([
-                'educational_card_id' => $card->id,
-                'quantity' => $validated['quantity'],
-                'type' => 'educational_card'
-            ]);
-        }
-        
-        return back()->with('success', __('Educational card added to cart successfully!'));
+        $orders = EducationalCardOrder::where('user_id', Auth::id())
+            ->with(['generation', 'orderItems.subject'])
+            ->recent()
+            ->paginate(10);
+
+        return view('educational-cards.my-orders', compact('orders'));
     }
-    
+
     /**
-     * Get or create user's cart
+     * Show specific order details
      */
-    private function getOrCreateCart()
+    public function showOrder(EducationalCardOrder $order)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        
-        $cart = $user->cart;
-        
-        if (!$cart) {
-            $cart = Cart::create(['user_id' => $user->id]);
+        // Ensure user can only view their own orders
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'غير مصرح لك بعرض هذا الطلب');
         }
-        
-        return $cart->load('cartItems');
+
+        $order->load(['generation', 'orderItems.subject']);
+
+        return view('educational-cards.show-order', compact('order'));
     }
-    
+
     /**
-     * Search educational cards
+     * Search for orders (for user)
      */
-    public function search(Request $request)
+    public function searchOrders(Request $request)
     {
-        $query = $request->get('q');
-        
-        if (empty($query)) {
-            return redirect()->route('educational-cards.index');
+        $query = EducationalCardOrder::where('user_id', Auth::id())
+            ->with(['generation', 'orderItems.subject']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
-        
-        $cards = EducationalCard::with(['subject.grade.platform', 'images'])
-                               ->where('is_active', true)
-                               ->where(function($q) use ($query) {
-                                   $q->where('title', 'LIKE', "%{$query}%")
-                                     ->orWhere('description', 'LIKE', "%{$query}%");
-                               })
-                               ->paginate(12);
-                               
-        return view('educational-cards.search', compact('cards', 'query'));
+
+        if ($request->filled('generation_id')) {
+            $query->where('generation_id', $request->generation_id);
+        }
+
+        if ($request->filled('student_name')) {
+            $query->where('student_name', 'like', '%' . $request->student_name . '%');
+        }
+
+        $orders = $query->recent()->paginate(10);
+        $generations = EducationalGeneration::active()->ordered()->get();
+
+        return view('educational-cards.my-orders', compact('orders', 'generations'));
     }
 }

@@ -752,39 +752,68 @@
                     </div>
                 </div>
                 
-                <!-- Educational System -->
-                <div class="nav-section">
-                    <div class="nav-section-title">{{ __('Educational System') }}</div>
-                    
-                    <div class="nav-item">
-                        <a href="{{ route('admin.platforms.index') }}" class="nav-link {{ request()->routeIs('admin.platforms.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-desktop"></i>
-                            {{ __('Platforms') }}
-                        </a>
-                    </div>
-                    
-                    <div class="nav-item">
-                        <a href="{{ route('admin.grades.index') }}" class="nav-link {{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-graduation-cap"></i>
-                            {{ __('Grades') }}
-                        </a>
-                    </div>
-                    
-                    <div class="nav-item">
-                        <a href="{{ route('admin.subjects.index') }}" class="nav-link {{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-book"></i>
-                            {{ __('Subjects') }}
-                        </a>
-                    </div>
-                    
-                    <div class="nav-item">
-                        <a href="{{ route('admin.educational-cards.index') }}" class="nav-link {{ request()->routeIs('admin.educational-cards.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-id-card"></i>
-                            {{ __('Educational Cards') }}
-                        </a>
-                    </div>
-                </div>
-                
+             {{-- إضافة هذا القسم في navbar الأدمن في ملف resources/views/layouts/admin.blade.php --}}
+{{-- استبدل قسم "Educational System" الموجود بهذا الكود الجديد --}}
+
+<!-- Educational System -->
+<div class="nav-section">
+    <div class="nav-section-title">{{ __('Educational System') }}</div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.generations.index') }}" class="nav-link {{ request()->routeIs('admin.generations.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-graduation-cap"></i>
+            {{ __('Generations') }}
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational-subjects.index') }}" class="nav-link {{ request()->routeIs('admin.educational-subjects.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-book"></i>
+            {{ __('Subjects & Pricing') }}
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational-card-orders.index') }}" class="nav-link {{ request()->routeIs('admin.educational-card-orders.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-file-alt"></i>
+            {{ __('Educational Orders') }}
+            @php
+                $pendingEducationalOrders = \App\Models\EducationalCardOrder::pending()->count();
+            @endphp
+            @if($pendingEducationalOrders > 0)
+                <span class="nav-badge">{{ $pendingEducationalOrders }}</span>
+            @endif
+        </a>
+    </div>
+    
+    {{-- حافظ على الروابط القديمة إذا كانت موجودة --}}
+    @if(Route::has('admin.platforms.index'))
+    <div class="nav-item">
+        <a href="{{ route('admin.platforms.index') }}" class="nav-link {{ request()->routeIs('admin.platforms.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-desktop"></i>
+            {{ __('Platforms') }}
+        </a>
+    </div>
+    @endif
+    
+    @if(Route::has('admin.grades.index'))
+    <div class="nav-item">
+        <a href="{{ route('admin.grades.index') }}" class="nav-link {{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-layer-group"></i>
+            {{ __('Grades') }}
+        </a>
+    </div>
+    @endif
+    
+    @if(Route::has('admin.educational-cards.index'))
+    <div class="nav-item">
+        <a href="{{ route('admin.educational-cards.index') }}" class="nav-link {{ request()->routeIs('admin.educational-cards.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-id-card"></i>
+            {{ __('Educational Cards') }}
+        </a>
+    </div>
+    @endif
+</div>
                 <!-- Order Management -->
                 <div class="nav-section">
                     <div class="nav-section-title">{{ __('Orders') }}</div>
