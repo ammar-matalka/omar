@@ -3,453 +3,1170 @@
 @section('title', 'البطاقات التعليمية')
 
 @section('content')
-<div class="container" style="margin-top: var(--space-xl);">
+<div class="container">
     <!-- Header Section -->
-    <div style="text-align: center; margin-bottom: var(--space-3xl);">
-        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--primary-500), var(--secondary-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            البطاقات التعليمية
-        </h1>
-        <p style="font-size: 1.125rem; color: var(--gray-600); max-width: 600px; margin: 0 auto;">
-            اختر الجيل المناسب لك واطلب الدوسية التي تحتاجها بسهولة
-        </p>
-    </div>
-
-    <!-- Generations Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" style="margin-bottom: var(--space-3xl);">
-        @forelse($generations as $generation)
-            <div class="generation-card card" 
-                 style="cursor: pointer; transition: all var(--transition-normal); border: 2px solid transparent;"
-                 onclick="selectGeneration({{ $generation->id }}, '{{ $generation->display_name }}')">
-                <div class="card-body" style="text-align: center; padding: var(--space-xl);">
-                    <!-- Generation Icon -->
-                    <div style="width: 80px; height: 80px; margin: 0 auto var(--space-lg); background: linear-gradient(135deg, var(--primary-500), var(--secondary-500)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700;">
-                        {{ $generation->year }}
-                    </div>
-                    
-                    <!-- Generation Name -->
-                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); color: var(--gray-900);">
-                        {{ $generation->display_name }}
-                    </h3>
-                    
-                    <!-- Description -->
-                    @if($generation->description)
-                        <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: var(--space-md);">
-                            {{ Str::limit($generation->description, 100) }}
-                        </p>
-                    @endif
-                    
-                    <!-- Subjects Count -->
-                    <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-xs); color: var(--primary-600); font-size: 0.875rem; font-weight: 500;">
-                        <i class="fas fa-book"></i>
-                        <span>{{ $generation->subjects_count }} مادة متاحة</span>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-3xl);">
-                <div style="color: var(--gray-400); font-size: 3rem; margin-bottom: var(--space-lg);">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <h3 style="color: var(--gray-600); margin-bottom: var(--space-sm);">لا توجد أجيال متاحة حالياً</h3>
-                <p style="color: var(--gray-500);">سيتم إضافة الأجيال قريباً</p>
-            </div>
-        @endforelse
-    </div>
-
-    <!-- Order Form Modal -->
-    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: var(--z-modal); align-items: center; justify-content: center; padding: var(--space-md);">
-        <div style="background: white; border-radius: var(--radius-xl); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
-            <!-- Modal Header -->
-            <div style="padding: var(--space-xl); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
-                <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900); margin: 0;">
-                    طلب دوسية - <span id="selectedGenerationName"></span>
-                </h2>
-                <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--gray-400); cursor: pointer;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <!-- Order Form -->
-            <form id="orderForm" action="{{ route('educational-cards.submit-order') }}" method="POST" style="padding: var(--space-xl);">
-                @csrf
-                <input type="hidden" id="generationId" name="generation_id" value="">
-
-                <!-- Student Name -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-user"></i>
-                        اسم الطالب *
-                    </label>
-                    <input type="text" name="student_name" class="form-input" required 
-                           placeholder="أدخل اسم الطالب" value="{{ old('student_name') }}">
-                </div>
-
-                <!-- Semester Selection -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-calendar"></i>
-                        الفصل الدراسي *
-                    </label>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm);">
-                        <label style="display: flex; align-items: center; padding: var(--space-md); border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);" class="semester-option">
-                            <input type="radio" name="semester" value="first" style="margin-right: var(--space-sm);" {{ old('semester') == 'first' ? 'checked' : '' }}>
-                            <span>الأول</span>
-                        </label>
-                        <label style="display: flex; align-items: center; padding: var(--space-md); border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);" class="semester-option">
-                            <input type="radio" name="semester" value="second" style="margin-right: var(--space-sm);" {{ old('semester') == 'second' ? 'checked' : '' }}>
-                            <span>الثاني</span>
-                        </label>
-                        <label style="display: flex; align-items: center; padding: var(--space-md); border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);" class="semester-option">
-                            <input type="radio" name="semester" value="both" style="margin-right: var(--space-sm);" {{ old('semester', 'both') == 'both' ? 'checked' : '' }}>
-                            <span>كلاهما</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Subjects Selection -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-book"></i>
-                        المواد المطلوبة *
-                    </label>
-                    <div id="subjectsContainer" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-md); background: var(--gray-50); min-height: 120px; display: flex; align-items: center; justify-content: center; color: var(--gray-500);">
-                        <div style="text-align: center;">
-                            <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
-                            <p>جاري تحميل المواد...</p>
-                        </div>
-                    </div>
-                    <div id="totalPriceContainer" style="margin-top: var(--space-md); padding: var(--space-md); background: var(--primary-50); border-radius: var(--radius-md); border: 1px solid var(--primary-200); display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 600; color: var(--primary-700);">المجموع الفرعي:</span>
-                            <span id="subtotalPrice" style="font-size: 1.125rem; font-weight: 700; color: var(--primary-700);">0 JD</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quantity -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-sort-numeric-up"></i>
-                        الكمية *
-                    </label>
-                    <input type="number" name="quantity" class="form-input" min="1" max="10" value="{{ old('quantity', 1) }}" 
-                           onchange="updateTotalPrice()" required>
-                </div>
-
-                <!-- Total Price Display -->
-                <div id="totalPriceDisplay" style="margin-bottom: var(--space-lg); padding: var(--space-lg); background: linear-gradient(135deg, var(--success-50), var(--success-100)); border: 2px solid var(--success-200); border-radius: var(--radius-lg); text-align: center; display: none;">
-                    <div style="font-size: 0.875rem; color: var(--success-700); margin-bottom: var(--space-xs);">المجموع النهائي</div>
-                    <div id="finalTotalPrice" style="font-size: 2rem; font-weight: 800; color: var(--success-800);">0 JD</div>
-                </div>
-
-                <!-- Contact Information -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label">
-                            <i class="fas fa-phone"></i>
-                            رقم الهاتف
-                        </label>
-                        <input type="tel" name="phone" class="form-input" placeholder="07xxxxxxxx" value="{{ old('phone') }}">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label">
-                            <i class="fas fa-map-marker-alt"></i>
-                            المدينة/المنطقة
-                        </label>
-                        <input type="text" name="address" class="form-input" placeholder="مثال: إربد - الحي الشرقي" value="{{ old('address') }}">
-                    </div>
-                </div>
-
-                <!-- Notes -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-sticky-note"></i>
-                        ملاحظات إضافية
-                    </label>
-                    <textarea name="notes" class="form-input" rows="3" placeholder="أي ملاحظات أو طلبات خاصة...">{{ old('notes') }}</textarea>
-                </div>
-
-                <!-- Submit Button -->
-                <div style="display: flex; gap: var(--space-md); justify-content: flex-end;">
-                    <button type="button" onclick="closeModal()" class="btn btn-secondary">
-                        إلغاء
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                        <i class="fas fa-paper-plane"></i>
-                        إرسال الطلب
-                    </button>
-                </div>
-            </form>
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 font-weight-bold text-primary mb-3">البطاقات التعليمية</h1>
+            <p class="lead text-muted">اختر الجيل ثم نوع الطلب المطلوب</p>
         </div>
     </div>
+
+    <!-- Step 1: Generations Selection -->
+    <div id="step1_generations" class="step-container">
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8 text-center">
+                <h3 class="section-title mb-4">
+                    <i class="fas fa-graduation-cap"></i>
+                    الخطوة الأولى: اختر الجيل
+                </h3>
+            </div>
+        </div>
+
+        <div class="row">
+            @forelse($generations as $generation)
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="generation-card card h-100" 
+                         data-generation-id="{{ $generation->id }}"
+                         data-generation-name="{{ $generation->display_name }}">
+                        <div class="card-header text-center">
+                            <div class="generation-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <h4 class="generation-year mb-0">{{ $generation->year }}</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ $generation->name }}</h5>
+                            
+                            @if($generation->description)
+                                <p class="card-text text-muted mb-3">{{ Str::limit($generation->description, 80) }}</p>
+                            @endif
+                            
+                            <div class="subjects-count mb-3">
+                                <span class="badge badge-pill badge-primary">
+                                    <i class="fas fa-book"></i>
+                                    {{ $generation->subjects_count }} مادة
+                                </span>
+                            </div>
+                            
+                            <button type="button" class="btn btn-primary btn-block select-generation-btn"
+                                    data-generation-id="{{ $generation->id }}"
+                                    data-generation-name="{{ $generation->display_name }}">
+                                <i class="fas fa-arrow-left"></i>
+                                اختيار هذا الجيل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">لا توجد أجيال متاحة حالياً</h4>
+                        <p class="text-muted">سيتم إضافة الأجيال قريباً</p>
+                    </div>
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- Step 2: Order Type Selection -->
+    <div id="step2_order_type" class="step-container" style="display: none;">
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10">
+                <div class="text-center mb-4">
+                    <button type="button" class="btn btn-outline-secondary back-to-generations-btn">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة لاختيار الجيل
+                    </button>
+                </div>
+                
+                <div class="alert alert-primary text-center">
+                    <h5 class="mb-2">
+                        <i class="fas fa-check-circle"></i>
+                        الجيل المختار: <span id="selected_generation_display" class="font-weight-bold"></span>
+                    </h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8 text-center">
+                <h3 class="section-title mb-4">
+                    <i class="fas fa-clipboard-list"></i>
+                    الخطوة الثانية: اختر نوع الطلب
+                </h3>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-5 mb-4">
+                <div class="order-type-card card h-100" data-order-type="card">
+                    <div class="card-header bg-success text-white text-center">
+                        <div class="order-type-icon">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <h4 class="mb-0">بطاقة تعليمية</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="card-text mb-4">بطاقات تعليمية للمواد الدراسية مع معلم ومنصة محددة</p>
+                        <ul class="list-unstyled text-left mb-4">
+                            <li><i class="fas fa-check text-success"></i> اختيار المادة</li>
+                            <li><i class="fas fa-check text-success"></i> اختيار المعلم</li>
+                            <li><i class="fas fa-check text-success"></i> اختيار الفصل</li>
+                            <li><i class="fas fa-check text-success"></i> اختيار المنصة</li>
+                        </ul>
+                        <button type="button" class="btn btn-success btn-block select-order-type-btn"
+                                data-order-type="card">
+                            <i class="fas fa-arrow-left"></i>
+                            اختيار بطاقة تعليمية
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5 mb-4">
+                <div class="order-type-card card h-100" data-order-type="dossier">
+                    <div class="card-header bg-info text-white text-center">
+                        <div class="order-type-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <h4 class="mb-0">دوسية</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="card-text mb-4">دوسيات جاهزة للمواد مع المعلم والمنصة</p>
+                        <ul class="list-unstyled text-left mb-4">
+                            <li><i class="fas fa-check text-info"></i> اختيار المادة</li>
+                            <li><i class="fas fa-check text-info"></i> اختيار المعلم</li>
+                            <li><i class="fas fa-check text-info"></i> اختيار الفصل</li>
+                            <li><i class="fas fa-check text-info"></i> اختيار المنصة</li>
+                            <li><i class="fas fa-check text-info"></i> اختيار الدوسية</li>
+                        </ul>
+                        <button type="button" class="btn btn-info btn-block select-order-type-btn"
+                                data-order-type="dossier">
+                            <i class="fas fa-arrow-left"></i>
+                            اختيار دوسية
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Order Form -->
+    <div id="step3_order_form" class="step-container" style="display: none;">
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10">
+                <div class="text-center mb-4">
+                    <button type="button" class="btn btn-outline-secondary back-to-order-type-btn">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة لاختيار نوع الطلب
+                    </button>
+                </div>
+                
+                <div class="alert alert-primary text-center">
+                    <h5 class="mb-2">
+                        <i class="fas fa-check-circle"></i>
+                        الجيل: <span id="selected_generation_display2" class="font-weight-bold"></span>
+                        | النوع: <span id="selected_order_type_display" class="font-weight-bold"></span>
+                    </h5>
+                </div>
+            </div>
+        </div>
+
+        @auth
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header text-center py-4">
+                        <h4 class="mb-0 text-white">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span id="form_title">طلب البطاقات التعليمية</span>
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="orderForm" action="{{ route('educational-cards.submit-order') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="generation_id" id="selected_generation_id">
+                            <input type="hidden" name="order_type" id="selected_order_type">
+                            
+                            <!-- Student Info -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="student_name" class="form-label">
+                                            <i class="fas fa-user text-primary"></i>
+                                            اسم الطالب <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control @error('student_name') is-invalid @enderror" 
+                                               id="student_name" name="student_name" value="{{ old('student_name') }}" 
+                                               placeholder="أدخل اسم الطالب" required>
+                                        @error('student_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="semester" class="form-label">
+                                            <i class="fas fa-calendar text-primary"></i>
+                                            الفصل الدراسي <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-control @error('semester') is-invalid @enderror" 
+                                                id="semester" name="semester" required>
+                                            <option value="">اختر الفصل</option>
+                                            <option value="first" {{ old('semester') == 'first' ? 'selected' : '' }}>الفصل الأول</option>
+                                            <option value="second" {{ old('semester') == 'second' ? 'selected' : '' }}>الفصل الثاني</option>
+                                            <option value="both" {{ old('semester') == 'both' ? 'selected' : '' }}>كلا الفصلين</option>
+                                        </select>
+                                        @error('semester')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Subject Selection -->
+                            <div class="form-group mb-4">
+                                <label class="form-label mb-3">
+                                    <i class="fas fa-book text-primary"></i>
+                                    المادة <span class="text-danger">*</span>
+                                </label>
+                                <div id="subjects_container" class="selection-container">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">جاري التحميل...</span>
+                                        </div>
+                                        <p class="mt-3 text-muted">جاري تحميل المواد...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Teacher Selection -->
+                            <div class="form-group mb-4" id="teacher_selection" style="display: none;">
+                                <label class="form-label mb-3">
+                                    <i class="fas fa-chalkboard-teacher text-primary"></i>
+                                    المعلم <span class="text-danger">*</span>
+                                </label>
+                                <div id="teachers_container" class="selection-container">
+                                    <div class="text-center py-3">
+                                        <p class="text-muted">اختر المادة أولاً</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Platform Selection -->
+                            <div class="form-group mb-4" id="platform_selection" style="display: none;">
+                                <label class="form-label mb-3">
+                                    <i class="fas fa-desktop text-primary"></i>
+                                    المنصة <span class="text-danger">*</span>
+                                </label>
+                                <div id="platforms_container" class="selection-container">
+                                    <div class="text-center py-3">
+                                        <p class="text-muted">اختر المعلم أولاً</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dossier Selection (for dossiers only) -->
+                            <div class="form-group mb-4" id="dossier_selection" style="display: none;">
+                                <label class="form-label mb-3">
+                                    <i class="fas fa-folder-open text-primary"></i>
+                                    الدوسية <span class="text-danger">*</span>
+                                </label>
+                                <div id="dossiers_container" class="selection-container">
+                                    <div class="text-center py-3">
+                                        <p class="text-muted">اختر المنصة أولاً</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quantity and Contact -->
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="quantity" class="form-label">
+                                            <i class="fas fa-sort-numeric-up text-primary"></i>
+                                            الكمية <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number" class="form-control @error('quantity') is-invalid @enderror" 
+                                               id="quantity" name="quantity" value="{{ old('quantity', 1) }}" 
+                                               min="1" max="10" required>
+                                        @error('quantity')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="phone" class="form-label">
+                                            <i class="fas fa-phone text-primary"></i>
+                                            رقم الهاتف
+                                        </label>
+                                        <input type="tel" class="form-control @error('phone') is-invalid @enderror" 
+                                               id="phone" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}"
+                                               placeholder="مثال: 079xxxxxxx">
+                                        @error('phone')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="form-group mb-4">
+                                <label for="address" class="form-label">
+                                    <i class="fas fa-map-marker-alt text-primary"></i>
+                                    العنوان
+                                </label>
+                                <textarea class="form-control @error('address') is-invalid @enderror" 
+                                          id="address" name="address" rows="2" 
+                                          placeholder="العنوان التفصيلي للتوصيل (اختياري)">{{ old('address') }}</textarea>
+                                @error('address')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="form-group mb-4">
+                                <label for="notes" class="form-label">
+                                    <i class="fas fa-sticky-note text-primary"></i>
+                                    ملاحظات إضافية
+                                </label>
+                                <textarea class="form-control @error('notes') is-invalid @enderror" 
+                                          id="notes" name="notes" rows="3" 
+                                          placeholder="أي ملاحظات خاصة بالطلب (اختياري)">{{ old('notes') }}</textarea>
+                                @error('notes')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Order Summary -->
+                            <div id="order_summary" class="order-summary" style="display: none;">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-calculator"></i>
+                                            ملخص الطلب
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="summary_content"></div>
+                                        <hr>
+                                        <p class="mb-0 text-muted">
+                                            <i class="fas fa-info-circle"></i>
+                                            سيتم التواصل معك قريباً لتأكيد الطلب
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-success btn-lg px-5" id="submit_order_btn" disabled>
+                                    <i class="fas fa-paper-plane"></i>
+                                    إرسال الطلب
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @else
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-lg text-center">
+                    <div class="card-body p-5">
+                        <i class="fas fa-user-lock fa-4x text-primary mb-4"></i>
+                        <h4 class="text-primary mb-3">تسجيل الدخول مطلوب</h4>
+                        <p class="text-muted mb-4">يجب تسجيل الدخول أولاً لطلب البطاقات التعليمية</p>
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="{{ route('login') }}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    تسجيل الدخول
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ route('register') }}" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-user-plus"></i>
+                                    إنشاء حساب
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endauth
+    </div>
+
+    <!-- My Orders Section -->
+    @auth
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-list"></i>
+                        طلباتي السابقة
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <a href="{{ route('educational-cards.my-orders') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye"></i>
+                        عرض جميع طلباتي
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endauth
 </div>
 
-@if(auth()->check())
-    <!-- User Orders Section -->
-    <div class="container" style="margin-top: var(--space-3xl); margin-bottom: var(--space-3xl);">
-        <div style="text-align: center; margin-bottom: var(--space-xl);">
-            <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: var(--space-sm);">طلباتي</h2>
-            <p style="color: var(--gray-600);">يمكنك متابعة حالة طلباتك من هنا</p>
-        </div>
-        
-        <div style="text-align: center;">
-            <a href="{{ route('user.educational-orders.index') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-list"></i>
-                عرض جميع طلباتي
-            </a>
-        </div>
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">
+        <i class="fas fa-check-circle"></i>
+        {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
     </div>
 @endif
 
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ session('error') }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+@endif
+@endsection
+
+@push('styles')
 <style>
-    .generation-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-xl);
-        border-color: var(--primary-500);
-    }
+/* Steps styling */
+.step-container {
+    animation: fadeIn 0.6s ease;
+}
 
-    .generation-card:hover .card-body > div:first-child {
-        background: linear-gradient(135deg, var(--secondary-500), var(--primary-500));
-        transform: scale(1.05);
-    }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-    .semester-option:hover {
-        border-color: var(--primary-500);
-        background: var(--primary-50);
-    }
+/* Generation Cards */
+.generation-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-    .semester-option:has(input:checked) {
-        border-color: var(--primary-500);
-        background: var(--primary-100);
-        color: var(--primary-700);
-    }
+.generation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
 
-    .subject-checkbox {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--space-md);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--space-sm);
-        cursor: pointer;
-        transition: all var(--transition-fast);
-    }
+.generation-card .card-header {
+    background: linear-gradient(135deg, #007bff, #6f42c1);
+    color: white;
+    border: none;
+    padding: 2rem 1rem 1rem;
+}
 
-    .subject-checkbox:hover {
-        border-color: var(--primary-500);
-        background: var(--primary-50);
-    }
+.generation-icon,
+.order-type-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+}
 
-    .subject-checkbox:has(input:checked) {
-        border-color: var(--primary-500);
-        background: var(--primary-100);
-    }
+.generation-year {
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
 
-    .subject-info {
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-    }
+/* Order Type Cards */
+.order-type-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-    .subject-price {
-        font-weight: 600;
-        color: var(--success-600);
-    }
+.order-type-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
 
-    #orderModal.show {
-        display: flex !important;
-    }
+.order-type-card.selected {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border: 2px solid #28a745;
+}
 
-    @media (max-width: 768px) {
-        #orderModal > div {
-            margin: var(--space-md);
-            max-height: calc(100vh - 2rem);
-        }
-        
-        .form-group:has([name="semester"]) > div {
-            grid-template-columns: 1fr;
-        }
-        
-        .form-group:has([name="phone"]) + .form-group {
-            grid-template-columns: 1fr;
-        }
+/* Selection containers */
+.selection-container {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    min-height: 120px;
+}
+
+.selection-item {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    padding: 1rem;
+}
+
+.selection-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #007bff;
+}
+
+.selection-item.selected {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #d4edda, #f8fff9);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.selection-checkbox {
+    transform: scale(1.2);
+}
+
+/* Form styling */
+.card-header {
+    background: linear-gradient(135deg, #007bff, #6f42c1);
+    border: none;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #1e7e34, #155724);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    border: none;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #138496, #0f6674);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    border-radius: 12px;
+}
+
+/* Order Summary */
+.order-summary {
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Title */
+.section-title {
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+/* Badge styling */
+.badge-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .generation-card, .order-type-card {
+        margin-bottom: 1.5rem;
     }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .generation-year {
+        font-size: 1.5rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .order-type-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
+
+/* Loading States */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Alert positioning */
+.alert.position-fixed {
+    top: 20px;
+    right: 20px;
+    max-width: 400px;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+}
 </style>
+@endpush
 
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    let selectedSubjects = [];
-    let subjectsData = [];
+$(document).ready(function() {
+    let selectedGeneration = null;
+    let selectedOrderType = null;
+    let availableSubjects = [];
+    let availableTeachers = [];
+    let availablePlatforms = [];
+    let availableDossiers = [];
+    let selectedItems = [];
 
-    function selectGeneration(generationId, generationName) {
-        document.getElementById('generationId').value = generationId;
-        document.getElementById('selectedGenerationName').textContent = generationName;
+    console.log('New Educational Cards System loaded');
+
+    // Step 1: Generation Selection
+    $(document).on('click', '.select-generation-btn', function(e) {
+        e.preventDefault();
         
-        // Load subjects for this generation
-        loadSubjects(generationId);
+        const generationId = $(this).data('generation-id');
+        const generationName = $(this).data('generation-name');
         
-        // Show modal
-        document.getElementById('orderModal').classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-        document.getElementById('orderModal').classList.remove('show');
-        document.body.style.overflow = 'auto';
+        selectedGeneration = generationId;
         
-        // Reset form
-        document.getElementById('orderForm').reset();
-        selectedSubjects = [];
-        subjectsData = [];
-        updateTotalPrice();
-    }
-
-    function loadSubjects(generationId) {
-        const container = document.getElementById('subjectsContainer');
-        container.innerHTML = `
-            <div style="text-align: center;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
-                <p>جاري تحميل المواد...</p>
-            </div>
-        `;
-
-        fetch(`/educational-cards/generations/${generationId}/subjects`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            subjectsData = data.subjects;
-            renderSubjects();
-        })
-        .catch(error => {
-            console.error('Error loading subjects:', error);
-            container.innerHTML = `
-                <div style="text-align: center; color: var(--error-500);">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
-                    <p>فشل في تحميل المواد. يرجى المحاولة مرة أخرى.</p>
-                </div>
-            `;
+        $('#selected_generation_id').val(generationId);
+        $('#selected_generation_display, #selected_generation_display2').text(generationName);
+        
+        $('#step1_generations').fadeOut(400, function() {
+            $('#step2_order_type').fadeIn(400);
+            loadSubjects(generationId);
         });
+    });
+
+    // Step 2: Order Type Selection
+    $(document).on('click', '.select-order-type-btn', function(e) {
+        e.preventDefault();
+        
+        const orderType = $(this).data('order-type');
+        selectedOrderType = orderType;
+        
+        $('#selected_order_type').val(orderType);
+        
+        const typeText = orderType === 'card' ? 'بطاقة تعليمية' : 'دوسية';
+        $('#selected_order_type_display').text(typeText);
+        $('#form_title').text('طلب ' + typeText);
+        
+        // Show/hide dossier selection based on order type
+        if (orderType === 'dossier') {
+            $('#dossier_selection').show();
+        } else {
+            $('#dossier_selection').hide();
+        }
+        
+        $('#step2_order_type').fadeOut(400, function() {
+            $('#step3_order_form').fadeIn(400);
+        });
+    });
+
+    // Back buttons
+    $(document).on('click', '.back-to-generations-btn', function(e) {
+        e.preventDefault();
+        $('#step2_order_type, #step3_order_form').fadeOut(400, function() {
+            $('#step1_generations').fadeIn(400);
+            resetAll();
+        });
+    });
+
+    $(document).on('click', '.back-to-order-type-btn', function(e) {
+        e.preventDefault();
+        $('#step3_order_form').fadeOut(400, function() {
+            $('#step2_order_type').fadeIn(400);
+            resetForm();
+        });
+    });
+
+    // Load subjects
+    function loadSubjects(generationId) {
+        $.get(`/educational-cards/subjects/${generationId}`)
+            .done(function(response) {
+                availableSubjects = response.subjects;
+                renderSubjects();
+            })
+            .fail(function() {
+                $('#subjects_container').html('<div class="text-center text-danger"><i class="fas fa-exclamation-triangle"></i> خطأ في تحميل المواد</div>');
+            });
     }
 
+    // Render subjects
     function renderSubjects() {
-        const container = document.getElementById('subjectsContainer');
-        
-        if (subjectsData.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; color: var(--gray-500);">
-                    <i class="fas fa-book-open" style="font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
-                    <p>لا توجد مواد متاحة لهذا الجيل حالياً</p>
-                </div>
-            `;
+        if (availableSubjects.length === 0) {
+            $('#subjects_container').html('<div class="text-center text-muted"><i class="fas fa-info-circle"></i> لا توجد مواد متاحة</div>');
             return;
         }
 
-        let html = '';
-        subjectsData.forEach(subject => {
-            const isChecked = selectedSubjects.includes(subject.id);
+        let html = '<div class="row">';
+        availableSubjects.forEach(function(subject) {
             html += `
-                <label class="subject-checkbox">
-                    <div class="subject-info">
-                        <input type="checkbox" name="subjects[]" value="${subject.id}" 
-                               onchange="toggleSubject(${subject.id})" ${isChecked ? 'checked' : ''}>
-                        <span style="font-weight: 500;">${subject.name}</span>
+                <div class="col-md-6 mb-3">
+                    <div class="selection-item" data-type="subject" data-id="${subject.id}">
+                        <div class="form-check">
+                            <input class="form-check-input selection-checkbox" type="checkbox" 
+                                   name="subjects[]" value="${subject.id}" id="subject_${subject.id}">
+                            <label class="form-check-label w-100" for="subject_${subject.id}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 font-weight-bold">${subject.name}</h6>
+                                        <small class="text-muted">مادة دراسية</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge badge-primary">${subject.formatted_price}</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
                     </div>
-                    <span class="subject-price">${subject.formatted_price}</span>
-                </label>
+                </div>
             `;
         });
-
-        container.innerHTML = html;
-        updateTotalPrice();
+        html += '</div>';
+        
+        $('#subjects_container').html(html);
+        bindSelectionEvents();
     }
 
-    function toggleSubject(subjectId) {
-        const index = selectedSubjects.indexOf(subjectId);
-        if (index > -1) {
-            selectedSubjects.splice(index, 1);
-        } else {
-            selectedSubjects.push(subjectId);
-        }
-        updateTotalPrice();
-    }
-
-    function updateTotalPrice() {
-        const quantity = parseInt(document.querySelector('[name="quantity"]').value) || 1;
-        let subtotal = 0;
-
-        // Calculate subtotal
-        selectedSubjects.forEach(subjectId => {
-            const subject = subjectsData.find(s => s.id === subjectId);
-            if (subject) {
-                subtotal += parseFloat(subject.price);
+    // Bind selection events
+    function bindSelectionEvents() {
+        $(document).on('change', 'input[name="subjects[]"]', function() {
+            updateSelections();
+            if (selectedItems.subjects && selectedItems.subjects.length > 0) {
+                loadTeachers();
+            } else {
+                clearTeachers();
             }
         });
 
-        const total = subtotal * quantity;
+        $(document).on('change', 'input[name="teachers"]', function() {
+            updateSelections();
+            if (selectedItems.teacher) {
+                loadPlatforms();
+            } else {
+                clearPlatforms();
+            }
+        });
 
-        // Update subtotal display
-        const subtotalContainer = document.getElementById('totalPriceContainer');
-        const subtotalPrice = document.getElementById('subtotalPrice');
-        
-        if (selectedSubjects.length > 0) {
-            subtotalContainer.style.display = 'block';
-            subtotalPrice.textContent = subtotal.toFixed(2) + ' JD';
-        } else {
-            subtotalContainer.style.display = 'none';
+        $(document).on('change', 'input[name="platforms"]', function() {
+            updateSelections();
+            if (selectedItems.platform && selectedOrderType === 'dossier') {
+                loadDossiers();
+            } else if (selectedItems.platform) {
+                updateOrderSummary();
+            }
+        });
+
+        $(document).on('change', 'input[name="dossiers[]"]', function() {
+            updateSelections();
+            updateOrderSummary();
+        });
+
+        $(document).on('click', '.selection-item', function(e) {
+            if (e.target.type !== 'checkbox' && e.target.type !== 'radio') {
+                const checkbox = $(this).find('input[type="checkbox"], input[type="radio"]');
+                if (checkbox.attr('type') === 'radio') {
+                    checkbox.prop('checked', true).trigger('change');
+                } else {
+                    checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+                }
+            }
+        });
+    }
+
+    // Update selections
+    function updateSelections() {
+        selectedItems = {
+            subjects: [],
+            teacher: null,
+            platform: null,
+            dossiers: []
+        };
+
+        $('input[name="subjects[]"]:checked').each(function() {
+            selectedItems.subjects.push(parseInt($(this).val()));
+        });
+
+        const teacherRadio = $('input[name="teachers"]:checked');
+        if (teacherRadio.length) {
+            selectedItems.teacher = parseInt(teacherRadio.val());
         }
 
-        // Update final total display
-        const totalDisplay = document.getElementById('totalPriceDisplay');
-        const finalTotalPrice = document.getElementById('finalTotalPrice');
-        
-        if (selectedSubjects.length > 0) {
-            totalDisplay.style.display = 'block';
-            finalTotalPrice.textContent = total.toFixed(2) + ' JD';
-        } else {
-            totalDisplay.style.display = 'none';
+        const platformRadio = $('input[name="platforms"]:checked');
+        if (platformRadio.length) {
+            selectedItems.platform = parseInt(platformRadio.val());
         }
+
+        $('input[name="dossiers[]"]:checked').each(function() {
+            selectedItems.dossiers.push(parseInt($(this).val()));
+        });
+
+        // Update visual selection
+        $('.selection-item').removeClass('selected');
+        $('input:checked').closest('.selection-item').addClass('selected');
+    }
+
+    // Load teachers, platforms, dossiers functions...
+    function loadTeachers() {
+        if (!selectedItems.subjects || selectedItems.subjects.length === 0) return;
+        
+        const subjectId = selectedItems.subjects[0]; // Use first selected subject
+        
+        $('#teacher_selection').show();
+        $('#teachers_container').html('<div class="text-center"><div class="spinner-border text-primary"></div><p class="mt-2">جاري تحميل المعلمين...</p></div>');
+        
+        $.get(`/educational-cards/teachers/${selectedGeneration}/${subjectId}`)
+            .done(function(response) {
+                renderTeachers(response.teachers);
+            })
+            .fail(function() {
+                $('#teachers_container').html('<div class="text-center text-danger">خطأ في تحميل المعلمين</div>');
+            });
+    }
+
+    function renderTeachers(teachers) {
+        if (teachers.length === 0) {
+            $('#teachers_container').html('<div class="text-center text-muted">لا يوجد معلمين متاحين</div>');
+            return;
+        }
+
+        let html = '<div class="row">';
+        teachers.forEach(function(teacher) {
+            html += `
+                <div class="col-md-6 mb-3">
+                    <div class="selection-item" data-type="teacher" data-id="${teacher.id}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" 
+                                   name="teachers" value="${teacher.id}" id="teacher_${teacher.id}">
+                            <label class="form-check-label w-100" for="teacher_${teacher.id}">
+                                <h6 class="mb-1 font-weight-bold">${teacher.name}</h6>
+                                ${teacher.specialization ? `<small class="text-muted">${teacher.specialization}</small>` : ''}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        $('#teachers_container').html(html);
+    }
+
+    function loadPlatforms() {
+        if (!selectedItems.teacher || !selectedItems.subjects || selectedItems.subjects.length === 0) return;
+        
+        const subjectId = selectedItems.subjects[0];
+        
+        $('#platform_selection').show();
+        $('#platforms_container').html('<div class="text-center"><div class="spinner-border text-primary"></div><p class="mt-2">جاري تحميل المنصات...</p></div>');
+        
+        $.get(`/educational-cards/platforms/${selectedGeneration}/${subjectId}/${selectedItems.teacher}`)
+            .done(function(response) {
+                renderPlatforms(response.platforms);
+            })
+            .fail(function() {
+                $('#platforms_container').html('<div class="text-center text-danger">خطأ في تحميل المنصات</div>');
+            });
+    }
+
+    function renderPlatforms(platforms) {
+        if (platforms.length === 0) {
+            $('#platforms_container').html('<div class="text-center text-muted">لا توجد منصات متاحة</div>');
+            return;
+        }
+
+        let html = '<div class="row">';
+        platforms.forEach(function(platform) {
+            html += `
+                <div class="col-md-6 mb-3">
+                    <div class="selection-item" data-type="platform" data-id="${platform.id}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" 
+                                   name="platforms" value="${platform.id}" id="platform_${platform.id}">
+                            <label class="form-check-label w-100" for="platform_${platform.id}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 font-weight-bold">${platform.name}</h6>
+                                        <small class="text-muted">منصة تعليمية</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge badge-info">+${platform.price_percentage}%</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        $('#platforms_container').html(html);
+    }
+
+    function loadDossiers() {
+        if (!selectedItems.platform || !selectedItems.subjects || selectedItems.subjects.length === 0 || !selectedItems.teacher) return;
+        
+        const subjectId = selectedItems.subjects[0];
+        const semester = $('#semester').val() || 'first';
+        
+        $('#dossiers_container').html('<div class="text-center"><div class="spinner-border text-primary"></div><p class="mt-2">جاري تحميل الدوسيات...</p></div>');
+        
+        $.get(`/educational-cards/dossiers/${selectedGeneration}/${subjectId}/${selectedItems.teacher}/${selectedItems.platform}/${semester}`)
+            .done(function(response) {
+                renderDossiers(response.dossiers);
+            })
+            .fail(function() {
+                $('#dossiers_container').html('<div class="text-center text-danger">خطأ في تحميل الدوسيات</div>');
+            });
+    }
+
+    function renderDossiers(dossiers) {
+        if (dossiers.length === 0) {
+            $('#dossiers_container').html('<div class="text-center text-muted">لا توجد دوسيات متاحة</div>');
+            return;
+        }
+
+        let html = '<div class="row">';
+        dossiers.forEach(function(dossier) {
+            html += `
+                <div class="col-md-6 mb-3">
+                    <div class="selection-item" data-type="dossier" data-id="${dossier.id}">
+                        <div class="form-check">
+                            <input class="form-check-input selection-checkbox" type="checkbox" 
+                                   name="dossiers[]" value="${dossier.id}" id="dossier_${dossier.id}">
+                            <label class="form-check-label w-100" for="dossier_${dossier.id}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 font-weight-bold">${dossier.name}</h6>
+                                        <small class="text-muted">${dossier.pages_count ? dossier.pages_count + ' صفحة' : 'دوسية'}</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge badge-success">${dossier.formatted_final_price}</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        $('#dossiers_container').html(html);
+    }
+
+    // Clear functions
+    function clearTeachers() {
+        $('#teacher_selection').hide();
+        $('#teachers_container').html('<div class="text-center py-3"><p class="text-muted">اختر المادة أولاً</p></div>');
+        clearPlatforms();
+    }
+
+    function clearPlatforms() {
+        $('#platform_selection').hide();
+        $('#platforms_container').html('<div class="text-center py-3"><p class="text-muted">اختر المعلم أولاً</p></div>');
+        clearDossiers();
+    }
+
+    function clearDossiers() {
+        $('#dossiers_container').html('<div class="text-center py-3"><p class="text-muted">اختر المنصة أولاً</p></div>');
+    }
+
+    // Update order summary
+    function updateOrderSummary() {
+        const data = {
+            order_type: selectedOrderType,
+            quantity: parseInt($('#quantity').val()) || 1
+        };
+
+        if (selectedOrderType === 'card') {
+            data.subjects = selectedItems.subjects;
+            data.platform_id = selectedItems.platform;
+        } else {
+            data.dossiers = selectedItems.dossiers;
+        }
+
+        if ((selectedOrderType === 'card' && selectedItems.subjects.length > 0 && selectedItems.platform) ||
+            (selectedOrderType === 'dossier' && selectedItems.dossiers.length > 0)) {
+            
+            $.post('/educational-cards/calculate-price', data)
+                .done(function(response) {
+                    if (response.success) {
+                        displayOrderSummary(response);
+                        $('#submit_order_btn').prop('disabled', false);
+                    }
+                })
+                .fail(function() {
+                    hideOrderSummary();
+                });
+        } else {
+            hideOrderSummary();
+        }
+    }
+
+    function displayOrderSummary(data) {
+        let itemsHtml = '<ul class="mb-2">';
+        data.items.forEach(function(item) {
+            itemsHtml += `<li>${item.name} - ${item.formatted_price}</li>`;
+        });
+        itemsHtml += '</ul>';
+
+        const summaryHtml = `
+            <div class="row">
+                <div class="col-md-8">
+                    <strong>العناصر المختارة (${data.items.length}):</strong><br>
+                    ${itemsHtml}
+                </div>
+                <div class="col-md-4 text-right">
+                    <strong>الكمية:</strong> ${data.quantity}<br>
+                    <strong>السعر للوحدة:</strong> ${data.total_price.toFixed(2)} JD<br>
+                    <strong class="text-success h5">الإجمالي: ${data.formatted_final_total}</strong>
+                </div>
+            </div>
+        `;
+        
+        $('#summary_content').html(summaryHtml);
+        $('#order_summary').slideDown();
+    }
+
+    function hideOrderSummary() {
+        $('#order_summary').slideUp();
+        $('#submit_order_btn').prop('disabled', true);
     }
 
     // Form submission
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
-        if (selectedSubjects.length === 0) {
+    $('#orderForm').on('submit', function(e) {
+        const hasSelections = (selectedOrderType === 'card' && selectedItems.subjects.length > 0 && selectedItems.platform) ||
+                             (selectedOrderType === 'dossier' && selectedItems.dossiers.length > 0);
+
+        if (!hasSelections) {
             e.preventDefault();
-            alert('يرجى اختيار مادة واحدة على الأقل');
-            return;
+            alert('يرجى إكمال جميع الاختيارات المطلوبة');
+            return false;
         }
 
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+        $('#submit_order_btn').html('<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...').prop('disabled', true);
     });
 
-    // Close modal when clicking outside
-    document.getElementById('orderModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModal();
-        }
+    // Event listeners for quantity change and semester change
+    $('#quantity').on('input', function() {
+        updateOrderSummary();
     });
 
-    // Handle escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && document.getElementById('orderModal').classList.contains('show')) {
-            closeModal();
+    $('#semester').on('change', function() {
+        if (selectedOrderType === 'dossier' && selectedItems.platform) {
+            loadDossiers();
         }
     });
 
-    // Initialize quantity change listener
-    document.addEventListener('DOMContentLoaded', function() {
-        const quantityInput = document.querySelector('[name="quantity"]');
-        if (quantityInput) {
-            quantityInput.addEventListener('change', updateTotalPrice);
-            quantityInput.addEventListener('input', updateTotalPrice);
-        }
-    });
+    // Reset functions
+    function resetForm() {
+        $('#orderForm')[0].reset();
+        selectedItems = [];
+        $('#teacher_selection, #platform_selection').hide();
+        $('#order_summary').hide();
+        $('#submit_order_btn').prop('disabled', true).html('<i class="fas fa-paper-plane"></i> إرسال الطلب');
+    }
+
+    function resetAll() {
+        resetForm();
+        selectedGeneration = null;
+        selectedOrderType = null;
+        availableSubjects = [];
+    }
+
+    // Auto-hide alerts
+    setTimeout(function() {
+        $('.alert-dismissible').fadeOut();
+    }, 5000);
+});
 </script>
-@endsection
+@endpush

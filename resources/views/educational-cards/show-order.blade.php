@@ -3,259 +3,317 @@
 @section('title', 'تفاصيل الطلب #' . $order->id)
 
 @section('content')
-<div class="container" style="margin-top: var(--space-xl); margin-bottom: var(--space-3xl);">
-    <!-- Breadcrumb -->
-    <nav style="margin-bottom: var(--space-lg);">
-        <div style="display: flex; align-items: center; gap: var(--space-sm); color: var(--gray-500); font-size: 0.875rem;">
-            <a href="{{ route('home') }}" style="color: var(--primary-600); text-decoration: none;">الرئيسية</a>
-            <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
-            <a href="{{ route('educational-cards.my-orders') }}" style="color: var(--primary-600); text-decoration: none;">طلباتي التعليمية</a>
-            <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
-            <span>طلب #{{ $order->id }}</span>
-        </div>
-    </nav>
-
+<div class="container">
     <!-- Header -->
-    <div style="text-align: center; margin-bottom: var(--space-2xl);">
-        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: var(--space-sm);">
-            تفاصيل الطلب #{{ $order->id }}
-        </h1>
-        <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-md);">
-            <span class="badge badge-{{ $order->status_color }}" style="font-size: 0.875rem; padding: var(--space-sm) var(--space-md);">
-                {{ $order->status_text }}
-            </span>
-            <span style="color: var(--gray-600);">{{ $order->created_at->format('Y-m-d H:i') }}</span>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="font-weight-bold text-primary">
+                        <i class="fas fa-file-alt"></i>
+                        تفاصيل الطلب #{{ $order->id }}
+                    </h2>
+                    <p class="text-muted mb-0">عرض جميع تفاصيل طلبك</p>
+                </div>
+                <div>
+                    <a href="{{ route('educational-cards.my-orders') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة للطلبات
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-xl);">
-        <!-- Main Content -->
-        <div>
-            <!-- Order Information -->
-            <div class="card" style="margin-bottom: var(--space-lg);">
-                <div class="card-header">
-                    <h3 class="card-title">
+    <div class="row">
+        <!-- Order Details -->
+        <div class="col-lg-8">
+            <!-- Order Status -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-{{ $order->status_color }} text-white">
+                    <h5 class="mb-0">
                         <i class="fas fa-info-circle"></i>
-                        معلومات الطلب
-                    </h3>
+                        حالة الطلب
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg);">
-                        <div>
-                            <label style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; display: block; margin-bottom: var(--space-xs);">اسم الطالب</label>
-                            <div style="font-weight: 600; font-size: 1.125rem;">{{ $order->student_name }}</div>
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="text-{{ $order->status_color }} mb-2">
+                                <i class="fas fa-{{ $order->status == 'completed' ? 'check-circle' : ($order->status == 'processing' ? 'cog fa-spin' : ($order->status == 'cancelled' ? 'times-circle' : 'clock')) }}"></i>
+                                {{ $order->status_text }}
+                            </h4>
+                            <p class="text-muted mb-0">
+                                @switch($order->status)
+                                    @case('pending')
+                                        طلبك قيد المراجعة وسيتم الرد عليك قريباً
+                                        @break
+                                    @case('processing')
+                                        جاري تحضير طلبك
+                                        @break
+                                    @case('completed')
+                                        تم تسليم طلبك بنجاح
+                                        @break
+                                    @case('cancelled')
+                                        تم إلغاء طلبك
+                                        @break
+                                    @default
+                                        حالة غير محددة
+                                @endswitch
+                            </p>
                         </div>
-                        
-                        <div>
-                            <label style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; display: block; margin-bottom: var(--space-xs);">الجيل التعليمي</label>
-                            <div style="font-weight: 600;">{{ $order->generation->display_name }}</div>
-                        </div>
-                        
-                        <div>
-                            <label style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; display: block; margin-bottom: var(--space-xs);">الفصل الدراسي</label>
-                            <div style="font-weight: 600;">{{ $order->semester_text }}</div>
-                        </div>
-                        
-                        <div>
-                            <label style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; display: block; margin-bottom: var(--space-xs);">الكمية</label>
-                            <div style="font-weight: 600;">{{ $order->quantity }} نسخة</div>
-                        </div>
-                    </div>
-                    
-                    @if($order->phone || $order->address)
-                    <div style="border-top: 1px solid var(--border-color); margin-top: var(--space-lg); padding-top: var(--space-lg);">
-                        <h4 style="margin-bottom: var(--space-md); color: var(--gray-700);">معلومات الاتصال</h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg);">
-                            @if($order->phone)
-                            <div>
-                                <label style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; display: block; margin-bottom: var(--space-xs);">رقم الهاتف</label>
-                                <div style="font-weight: 500;">
-                                    <i class="fas fa-phone" style="color: var(--primary-500); margin-right: var(--space-xs);"></i>
-                                    {{ $order->phone }}
+                        <div class="col-md-4 text-center">
+                            @if($order->status == 'completed')
+                                <div class="text-success">
+                                    <i class="fas fa-check-circle fa-4x"></i>
                                 </div>
-                            </div>
-                            @endif
-                            
-                            @if($order->address)
-                            <div>
-                                <label style="font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; display: block; margin-bottom: var(--space-xs);">العنوان</label>
-                                <div style="font-weight: 500;">
-                                    <i class="fas fa-map-marker-alt" style="color: var(--primary-500); margin-right: var(--space-xs);"></i>
-                                    {{ $order->address }}
+                            @elseif($order->status == 'processing')
+                                <div class="text-info">
+                                    <i class="fas fa-cog fa-4x fa-spin"></i>
                                 </div>
-                            </div>
+                            @elseif($order->status == 'cancelled')
+                                <div class="text-danger">
+                                    <i class="fas fa-times-circle fa-4x"></i>
+                                </div>
+                            @else
+                                <div class="text-warning">
+                                    <i class="fas fa-clock fa-4x"></i>
+                                </div>
                             @endif
                         </div>
                     </div>
+
+                    @if($order->admin_notes)
+                        <hr>
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-comment"></i> ملاحظة من الإدارة:</strong><br>
+                            {{ $order->admin_notes }}
+                        </div>
                     @endif
-                    
-                    @if($order->notes)
-                    <div style="border-top: 1px solid var(--border-color); margin-top: var(--space-lg); padding-top: var(--space-lg);">
-                        <h4 style="margin-bottom: var(--space-sm); color: var(--gray-700);">ملاحظات إضافية</h4>
-                        <div style="background: var(--gray-50); padding: var(--space-md); border-radius: var(--radius-md); border-left: 3px solid var(--primary-500);">
-                            {{ $order->notes }}
+                </div>
+            </div>
+
+            <!-- Order Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info"></i>
+                        معلومات الطلب
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="font-weight-bold">رقم الطلب:</td>
+                                    <td>{{ $order->id }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">اسم الطالب:</td>
+                                    <td>{{ $order->student_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">الجيل:</td>
+                                    <td>
+                                        <span class="badge badge-secondary">{{ $order->generation->display_name }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">الفصل:</td>
+                                    <td>{{ $order->semester_text }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="font-weight-bold">الكمية:</td>
+                                    <td>{{ $order->quantity }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">رقم الهاتف:</td>
+                                    <td>{{ $order->phone ?: 'غير محدد' }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">تاريخ الطلب:</td>
+                                    <td>{{ $order->created_at->format('Y/m/d H:i') }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">آخر تحديث:</td>
+                                    <td>{{ $order->updated_at->format('Y/m/d H:i') }}</td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
+
+                    @if($order->address)
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="font-weight-bold">العنوان:</h6>
+                                <p class="text-muted">{{ $order->address }}</p>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($order->notes)
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="font-weight-bold">ملاحظاتك:</h6>
+                                <div class="alert alert-light">
+                                    {{ $order->notes }}
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
 
             <!-- Order Items -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
                         <i class="fas fa-list"></i>
                         المواد المطلوبة
-                    </h3>
+                    </h5>
                 </div>
-                <div class="card-body" style="padding: 0;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>المادة</th>
-                                <th>السعر الوحدة</th>
-                                <th>الكمية</th>
-                                <th>المجموع الفرعي</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($order->orderItems as $item)
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="thead-light">
                                 <tr>
-                                    <td>
-                                        <div style="font-weight: 600;">{{ $item->subject_name }}</div>
-                                        @if($item->subject)
-                                            <div style="font-size: 0.75rem; color: var(--gray-500);">
-                                                السعر الحالي: {{ $item->subject->formatted_price }}
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td style="font-weight: 500;">{{ $item->formatted_price }}</td>
-                                    <td>{{ $item->quantity }}</td>
-                                    <td style="font-weight: 600; color: var(--success-600);">{{ $item->formatted_subtotal }}</td>
+                                    <th>اسم المادة</th>
+                                    <th>سعر الوحدة</th>
+                                    <th>الكمية</th>
+                                    <th>المجموع</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot>
-                            <tr style="background: var(--gray-50); font-weight: 700;">
-                                <td colspan="3" style="text-align: right;">المجموع النهائي:</td>
-                                <td style="font-size: 1.125rem; color: var(--success-600);">{{ $order->formatted_total }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach($order->orderItems as $item)
+                                    <tr>
+                                        <td>
+                                            <span class="font-weight-bold">{{ $item->subject_name }}</span>
+                                        </td>
+                                        <td>{{ $item->formatted_price }}</td>
+                                        <td>{{ $item->quantity }}</td>
+                                        <td class="font-weight-bold text-success">{{ $item->formatted_subtotal }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="thead-light">
+                                <tr>
+                                    <th colspan="3" class="text-right">المجموع الكلي:</th>
+                                    <th class="text-success h5">{{ $order->formatted_total }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar -->
-        <div>
-            <!-- Status Timeline -->
-            <div class="card" style="margin-bottom: var(--space-lg);">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-clock"></i>
-                        حالة الطلب
-                    </h3>
+        <div class="col-lg-4">
+            <!-- Order Summary -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calculator"></i>
+                        ملخص الطلب
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <div style="position: relative;">
-                        @php
-                            $statuses = [
-                                'pending' => ['text' => 'قيد الانتظار', 'icon' => 'fas fa-clock', 'color' => 'warning'],
-                                'processing' => ['text' => 'قيد المعالجة', 'icon' => 'fas fa-cog', 'color' => 'info'], 
-                                'completed' => ['text' => 'مكتمل', 'icon' => 'fas fa-check', 'color' => 'success'],
-                            ];
-                            $currentStatusIndex = array_search($order->status, array_keys($statuses));
-                        @endphp
-                        
-                        @foreach($statuses as $status => $info)
-                            @php
-                                $statusIndex = array_search($status, array_keys($statuses));
-                                $isActive = $statusIndex <= $currentStatusIndex;
-                                $isCurrent = $status === $order->status;
-                            @endphp
-                            
-                            <div style="display: flex; align-items: center; margin-bottom: var(--space-md); position: relative;">
-                                <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid; {{ $isActive ? 'background: var(--' . $info['color'] . '-500); border-color: var(--' . $info['color'] . '-500); color: white;' : 'border-color: var(--gray-300); color: var(--gray-400);' }}">
-                                    <i class="{{ $info['icon'] }}"></i>
-                                </div>
-                                <div style="margin-right: var(--space-md); flex: 1;">
-                                    <div style="font-weight: {{ $isCurrent ? '700' : '500' }}; {{ $isActive ? 'color: var(--' . $info['color'] . '-700);' : 'color: var(--gray-500);' }}">
-                                        {{ $info['text'] }}
-                                    </div>
-                                    @if($isCurrent)
-                                        <div style="font-size: 0.75rem; color: var(--gray-500);">الحالة الحالية</div>
-                                    @endif
-                                </div>
-                            </div>
-                            
-                            @if(!$loop->last && $statusIndex < count($statuses) - 1)
-                                <div style="width: 2px; height: 20px; background: {{ $statusIndex < $currentStatusIndex ? 'var(--' . $info['color'] . '-300)' : 'var(--gray-300)' }}; margin-left: 19px; margin-bottom: var(--space-sm);"></div>
-                            @endif
-                        @endforeach
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <span class="text-muted">عدد المواد:</span>
+                        <h4 class="text-primary">{{ $order->orderItems->count() }}</h4>
+                    </div>
+                    <div class="mb-3">
+                        <span class="text-muted">الكمية الإجمالية:</span>
+                        <h4 class="text-info">{{ $order->quantity }}</h4>
+                    </div>
+                    <div class="mb-3">
+                        <span class="text-muted">المبلغ الإجمالي:</span>
+                        <h3 class="text-success font-weight-bold">{{ $order->formatted_total }}</h3>
                     </div>
                 </div>
             </div>
 
-            <!-- Order Summary -->
-            <div class="card" style="margin-bottom: var(--space-lg);">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-calculator"></i>
-                        ملخص الطلب
-                    </h3>
+            <!-- Timeline -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history"></i>
+                        تاريخ الطلب
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
-                        <span>عدد المواد:</span>
-                        <span style="font-weight: 600;">{{ $order->orderItems->count() }} مادة</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
-                        <span>الكمية:</span>
-                        <span style="font-weight: 600;">{{ $order->quantity }} نسخة</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
-                        <span>الفصل:</span>
-                        <span style="font-weight: 600;">{{ $order->semester_text }}</span>
-                    </div>
-                    <hr style="margin: var(--space-md) 0;">
-                    <div style="display: flex; justify-content: space-between; font-size: 1.125rem; font-weight: 700; color: var(--success-600);">
-                        <span>المجموع:</span>
-                        <span>{{ $order->formatted_total }}</span>
+                    <div class="timeline">
+                        <div class="timeline-item active">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">تم إنشاء الطلب</h6>
+                                <p class="timeline-text">{{ $order->created_at->format('Y/m/d H:i') }}</p>
+                            </div>
+                        </div>
+
+                        @if($order->status != 'pending')
+                            <div class="timeline-item {{ $order->status == 'processing' || $order->status == 'completed' ? 'active' : '' }}">
+                                <div class="timeline-marker {{ $order->status == 'processing' || $order->status == 'completed' ? 'bg-info' : 'bg-secondary' }}"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">
+                                        @if($order->status == 'cancelled')
+                                            تم إلغاء الطلب
+                                        @else
+                                            بدء المعالجة
+                                        @endif
+                                    </h6>
+                                    <p class="timeline-text">{{ $order->updated_at->format('Y/m/d H:i') }}</p>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($order->status == 'completed')
+                            <div class="timeline-item active">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">تم إكمال الطلب</h6>
+                                    <p class="timeline-text">{{ $order->updated_at->format('Y/m/d H:i') }}</p>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-tools"></i>
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs"></i>
                         إجراءات
-                    </h3>
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
-                        <a href="{{ route('educational-cards.my-orders') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i>
-                            العودة للطلبات
-                        </a>
-                        
-                        @if($order->status === 'pending')
-                            <a href="{{ route('user.conversations.create') }}?order_id={{ $order->id }}" class="btn btn-primary">
-                                <i class="fas fa-comments"></i>
-                                التواصل مع الدعم
-                            </a>
-                        @endif
-                        
-                        <a href="{{ route('educational-cards.index') }}" class="btn btn-success">
-                            <i class="fas fa-plus"></i>
-                            طلب دوسية جديدة
-                        </a>
-                        
-                        <button onclick="window.print()" class="btn btn-secondary">
+                    <div class="d-grid gap-2">
+                        <button onclick="window.print()" class="btn btn-outline-primary btn-block">
                             <i class="fas fa-print"></i>
-                            طباعة الطلب
+                            طباعة تفاصيل الطلب
                         </button>
+                        
+                        @if($order->status == 'pending')
+                            <button type="button" class="btn btn-outline-warning btn-block" 
+                                    data-toggle="modal" data-target="#contactModal">
+                                <i class="fas fa-envelope"></i>
+                                تواصل مع الإدارة
+                            </button>
+                        @endif
+
+                        <a href="{{ route('educational-cards.index') }}" class="btn btn-outline-success btn-block">
+                            <i class="fas fa-plus"></i>
+                            طلب جديد
+                        </a>
                     </div>
                 </div>
             </div>
@@ -263,34 +321,126 @@
     </div>
 </div>
 
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-envelope"></i>
+                    تواصل مع الإدارة
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>للاستفسار حول طلبك #{{ $order->id }}، يمكنك التواصل معنا عبر:</p>
+                <div class="list-group">
+                    <a href="mailto:support@example.com" class="list-group-item list-group-item-action">
+                        <i class="fas fa-envelope text-primary"></i>
+                        البريد الإلكتروني: support@example.com
+                    </a>
+                    <a href="tel:+962123456789" class="list-group-item list-group-item-action">
+                        <i class="fas fa-phone text-success"></i>
+                        الهاتف: +962 12 345 6789
+                    </a>
+                    @if(Route::has('user.conversations.create'))
+                        <a href="{{ route('user.conversations.create') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-comments text-info"></i>
+                            إرسال رسالة عبر النظام
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('styles')
 <style>
-    @media print {
-        .card {
-            box-shadow: none !important;
-            border: 1px solid #ddd !important;
-        }
-        
-        .btn, .card:last-child {
-            display: none !important;
-        }
-        
-        body {
-            background: white !important;
-        }
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -23px;
+    top: 20px;
+    height: calc(100% + 10px);
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-item.active:not(:last-child)::before {
+    background-color: #28a745;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-item.active .timeline-marker {
+    box-shadow: 0 0 0 2px #28a745;
+}
+
+.timeline-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.timeline-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+@media print {
+    .btn, .modal, .card-header {
+        display: none !important;
     }
     
-    @media (max-width: 768px) {
-        .container > div:last-child {
-            grid-template-columns: 1fr;
-        }
-        
-        .table {
-            font-size: 0.875rem;
-        }
-        
-        .table th, .table td {
-            padding: var(--space-sm);
-        }
+    .card {
+        border: none !important;
+        box-shadow: none !important;
     }
+    
+    body {
+        background: white !important;
+    }
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+}
 </style>
-@endsection
+@endpush
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    // Smooth scroll for timeline
+    $('.timeline-item').each(function(index) {
+        $(this).delay(index * 200).animate({
+            opacity: 1
+        }, 500);
+    });
+});
+</script>
+@endpush

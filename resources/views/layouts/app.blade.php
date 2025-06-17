@@ -714,7 +714,6 @@
                 <ul class="nav-links">
                     <li><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
                     <li><a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">Products</a></li>
-                    <li><a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}">Educational Cards</a></li>
                         <li class="dropdown" style="position: relative;">
         <a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}">
             <i class="fas fa-graduation-cap"></i>
@@ -833,7 +832,6 @@
                     <ul style="list-style: none; color: var(--gray-400);">
                         <li style="margin-bottom: var(--space-sm);"><a href="{{ route('home') }}" style="color: inherit; text-decoration: none;">Home</a></li>
                         <li style="margin-bottom: var(--space-sm);"><a href="{{ route('products.index') }}" style="color: inherit; text-decoration: none;">Products</a></li>
-                        <li style="margin-bottom: var(--space-sm);"><a href="{{ route('educational-cards.index') }}" style="color: inherit; text-decoration: none;">Educational Cards</a></li>
                     </ul>
                 </div>
                 <div>
