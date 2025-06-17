@@ -1,357 +1,318 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+// Controllers
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CouponController;
+use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\EducationalCardsController;
+
+// Auth Controllers
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\EducationalCardsController;
-use App\Http\Controllers\Auth\VerificationController;
-use App\Http\Controllers\Admin\ConversationController;
-use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
+use App\Http\Controllers\Auth\StepRegistrationController;
+
+// User Controllers
+use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Http\Controllers\User\ConversationController as UserConversationController;
+
+// Admin Controllers
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\TestimonialController as AdminTestimonialController;
+use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
-
-// ====================================
-// REAL-TIME MESSAGING API ROUTES
-// ====================================
-Route::middleware(['auth'])->group(function () {
-    // للمستخدمين العاديين
-    Route::get('/user/conversations/{conversation}/check-new-messages', [UserConversationController::class, 'checkNewMessages'])
-        ->name('user.conversations.check-new-messages');
-    
-    // للأدمن
-    Route::get('/admin/conversations/{conversation}/check-new-messages', [AdminConversationController::class, 'checkNewMessages'])
-        ->name('admin.conversations.check-new-messages');
-    
-    // للحصول على آخر رسالة
-    Route::get('/conversations/{conversation}/latest-message', [UserConversationController::class, 'getLatestMessage'])
-        ->name('conversations.latest-message');
-});
-
-// Admin Conversation Routes
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    
-    // Conversations Management
-    Route::resource('conversations', AdminConversationController::class)->only([
-        'index', 'show'
-    ]);
-    
-    // Additional conversation routes
-    Route::post('conversations/{conversation}/reply', [AdminConversationController::class, 'reply'])
-        ->name('conversations.reply');
-    
-    Route::patch('conversations/{conversation}/mark-read', [AdminConversationController::class, 'markAsRead'])
-        ->name('conversations.mark-read');
-    
-    Route::post('conversations/mark-all-read', [AdminConversationController::class, 'markAllAsRead'])
-        ->name('conversations.mark-all-read');
-    
-    // Check for new messages (AJAX endpoint)
-    Route::get('conversations/check-new', [AdminConversationController::class, 'checkNewMessages'])
-        ->name('conversations.check-new');
-    
-    // Get conversation counts for notifications
-    Route::get('conversations/counts', [AdminConversationController::class, 'getCounts'])
-        ->name('conversations.counts');
-});
-
-// User Conversation Routes
-Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
-    
-    // User conversations
-    Route::resource('conversations', UserConversationController::class)->only([
-        'index', 'create', 'store', 'show'
-    ]);
-    
-    // Reply to conversation
-    Route::post('conversations/{conversation}/reply', [UserConversationController::class, 'reply'])
-        ->name('conversations.reply');
-    
-    // Mark conversation as read
-    Route::patch('conversations/{conversation}/mark-read', [UserConversationController::class, 'markAsRead'])
-        ->name('conversations.mark-read');
-    
-    // الطرق المفقودة
-    Route::get('conversations/{conversation}/check-new-messages', [UserConversationController::class, 'checkNewMessages'])
-        ->name('conversations.check-new-messages');
-    
-    // هذا هو المفقود الرئيسي:
-    Route::get('conversations/unread-count', [UserConversationController::class, 'getUnreadCount'])
-        ->name('conversations.unread-count');
-});
-
-// Alternative routes without 'user' prefix (if needed)
-Route::middleware(['auth'])->group(function () {
-    
-    // Direct conversation routes for users
-    Route::get('my-conversations', [UserConversationController::class, 'index'])
-        ->name('conversations.index');
-    
-    Route::get('conversations/create', [UserConversationController::class, 'create'])
-        ->name('conversations.create');
-    
-    Route::post('conversations', [UserConversationController::class, 'store'])
-        ->name('conversations.store');
-    
-    Route::get('conversations/{conversation}', [UserConversationController::class, 'show'])
-        ->name('conversations.show');
-    
-    Route::post('conversations/{conversation}/reply', [UserConversationController::class, 'reply'])
-        ->name('conversations.reply');
-});
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\EducationalCardOrdersController;
+use App\Http\Controllers\Admin\EducationalSubjectsController;
+use App\Http\Controllers\Admin\GenerationsController;
+use App\Http\Controllers\Admin\EducationalCardsController as AdminEducationalCardsController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
-
-// ====================================
-// AUTHENTICATION ROUTES (SIMPLE)
-// ====================================
-
-// Simple Registration Routes (بدون كود تحقق)
-Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register')->middleware('guest');
-Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register'])->middleware('guest');
-
-// Login Routes
-Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
-Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login'])->middleware('guest');
-Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
-
-// Password Reset Routes
-Route::get('/password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request')->middleware('guest');
-Route::post('/password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email')->middleware('guest');
-Route::get('/password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset')->middleware('guest');
-Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update')->middleware('guest');
-
-// Email Verification Routes (اختياري - يمكنك حذفها إذا لم تكن تريد التحقق من الإيميل)
-Route::get('/email/verify', [App\Http\Controllers\Auth\VerificationController::class, 'show'])->name('verification.notice')->middleware('auth');
-Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Auth\VerificationController::class, 'verify'])->name('verification.verify')->middleware(['auth', 'signed']);
-Route::post('/email/resend', [App\Http\Controllers\Auth\VerificationController::class, 'resend'])->name('verification.resend')->middleware(['auth', 'throttle:6,1']);
-
-// Password Confirmation Routes
-Route::get('/password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordController::class, 'showConfirmForm'])->name('password.confirm')->middleware('auth');
-Route::post('/password/confirm', [App\Http\Controllers\Auth\ConfirmPasswordController::class, 'confirm'])->middleware('auth');
-
 
 // ====================================
 // PUBLIC ROUTES
 // ====================================
 
-// Home and Public Pages
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/about', function () {
-    return view('about');
-})->name('about');
-Route::get('/contact', function () {
-    return view('contact');
-})->name('contact');
+Route::get('/', function () {
+    return view('welcome');
+})->name('welcome');
 
-// Product Routes (Public)
-Route::get('/products', [App\Http\Controllers\ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{product}', [App\Http\Controllers\ProductController::class, 'show'])->name('products.show');
-Route::get('/products/{product}/images', [App\Http\Controllers\ProductController::class, 'getImages'])->name('products.images');
-Route::get('/shop', [App\Http\Controllers\ProductController::class, 'index'])->name('shop.index');
+// Language Switching
+Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
+Route::get('/language/current', [LanguageController::class, 'current'])->name('language.current');
 
-// Categories
-Route::get('/categories', [HomeController::class, 'allCategories'])->name('categories.all');
-Route::get('/products/all', [HomeController::class, 'allProducts'])->name('products.all');
+// Products (Public)
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/products/{product}/images', [ProductController::class, 'getImages'])->name('products.images');
 
-// Educational Cards Routes (Public)
-Route::prefix('educational-cards')->name('educational-cards.')->group(function () {
-    Route::get('/', [EducationalCardsController::class, 'index'])->name('index');
-    Route::get('/search', [EducationalCardsController::class, 'search'])->name('search');
-    Route::get('/{platform}', [EducationalCardsController::class, 'showGrades'])->name('grades');
-    Route::get('/{platform}/{grade}', [EducationalCardsController::class, 'showSubjects'])->name('subjects');
-    Route::get('/{platform}/{grade}/{subject}', [EducationalCardsController::class, 'showCards'])->name('cards');
-    Route::get('/card/{card}', [EducationalCardsController::class, 'showCard'])->name('show');
+// Educational Cards (Public)
+Route::get('/educational-cards', [EducationalCardsController::class, 'index'])->name('educational-cards.index');
+Route::get('/educational-cards/subjects/{generation}', [EducationalCardsController::class, 'getSubjects'])->name('educational-cards.subjects');
+
+// ====================================
+// AUTHENTICATION ROUTES
+// ====================================
+
+// Step Registration Routes
+Route::prefix('register')->name('register.')->group(function () {
+    Route::get('/step1', [StepRegistrationController::class, 'showStep1'])->name('step1');
+    Route::post('/step1', [StepRegistrationController::class, 'processStep1'])->name('step1.process');
+    Route::get('/step2', [StepRegistrationController::class, 'showStep2'])->name('step2');
+    Route::post('/step2', [StepRegistrationController::class, 'processStep2'])->name('step2.process');
+    Route::post('/resend-code', [StepRegistrationController::class, 'resendCode'])->name('resend-code');
+    Route::get('/back-to-step1', [StepRegistrationController::class, 'backToStep1'])->name('back-to-step1');
 });
 
-// Public Testimonials
-Route::get('/testimonials', [App\Http\Controllers\TestimonialController::class, 'index'])->name('testimonials.index');
+// Standard Authentication Routes
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+
+// Password Reset Routes
+Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // ====================================
 // AUTHENTICATED USER ROUTES
 // ====================================
+
 Route::middleware(['auth'])->group(function () {
     
-    // Cart Routes
-    Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/add', [App\Http\Controllers\CartController::class, 'addItem'])->name('cart.addItem');
-    Route::put('/cart/{cartItem}', [App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
-    Route::delete('/cart/{cartItem}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
-    Route::delete('/cart/clear', [App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
-    Route::get('/cart/count', [App\Http\Controllers\CartController::class, 'getCartCount'])->name('cart.count');
+    // Home/Dashboard
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
     
-    // Educational Cards Cart
-    Route::post('/educational-cards/add-to-cart', [EducationalCardsController::class, 'addToCart'])->name('educational-cards.add-to-cart');
+    // Cart Management
+    Route::prefix('cart')->name('cart.')->group(function () {
+        Route::get('/', [CartController::class, 'index'])->name('index');
+        Route::post('/add', [CartController::class, 'addItem'])->name('add');
+        Route::patch('/update/{cartItem}', [CartController::class, 'update'])->name('update');
+        Route::delete('/remove/{cartItem}', [CartController::class, 'remove'])->name('remove');
+        Route::delete('/clear', [CartController::class, 'clear'])->name('clear');
+        Route::get('/count', [CartController::class, 'getCartCount'])->name('count');
+    });
     
-    // Checkout Routes
-    Route::get('/checkout', [App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
-    Route::post('/checkout/apply-coupon', [App\Http\Controllers\CheckoutController::class, 'applyCoupon'])->name('checkout.applyCoupon');
-    Route::delete('/checkout/remove-coupon', [App\Http\Controllers\CheckoutController::class, 'removeCoupon'])->name('checkout.removeCoupon');
+    // Checkout
+    Route::prefix('checkout')->name('checkout.')->group(function () {
+        Route::get('/', [CheckoutController::class, 'index'])->name('index');
+        Route::post('/', [CheckoutController::class, 'store'])->name('store');
+        Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('apply-coupon');
+        Route::post('/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('remove-coupon');
+    });
     
-    // Order Routes
-    Route::get('/orders', [App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+    // Orders
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+    });
     
-    // Testimonial Routes (User)
-    Route::get('/testimonials/create/{order}', [App\Http\Controllers\TestimonialController::class, 'create'])->name('testimonials.create');
-    Route::post('/testimonials', [App\Http\Controllers\TestimonialController::class, 'store'])->name('testimonials.store');
+    // Educational Card Orders
+    Route::prefix('educational-cards')->name('educational-cards.')->group(function () {
+        Route::post('/submit-order', [EducationalCardsController::class, 'submitOrder'])->name('submit-order');
+        Route::get('/my-orders', [EducationalCardsController::class, 'myOrders'])->name('my-orders');
+        Route::get('/orders/{order}', [EducationalCardsController::class, 'showOrder'])->name('show-order');
+        Route::get('/search-orders', [EducationalCardsController::class, 'searchOrders'])->name('search-orders');
+    });
     
-    // Wishlist Routes
-    Route::get('/wishlist', [App\Http\Controllers\WishlistController::class, 'index'])->name('wishlist.index');
-    Route::post('/wishlist/toggle', [App\Http\Controllers\WishlistController::class, 'toggle'])->name('wishlist.toggle');
-    Route::post('/wishlist', [App\Http\Controllers\WishlistController::class, 'store'])->name('wishlist.store');
-    Route::delete('/wishlist/{productId}', [App\Http\Controllers\WishlistController::class, 'destroy'])->name('wishlist.destroy');
+    // Coupons
+    Route::prefix('coupons')->name('coupons.')->group(function () {
+        Route::get('/', [CouponController::class, 'index'])->name('index');
+        Route::get('/{coupon}', [CouponController::class, 'show'])->name('show');
+    });
     
-    // Coupon Routes (User)
-    Route::get('/coupons', [App\Http\Controllers\CouponController::class, 'index'])->name('coupons.index');
-    Route::get('/coupons/{coupon}', [App\Http\Controllers\CouponController::class, 'show'])->name('coupons.show');
+    // Testimonials
+    Route::prefix('testimonials')->name('testimonials.')->group(function () {
+        Route::get('/create/{order}', [TestimonialController::class, 'create'])->name('create');
+        Route::post('/', [TestimonialController::class, 'store'])->name('store');
+    });
+    
+    // Wishlist
+    Route::prefix('wishlist')->name('wishlist.')->group(function () {
+        Route::get('/', [WishlistController::class, 'index'])->name('index');
+        Route::post('/add', [WishlistController::class, 'store'])->name('add');
+        Route::delete('/{product}', [WishlistController::class, 'destroy'])->name('remove');
+        Route::post('/toggle', [WishlistController::class, 'toggle'])->name('toggle');
+    });
+    
+    // User Profile Management
+    Route::prefix('user')->name('user.')->group(function () {
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [UserProfileController::class, 'show'])->name('show');
+            Route::get('/edit', [UserProfileController::class, 'edit'])->name('edit');
+            Route::patch('/', [UserProfileController::class, 'update'])->name('update');
+            Route::get('/change-password', [UserProfileController::class, 'changePassword'])->name('change-password');
+            Route::patch('/change-password', [UserProfileController::class, 'updatePassword'])->name('update-password');
+        });
+        
+        // User Conversations
+        Route::prefix('conversations')->name('conversations.')->group(function () {
+            Route::get('/', [UserConversationController::class, 'index'])->name('index');
+            Route::get('/create', [UserConversationController::class, 'create'])->name('create');
+            Route::post('/', [UserConversationController::class, 'store'])->name('store');
+            Route::get('/{conversation}', [UserConversationController::class, 'show'])->name('show');
+            Route::post('/{conversation}/reply', [UserConversationController::class, 'reply'])->name('reply');
+            Route::get('/{conversation}/check-messages', [UserConversationController::class, 'checkNewMessages'])->name('check-messages');
+            Route::post('/{conversation}/mark-read', [UserConversationController::class, 'markAsRead'])->name('mark-read');
+            Route::get('/unread/count', [UserConversationController::class, 'getUnreadCount'])->name('unread-count');
+        });
+    });
 });
 
 // ====================================
-// USER AREA ROUTES
+// ADMIN ROUTES - SIMPLE VERSION
 // ====================================
-Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
+
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     
-    // User Conversations
-    Route::get('/conversations', [App\Http\Controllers\User\ConversationController::class, 'index'])->name('conversations.index');
-    Route::get('/conversations/create', [App\Http\Controllers\User\ConversationController::class, 'create'])->name('conversations.create');
-    Route::post('/conversations', [App\Http\Controllers\User\ConversationController::class, 'store'])->name('conversations.store');
-    Route::get('/conversations/{conversation}', [App\Http\Controllers\User\ConversationController::class, 'show'])->name('conversations.show');
-    Route::post('/conversations/{conversation}/reply', [App\Http\Controllers\User\ConversationController::class, 'reply'])->name('conversations.reply');
-    
-    // User Profile Routes
-    Route::get('/profile', [App\Http\Controllers\User\ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [App\Http\Controllers\User\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [App\Http\Controllers\User\ProfileController::class, 'update'])->name('profile.update');
-    Route::get('/profile/change-password', [App\Http\Controllers\User\ProfileController::class, 'changePassword'])->name('profile.change-password');
-    Route::put('/profile/password', [App\Http\Controllers\User\ProfileController::class, 'updatePassword'])->name('profile.update-password');
-  // Real-time routes - أضف هذه
-    Route::get('/conversations/{conversation}/check-new-messages', [App\Http\Controllers\User\ConversationController::class, 'checkNewMessages'])->name('conversations.check-new-messages');
-    
-    // هذا هو المفقود:
-    Route::get('/conversations/unread-count', [App\Http\Controllers\User\ConversationController::class, 'getUnreadCount'])->name('conversations.unread-count');
-    
-    // Mark as read
-    Route::patch('/conversations/{conversation}/mark-read', [App\Http\Controllers\User\ConversationController::class, 'markAsRead'])->name('conversations.mark-read');
-});
-// ====================================
-// ADMIN ROUTES
-// ====================================
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {    
-    // Dashboard Routes
-    Route::get('/dashboard', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/notifications', [App\Http\Controllers\Admin\AdminDashboardController::class, 'getNotificationCounts'])->name('dashboard.notifications');
-    Route::get('/dashboard/export', [App\Http\Controllers\Admin\AdminDashboardController::class, 'exportDashboardData'])->name('dashboard.export');
-    
-    // Admin Profile Routes
-    Route::get('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
-    Route::get('/profile/change-password', [App\Http\Controllers\Admin\ProfileController::class, 'changePassword'])->name('profile.change-password');
-    Route::put('/profile/password', [App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('profile.update-password');
+    // Admin Dashboard
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/notifications', [AdminDashboardController::class, 'getNotificationCounts'])->name('dashboard.notifications');
+    Route::post('/dashboard/mark-conversations-read', [AdminDashboardController::class, 'markAllConversationsRead'])->name('dashboard.mark-conversations-read');
+    Route::post('/dashboard/mark-testimonials-reviewed', [AdminDashboardController::class, 'markAllTestimonialsReviewed'])->name('dashboard.mark-testimonials-reviewed');
+    Route::get('/dashboard/export', [AdminDashboardController::class, 'exportDashboardData'])->name('dashboard.export');
     
     // Categories Management
-    Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class);
+    Route::resource('categories', AdminCategoryController::class);
     
     // Products Management
-    Route::resource('products', App\Http\Controllers\Admin\ProductController::class);
-    Route::post('/products/{product}/update-image-order', [App\Http\Controllers\Admin\ProductController::class, 'updateImageOrder'])->name('products.update-image-order');
-    
-    // Educational Cards Management
-    Route::resource('platforms', App\Http\Controllers\Admin\PlatformController::class);
-    Route::resource('grades', App\Http\Controllers\Admin\GradeController::class);
-    Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);
-    Route::resource('educational-cards', App\Http\Controllers\Admin\EducationalCardController::class);
-    
-    // AJAX Routes for Educational Cards
-    Route::get('/platforms/{platform}/grades', [App\Http\Controllers\Admin\SubjectController::class, 'getGradesByPlatform'])->name('platforms.grades');
-    Route::get('/grades/{grade}/subjects', [App\Http\Controllers\Admin\EducationalCardController::class, 'getSubjectsByGrade'])->name('grades.subjects');
-    Route::post('/educational-cards/{educationalCard}/update-image-order', [App\Http\Controllers\Admin\EducationalCardController::class, 'updateImageOrder'])->name('educational-cards.update-image-order');
+    Route::resource('products', AdminProductController::class);
+    Route::post('/products/{product}/update-image-order', [AdminProductController::class, 'updateImageOrder'])->name('products.update-image-order');
     
     // Orders Management
-    Route::resource('orders', App\Http\Controllers\Admin\OrderController::class);
+    Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update', 'destroy']);
+    
+    // Educational Generations Management
+    Route::get('/generations', [GenerationsController::class, 'index'])->name('generations.index');
+    Route::get('/generations/create', [GenerationsController::class, 'create'])->name('generations.create');
+    Route::post('/generations', [GenerationsController::class, 'store'])->name('generations.store');
+    Route::get('/generations/{generation}', [GenerationsController::class, 'show'])->name('generations.show');
+    Route::get('/generations/{generation}/edit', [GenerationsController::class, 'edit'])->name('generations.edit');
+    Route::patch('/generations/{generation}', [GenerationsController::class, 'update'])->name('generations.update');
+    Route::delete('/generations/{generation}', [GenerationsController::class, 'destroy'])->name('generations.destroy');
+    Route::post('/generations/{generation}/toggle-status', [GenerationsController::class, 'toggleStatus'])->name('generations.toggle-status');
+    
+    // Educational Subjects Management
+    Route::resource('educational-subjects', EducationalSubjectsController::class);
+    Route::post('/educational-subjects/{educationalSubject}/toggle-status', [EducationalSubjectsController::class, 'toggleStatus'])->name('educational-subjects.toggle-status');
+    Route::get('/educational-subjects/generation/{generation}', [EducationalSubjectsController::class, 'getByGeneration'])->name('educational-subjects.by-generation');
+    
+    // Educational Card Orders Management
+    Route::prefix('educational-card-orders')->name('educational-card-orders.')->group(function () {
+        Route::get('/', [EducationalCardOrdersController::class, 'index'])->name('index');
+        Route::get('/{educationalCardOrder}', [EducationalCardOrdersController::class, 'show'])->name('show');
+        Route::patch('/{educationalCardOrder}/status', [EducationalCardOrdersController::class, 'updateStatus'])->name('update-status');
+        Route::delete('/{educationalCardOrder}', [EducationalCardOrdersController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-update', [EducationalCardOrdersController::class, 'bulkUpdate'])->name('bulk-update');
+        Route::get('/export/csv', [EducationalCardOrdersController::class, 'export'])->name('export');
+        Route::get('/stats/quick', [EducationalCardOrdersController::class, 'quickStats'])->name('quick-stats');
+    });
+    
+    // Educational Cards Management (Admin)
+    Route::prefix('educational-cards')->name('educational-cards.')->group(function () {
+        Route::get('/', function() {
+            if (Auth::user()->role !== 'admin') abort(403);
+            return view('admin.educational-cards.index');
+        })->name('index');
+        Route::get('/create', function() {
+            if (Auth::user()->role !== 'admin') abort(403);
+            return view('admin.educational-cards.create');
+        })->name('create');
+        Route::post('/', function() {
+            if (Auth::user()->role !== 'admin') abort(403);
+            return redirect()->route('admin.educational-cards.index');
+        })->name('store');
+        Route::get('/{id}', function($id) {
+            if (Auth::user()->role !== 'admin') abort(403);
+            return view('admin.educational-cards.show', compact('id'));
+        })->name('show');
+        Route::get('/{id}/edit', function($id) {
+            if (Auth::user()->role !== 'admin') abort(403);
+            return view('admin.educational-cards.edit', compact('id'));
+        })->name('edit');
+        Route::patch('/{id}', function($id) {
+            if (Auth::user()->role !== 'admin') abort(403);
+            return redirect()->route('admin.educational-cards.index');
+        })->name('update');
+        Route::delete('/{id}', function($id) {
+            if (Auth::user()->role !== 'admin') abort(403);
+            return redirect()->route('admin.educational-cards.index');
+        })->name('destroy');
+    });
     
     // Users Management
-    Route::resource('users', App\Http\Controllers\Admin\UserController::class);
-    
-    // Conversations Management
-    Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
-    Route::get('/conversations/{conversation}', [App\Http\Controllers\Admin\ConversationController::class, 'show'])->name('conversations.show');
-    Route::post('/conversations/{conversation}/reply', [App\Http\Controllers\Admin\ConversationController::class, 'reply'])->name('conversations.reply');
-    Route::post('/conversations/mark-all-read', [AdminDashboardController::class, 'markAllConversationsRead'])->name('conversations.mark-all-read');
+    Route::resource('users', AdminUserController::class);
+    Route::post('/users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::post('/users/{user}/verify-email', [AdminUserController::class, 'verifyEmail'])->name('users.verify-email');
+    Route::post('/users/{user}/send-password-reset', [AdminUserController::class, 'sendPasswordReset'])->name('users.send-password-reset');
+    Route::get('/users/statistics/get', [AdminUserController::class, 'getStatistics'])->name('users.statistics');
+    Route::get('/users/export/csv', [AdminUserController::class, 'export'])->name('users.export');
     
     // Testimonials Management
-    Route::get('/testimonials', [App\Http\Controllers\Admin\TestimonialController::class, 'index'])->name('testimonials.index');
-    Route::get('/testimonials/{testimonial}', [App\Http\Controllers\Admin\TestimonialController::class, 'show'])->name('testimonials.show');
-    Route::patch('/testimonials/{testimonial}/approve', [App\Http\Controllers\Admin\TestimonialController::class, 'approve'])->name('testimonials.approve');
-    Route::patch('/testimonials/{testimonial}/reject', [App\Http\Controllers\Admin\TestimonialController::class, 'reject'])->name('testimonials.reject');
-    Route::delete('/testimonials/{testimonial}', [App\Http\Controllers\Admin\TestimonialController::class, 'destroy'])->name('testimonials.destroy');
-    Route::post('/testimonials/mark-all-reviewed', [App\Http\Controllers\Admin\AdminDashboardController::class, 'markAllTestimonialsReviewed'])->name('testimonials.mark-all-reviewed');
+    Route::prefix('testimonials')->name('testimonials.')->group(function () {
+        Route::get('/', [AdminTestimonialController::class, 'index'])->name('index');
+        Route::get('/{testimonial}', [AdminTestimonialController::class, 'show'])->name('show');
+        Route::patch('/{testimonial}/approve', [AdminTestimonialController::class, 'approve'])->name('approve');
+        Route::patch('/{testimonial}/reject', [AdminTestimonialController::class, 'reject'])->name('reject');
+        Route::delete('/{testimonial}', [AdminTestimonialController::class, 'destroy'])->name('destroy');
+    });
     
     // Coupons Management
-    Route::resource('coupons', App\Http\Controllers\Admin\CouponController::class);
-    Route::get('/coupons/generate/multiple', [App\Http\Controllers\Admin\CouponController::class, 'generateMultiple'])->name('coupons.generate');
-    Route::post('/coupons/generate/multiple', [App\Http\Controllers\Admin\CouponController::class, 'storeMultiple'])->name('coupons.storeMultiple');
+    Route::prefix('coupons')->name('coupons.')->group(function () {
+        Route::get('/', [AdminCouponController::class, 'index'])->name('index');
+        Route::get('/create', [AdminCouponController::class, 'create'])->name('create');
+        Route::post('/', [AdminCouponController::class, 'store'])->name('store');
+        Route::get('/{coupon}', [AdminCouponController::class, 'show'])->name('show');
+        Route::get('/{coupon}/edit', [AdminCouponController::class, 'edit'])->name('edit');
+        Route::patch('/{coupon}', [AdminCouponController::class, 'update'])->name('update');
+        Route::delete('/{coupon}', [AdminCouponController::class, 'destroy'])->name('destroy');
+        
+        // Multiple Coupons Generation
+        Route::get('/generate/multiple', [AdminCouponController::class, 'generateMultiple'])->name('generate-multiple');
+        Route::post('/generate/multiple', [AdminCouponController::class, 'storeMultiple'])->name('store-multiple');
+    });
+    
+    // Conversations Management
+    Route::prefix('conversations')->name('conversations.')->group(function () {
+        Route::get('/', [AdminConversationController::class, 'index'])->name('index');
+        Route::get('/{conversation}', [AdminConversationController::class, 'show'])->name('show');
+        Route::post('/{conversation}/reply', [AdminConversationController::class, 'reply'])->name('reply');
+        Route::get('/{conversation}/check-messages', [AdminConversationController::class, 'checkNewMessages'])->name('check-messages');
+        Route::post('/{conversation}/mark-read', [AdminConversationController::class, 'markAsRead'])->name('mark-read');
+        Route::post('/mark-all-read', [AdminConversationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::get('/counts/get', [AdminConversationController::class, 'getCounts'])->name('get-counts');
+    });
+    
+    // Admin Profile Management
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [AdminProfileController::class, 'show'])->name('show');
+        Route::get('/edit', [AdminProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [AdminProfileController::class, 'update'])->name('update');
+        Route::get('/change-password', [AdminProfileController::class, 'changePassword'])->name('change-password');
+        Route::patch('/change-password', [AdminProfileController::class, 'updatePassword'])->name('update-password');
+    });
 });
-
-// ====================================
-// DEVELOPMENT/DEBUG ROUTES
-// ====================================
-if (app()->environment('local')) {
-    Route::get('/project-structure', function () {
-        function listFolderFiles($dir, $prefix = '') {
-            if (!is_dir($dir)) return '';
-            
-            $ffs = scandir($dir);
-            $output = '';
-            foreach ($ffs as $ff) {
-                if ($ff != '.' && $ff != '..') {
-                    $path = $dir . DIRECTORY_SEPARATOR . $ff;
-                    $output .= $prefix . '├── ' . $ff;
-                    if (is_dir($path)) {
-                        $output .= "/\n" . listFolderFiles($path, $prefix . '│   ');
-                    } else {
-                        $output .= "\n";
-                    }
-                }
-            }
-            return $output;
-        }
-
-        $basePaths = [
-            'app/Http/Controllers' => 'Controllers',
-            'app/Models' => 'Models',
-            'config' => 'Config',
-            'database/migrations' => 'Migrations',
-            'resources/views' => 'Views',
-            'routes' => 'Routes',
-        ];
-
-        $structure = '';
-
-        foreach ($basePaths as $path => $label) {
-            $fullPath = base_path($path);
-            if (is_dir($fullPath)) {
-                $structure .= "$label:\n";
-                $structure .= listFolderFiles($fullPath);
-                $structure .= "\n\n";
-            }
-        }
-
-        return "<pre>$structure</pre>";
-    })->name('debug.structure');
-}

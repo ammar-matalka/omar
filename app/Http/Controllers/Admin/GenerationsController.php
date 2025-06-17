@@ -5,17 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\EducationalGeneration;
+use Illuminate\Support\Facades\Auth;
 
 class GenerationsController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'admin']);
-    }
-
     public function index()
     {
-        $generations = EducationalGeneration::withCount('subjects', 'orders')
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Access denied. Admin privileges required.');
+        }
+
+        $generations = EducationalGeneration::withCount(['subjects', 'orders'])
             ->orderBy('order', 'asc')
             ->orderBy('year', 'desc')
             ->paginate(20);
@@ -25,11 +26,21 @@ class GenerationsController extends Controller
 
     public function create()
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         return view('admin.generations.create');
     }
 
     public function store(Request $request)
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'year' => 'required|integer|min:2000|max:2050|unique:educational_generations,year',
@@ -63,6 +74,11 @@ class GenerationsController extends Controller
 
     public function show(EducationalGeneration $generation)
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $generation->load(['subjects' => function($query) {
             $query->orderBy('order', 'asc')->orderBy('name', 'asc');
         }]);
@@ -79,11 +95,21 @@ class GenerationsController extends Controller
 
     public function edit(EducationalGeneration $generation)
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         return view('admin.generations.edit', compact('generation'));
     }
 
     public function update(Request $request, EducationalGeneration $generation)
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'year' => 'required|integer|min:2000|max:2050|unique:educational_generations,year,' . $generation->id,
@@ -117,6 +143,11 @@ class GenerationsController extends Controller
 
     public function destroy(EducationalGeneration $generation)
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         // Check if generation has orders
         if ($generation->orders()->count() > 0) {
             return back()->withErrors(['error' => 'لا يمكن حذف الجيل لأنه يحتوي على طلبات']);
@@ -130,6 +161,11 @@ class GenerationsController extends Controller
 
     public function toggleStatus(EducationalGeneration $generation)
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $generation->update([
             'is_active' => !$generation->is_active
         ]);

@@ -1,494 +1,264 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'البطاقات التعليمية')
+@section('title', 'إدارة طلبات البطاقات التعليمية')
 
 @section('content')
-<div class="container" style="margin-top: var(--space-xl);">
-    <!-- Header Section -->
-    <div style="text-align: center; margin-bottom: var(--space-3xl);">
-        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--primary-500), var(--secondary-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            البطاقات التعليمية
-        </h1>
-        <p style="font-size: 1.125rem; color: var(--gray-600); max-width: 600px; margin: 0 auto;">
-            اختر الجيل المناسب لك واطلب الدوسية التي تحتاجها بسهولة
-        </p>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">إدارة طلبات البطاقات التعليمية</h1>
+        <div>
+            <a href="{{ route('admin.educational-card-orders.export') }}" class="btn btn-success btn-icon-split">
+                <span class="icon text-white-50">
+                    <i class="fas fa-download"></i>
+                </span>
+                <span class="text">تصدير CSV</span>
+            </a>
+        </div>
     </div>
 
-    <!-- Generations Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" style="margin-bottom: var(--space-3xl);">
-        @forelse($generations as $generation)
-            <div class="generation-card card" 
-                 style="cursor: pointer; transition: all var(--transition-normal); border: 2px solid transparent;"
-                 onclick="selectGeneration({{ $generation->id }}, '{{ $generation->display_name }}')">
-                <div class="card-body" style="text-align: center; padding: var(--space-xl);">
-                    <!-- Generation Icon -->
-                    <div style="width: 80px; height: 80px; margin: 0 auto var(--space-lg); background: linear-gradient(135deg, var(--primary-500), var(--secondary-500)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700;">
-                        {{ $generation->year }}
-                    </div>
-                    
-                    <!-- Generation Name -->
-                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); color: var(--gray-900);">
-                        {{ $generation->display_name }}
-                    </h3>
-                    
-                    <!-- Description -->
-                    @if($generation->description)
-                        <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: var(--space-md);">
-                            {{ Str::limit($generation->description, 100) }}
-                        </p>
-                    @endif
-                    
-                    <!-- Subjects Count -->
-                    <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-xs); color: var(--primary-600); font-size: 0.875rem; font-weight: 500;">
-                        <i class="fas fa-book"></i>
-                        <span>{{ $generation->subjects_count }} مادة متاحة</span>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-3xl);">
-                <div style="color: var(--gray-400); font-size: 3rem; margin-bottom: var(--space-lg);">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <h3 style="color: var(--gray-600); margin-bottom: var(--space-sm);">لا توجد أجيال متاحة حالياً</h3>
-                <p style="color: var(--gray-500);">سيتم إضافة الأجيال قريباً</p>
-            </div>
-        @endforelse
-    </div>
-
-    <!-- Order Form Modal -->
-    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: var(--z-modal); align-items: center; justify-content: center; padding: var(--space-md);">
-        <div style="background: white; border-radius: var(--radius-xl); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
-            <!-- Modal Header -->
-            <div style="padding: var(--space-xl); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
-                <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900); margin: 0;">
-                    طلب دوسية - <span id="selectedGenerationName"></span>
-                </h2>
-                <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--gray-400); cursor: pointer;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <!-- Order Form -->
-            <form id="orderForm" action="{{ route('educational-cards.submit-order') }}" method="POST" style="padding: var(--space-xl);">
-                @csrf
-                <input type="hidden" id="generationId" name="generation_id" value="">
-
-                <!-- Student Name -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-user"></i>
-                        اسم الطالب *
-                    </label>
-                    <input type="text" name="student_name" class="form-input" required 
-                           placeholder="أدخل اسم الطالب" value="{{ old('student_name') }}">
-                </div>
-
-                <!-- Semester Selection -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-calendar"></i>
-                        الفصل الدراسي *
-                    </label>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm);">
-                        <label style="display: flex; align-items: center; padding: var(--space-md); border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);" class="semester-option">
-                            <input type="radio" name="semester" value="first" style="margin-right: var(--space-sm);" {{ old('semester') == 'first' ? 'checked' : '' }}>
-                            <span>الأول</span>
-                        </label>
-                        <label style="display: flex; align-items: center; padding: var(--space-md); border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);" class="semester-option">
-                            <input type="radio" name="semester" value="second" style="margin-right: var(--space-sm);" {{ old('semester') == 'second' ? 'checked' : '' }}>
-                            <span>الثاني</span>
-                        </label>
-                        <label style="display: flex; align-items: center; padding: var(--space-md); border: 1px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);" class="semester-option">
-                            <input type="radio" name="semester" value="both" style="margin-right: var(--space-sm);" {{ old('semester', 'both') == 'both' ? 'checked' : '' }}>
-                            <span>كلاهما</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Subjects Selection -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-book"></i>
-                        المواد المطلوبة *
-                    </label>
-                    <div id="subjectsContainer" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-md); background: var(--gray-50); min-height: 120px; display: flex; align-items: center; justify-content: center; color: var(--gray-500);">
-                        <div style="text-align: center;">
-                            <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
-                            <p>جاري تحميل المواد...</p>
+    <!-- إحصائيات سريعة -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">إجمالي الطلبات</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['total_orders'] }}</div>
                         </div>
-                    </div>
-                    <div id="totalPriceContainer" style="margin-top: var(--space-md); padding: var(--space-md); background: var(--primary-50); border-radius: var(--radius-md); border: 1px solid var(--primary-200); display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 600; color: var(--primary-700);">المجموع الفرعي:</span>
-                            <span id="subtotalPrice" style="font-size: 1.125rem; font-weight: 700; color: var(--primary-700);">0 JD</span>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Quantity -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-sort-numeric-up"></i>
-                        الكمية *
-                    </label>
-                    <input type="number" name="quantity" class="form-input" min="1" max="10" value="{{ old('quantity', 1) }}" 
-                           onchange="updateTotalPrice()" required>
-                </div>
-
-                <!-- Total Price Display -->
-                <div id="totalPriceDisplay" style="margin-bottom: var(--space-lg); padding: var(--space-lg); background: linear-gradient(135deg, var(--success-50), var(--success-100)); border: 2px solid var(--success-200); border-radius: var(--radius-lg); text-align: center; display: none;">
-                    <div style="font-size: 0.875rem; color: var(--success-700); margin-bottom: var(--space-xs);">المجموع النهائي</div>
-                    <div id="finalTotalPrice" style="font-size: 2rem; font-weight: 800; color: var(--success-800);">0 JD</div>
-                </div>
-
-                <!-- Contact Information -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label">
-                            <i class="fas fa-phone"></i>
-                            رقم الهاتف
-                        </label>
-                        <input type="tel" name="phone" class="form-input" placeholder="07xxxxxxxx" value="{{ old('phone') }}">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label">
-                            <i class="fas fa-map-marker-alt"></i>
-                            المدينة/المنطقة
-                        </label>
-                        <input type="text" name="address" class="form-input" placeholder="مثال: إربد - الحي الشرقي" value="{{ old('address') }}">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">قيد الانتظار</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['pending_orders'] }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Notes -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-sticky-note"></i>
-                        ملاحظات إضافية
-                    </label>
-                    <textarea name="notes" class="form-input" rows="3" placeholder="أي ملاحظات أو طلبات خاصة...">{{ old('notes') }}</textarea>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">قيد المعالجة</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['processing_orders'] }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-cog fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Submit Button -->
-                <div style="display: flex; gap: var(--space-md); justify-content: flex-end;">
-                    <button type="button" onclick="closeModal()" class="btn btn-secondary">
-                        إلغاء
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                        <i class="fas fa-paper-plane"></i>
-                        إرسال الطلب
-                    </button>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">مكتملة</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['completed_orders'] }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الفلاتر -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.educational-card-orders.index') }}">
+                <div class="row">
+                    <div class="col-md-2">
+                        <label for="status">الحالة</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="">جميع الحالات</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>قيد الانتظار</option>
+                            <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>قيد المعالجة</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>مكتملة</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>ملغاة</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="generation_id">الجيل</label>
+                        <select name="generation_id" id="generation_id" class="form-control">
+                            <option value="">جميع الأجيال</option>
+                            @foreach($generations as $generation)
+                                <option value="{{ $generation->id }}" {{ request('generation_id') == $generation->id ? 'selected' : '' }}>
+                                    {{ $generation->display_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="search">البحث</label>
+                        <input type="text" name="search" id="search" class="form-control" 
+                               value="{{ request('search') }}" placeholder="اسم الطالب أو المستخدم">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="date_from">من تاريخ</label>
+                        <input type="date" name="date_from" id="date_from" class="form-control" 
+                               value="{{ request('date_from') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="date_to">إلى تاريخ</label>
+                        <input type="date" name="date_to" id="date_to" class="form-control" 
+                               value="{{ request('date_to') }}">
+                    </div>
+                    <div class="col-md-1">
+                        <label>&nbsp;</label>
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
-</div>
 
-@auth
-    <!-- User Orders Section -->
-    <div class="container" style="margin-top: var(--space-3xl); margin-bottom: var(--space-3xl);">
-        <div style="text-align: center; margin-bottom: var(--space-xl);">
-            <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: var(--space-sm);">طلباتي</h2>
-            <p style="color: var(--gray-600);">يمكنك متابعة حالة طلباتك من هنا</p>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
-        
-        <div style="text-align: center;">
-            <a href="{{ route('user.educational-orders.index') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-list"></i>
-                عرض جميع طلباتي
-            </a>
+    @endif
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">قائمة طلبات البطاقات التعليمية</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>اسم الطالب</th>
+                            <th>المستخدم</th>
+                            <th>الجيل</th>
+                            <th>الفصل</th>
+                            <th>الكمية</th>
+                            <th>المجموع</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($orders as $order)
+                            <tr>
+                                <td>{{ $order->id }}</td>
+                                <td>{{ $order->student_name }}</td>
+                                <td>
+                                    <small>{{ $order->user->name }}</small><br>
+                                    <small class="text-muted">{{ $order->user->email }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge badge-secondary">
+                                        {{ $order->generation->display_name }}
+                                    </span>
+                                </td>
+                                <td>{{ $order->semester_text }}</td>
+                                <td>{{ $order->quantity }}</td>
+                                <td>{{ $order->formatted_total }}</td>
+                                <td>
+                                    <span class="badge badge-{{ $order->status_color }}">
+                                        {{ $order->status_text }}
+                                    </span>
+                                </td>
+                                <td>{{ $order->created_at->format('Y-m-d') }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ route('admin.educational-card-orders.show', $order) }}" 
+                                           class="btn btn-info btn-sm" title="عرض">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if($order->status !== 'completed')
+                                            <button type="button" class="btn btn-warning btn-sm" 
+                                                    data-toggle="modal" data-target="#statusModal{{ $order->id }}" title="تغيير الحالة">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <!-- Modal لتغيير الحالة -->
+                                    <div class="modal fade" id="statusModal{{ $order->id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">تغيير حالة الطلب #{{ $order->id }}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal">
+                                                        <span>&times;</span>
+                                                    </button>
+                                                </div>
+                                                <form action="{{ route('admin.educational-card-orders.update-status', $order) }}" method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <label for="status{{ $order->id }}">الحالة الجديدة</label>
+                                                            <select name="status" id="status{{ $order->id }}" class="form-control">
+                                                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>قيد الانتظار</option>
+                                                                <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>قيد المعالجة</option>
+                                                                <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>مكتملة</option>
+                                                                <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>ملغاة</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="admin_notes{{ $order->id }}">ملاحظات الأدمن</label>
+                                                            <textarea name="admin_notes" id="admin_notes{{ $order->id }}" 
+                                                                      class="form-control" rows="3" 
+                                                                      placeholder="ملاحظات إضافية (اختياري)">{{ $order->admin_notes }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">إلغاء</button>
+                                                        <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10" class="text-center">لا توجد طلبات</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if($orders->hasPages())
+                <div class="d-flex justify-content-center">
+                    {{ $orders->appends(request()->query())->links() }}
+                </div>
+            @endif
         </div>
     </div>
-@endauth
-
-<style>
-    .generation-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-xl);
-        border-color: var(--primary-500);
-    }
-
-    .generation-card:hover .card-body > div:first-child {
-        background: linear-gradient(135deg, var(--secondary-500), var(--primary-500));
-        transform: scale(1.05);
-    }
-
-    .semester-option:hover {
-        border-color: var(--primary-500);
-        background: var(--primary-50);
-    }
-
-    .semester-option:has(input:checked) {
-        border-color: var(--primary-500);
-        background: var(--primary-100);
-        color: var(--primary-700);
-    }
-
-    .subject-checkbox {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--space-md);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--space-sm);
-        cursor: pointer;
-        transition: all var(--transition-fast);
-    }
-
-    .subject-checkbox:hover {
-        border-color: var(--primary-500);
-        background: var(--primary-50);
-    }
-
-    .subject-checkbox:has(input:checked) {
-        border-color: var(--primary-500);
-        background: var(--primary-100);
-    }
-
-    .subject-info {
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-    }
-
-    .subject-price {
-        font-weight: 600;
-        color: var(--success-600);
-    }
-
-    #orderModal.show {
-        display: flex !important;
-    }
-
-    @media (max-width: 768px) {
-        #orderModal > div {
-            margin: var(--space-md);
-            max-height: calc(100vh - 2rem);
-        }
-        
-        .form-group:has([name="semester"]) > div {
-            grid-template-columns: 1fr;
-        }
-        
-        .form-group:has([name="phone"]) + .form-group {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<script>
-    let selectedSubjects = [];
-    let subjectsData = [];
-
-    function selectGeneration(generationId, generationName) {
-        @guest
-            // إذا كان المستخدم غير مسجل دخول
-            alert('يرجى تسجيل الدخول أولاً لإرسال الطلبات');
-            window.location.href = '{{ route("login") }}';
-            return;
-        @endguest
-
-        document.getElementById('generationId').value = generationId;
-        document.getElementById('selectedGenerationName').textContent = generationName;
-        
-        // Load subjects for this generation
-        loadSubjects(generationId);
-        
-        // Show modal
-        document.getElementById('orderModal').classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-        document.getElementById('orderModal').classList.remove('show');
-        document.body.style.overflow = 'auto';
-        
-        // Reset form
-        document.getElementById('orderForm').reset();
-        selectedSubjects = [];
-        subjectsData = [];
-        updateTotalPrice();
-    }
-
-    function loadSubjects(generationId) {
-        const container = document.getElementById('subjectsContainer');
-        container.innerHTML = `
-            <div style="text-align: center;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
-                <p>جاري تحميل المواد...</p>
-            </div>
-        `;
-
-        fetch(`/educational-cards/generations/${generationId}/subjects`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            subjectsData = data.subjects || [];
-            renderSubjects();
-        })
-        .catch(error => {
-            console.error('Error loading subjects:', error);
-            container.innerHTML = `
-                <div style="text-align: center; color: var(--error-500);">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
-                    <p>فشل في تحميل المواد. يرجى المحاولة مرة أخرى.</p>
-                </div>
-            `;
-        });
-    }
-
-    function renderSubjects() {
-        const container = document.getElementById('subjectsContainer');
-        
-        if (subjectsData.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; color: var(--gray-500);">
-                    <i class="fas fa-book-open" style="font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
-                    <p>لا توجد مواد متاحة لهذا الجيل حالياً</p>
-                </div>
-            `;
-            return;
-        }
-
-        let html = '';
-        subjectsData.forEach(subject => {
-            const isChecked = selectedSubjects.includes(subject.id);
-            html += `
-                <label class="subject-checkbox">
-                    <div class="subject-info">
-                        <input type="checkbox" name="subjects[]" value="${subject.id}" 
-                               onchange="toggleSubject(${subject.id})" ${isChecked ? 'checked' : ''}>
-                        <span style="font-weight: 500;">${subject.name}</span>
-                    </div>
-                    <span class="subject-price">${subject.formatted_price}</span>
-                </label>
-            `;
-        });
-
-        container.innerHTML = html;
-        updateTotalPrice();
-    }
-
-    function toggleSubject(subjectId) {
-        const index = selectedSubjects.indexOf(subjectId);
-        if (index > -1) {
-            selectedSubjects.splice(index, 1);
-        } else {
-            selectedSubjects.push(subjectId);
-        }
-        updateTotalPrice();
-    }
-
-    function updateTotalPrice() {
-        const quantity = parseInt(document.querySelector('[name="quantity"]').value) || 1;
-        let subtotal = 0;
-
-        // Calculate subtotal
-        selectedSubjects.forEach(subjectId => {
-            const subject = subjectsData.find(s => s.id === subjectId);
-            if (subject) {
-                subtotal += parseFloat(subject.price);
-            }
-        });
-
-        const total = subtotal * quantity;
-
-        // Update subtotal display
-        const subtotalContainer = document.getElementById('totalPriceContainer');
-        const subtotalPrice = document.getElementById('subtotalPrice');
-        
-        if (selectedSubjects.length > 0) {
-            subtotalContainer.style.display = 'block';
-            subtotalPrice.textContent = subtotal.toFixed(2) + ' JD';
-        } else {
-            subtotalContainer.style.display = 'none';
-        }
-
-        // Update final total display
-        const totalDisplay = document.getElementById('totalPriceDisplay');
-        const finalTotalPrice = document.getElementById('finalTotalPrice');
-        
-        if (selectedSubjects.length > 0) {
-            totalDisplay.style.display = 'block';
-            finalTotalPrice.textContent = total.toFixed(2) + ' JD';
-        } else {
-            totalDisplay.style.display = 'none';
-        }
-    }
-
-    // Form submission
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
-        if (selectedSubjects.length === 0) {
-            e.preventDefault();
-            alert('يرجى اختيار مادة واحدة على الأقل');
-            return;
-        }
-
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
-    });
-
-    // Close modal when clicking outside
-    document.getElementById('orderModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModal();
-        }
-    });
-
-    // Handle escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && document.getElementById('orderModal').classList.contains('show')) {
-            closeModal();
-        }
-    });
-
-    // Initialize quantity change listener
-    document.addEventListener('DOMContentLoaded', function() {
-        const quantityInput = document.querySelector('[name="quantity"]');
-        if (quantityInput) {
-            quantityInput.addEventListener('change', updateTotalPrice);
-            quantityInput.addEventListener('input', updateTotalPrice);
-        }
-    });
-
-    // Handle old form values
-    @if(old('generation_id') && old('subjects'))
-        document.addEventListener('DOMContentLoaded', function() {
-            // If there are old values, show the modal with previous data
-            const oldGenerationId = '{{ old("generation_id") }}';
-            const oldSubjects = @json(old('subjects', []));
-            
-            if (oldGenerationId) {
-                // Find generation name
-                const generationCards = document.querySelectorAll('.generation-card');
-                generationCards.forEach(card => {
-                    if (card.getAttribute('onclick').includes(oldGenerationId)) {
-                        const generationName = card.querySelector('h3').textContent;
-                        document.getElementById('generationId').value = oldGenerationId;
-                        document.getElementById('selectedGenerationName').textContent = generationName;
-                        
-                        loadSubjects(oldGenerationId);
-                        selectedSubjects = oldSubjects.map(id => parseInt(id));
-                        
-                        document.getElementById('orderModal').classList.add('show');
-                        document.body.style.overflow = 'hidden';
-                    }
-                });
-            }
-        });
-    @endif
-</script>
+</div>
 @endsection

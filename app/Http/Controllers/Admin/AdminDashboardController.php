@@ -13,6 +13,7 @@ use App\Models\Conversation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class AdminDashboardController extends Controller
 {
@@ -23,6 +24,11 @@ class AdminDashboardController extends Controller
      */
     public function index()
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Access denied. Admin privileges required.');
+        }
+
         // Get counts for dashboard cards
         $totalProducts = Product::count();
         $totalOrders = Order::count();
@@ -142,6 +148,11 @@ class AdminDashboardController extends Controller
      */
     public function getNotificationCounts()
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $unreadConversationsCount = Conversation::where('is_read_by_admin', false)->count();
         $pendingTestimonialsCount = Testimonial::where('status', 'pending')->count();
         
@@ -158,6 +169,11 @@ class AdminDashboardController extends Controller
      */
     public function markAllConversationsRead()
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         Conversation::where('is_read_by_admin', false)
             ->update(['is_read_by_admin' => true]);
         
@@ -171,6 +187,11 @@ class AdminDashboardController extends Controller
      */
     public function markAllTestimonialsReviewed()
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         // This is just for clearing the notification badge
         // You might want to add a 'reviewed' status or handle differently
         return redirect()->back()->with('success', 'All testimonials notifications cleared.');
@@ -186,8 +207,8 @@ class AdminDashboardController extends Controller
         return [
             'products' => [
                 'total' => Product::count(),
-                'active' => Product::where('status', 'active')->count(),
-                'out_of_stock' => Product::where('stock_quantity', '<=', 0)->count(),
+                'active' => Product::where('is_active', true)->count(),
+                'out_of_stock' => Product::where('stock', '<=', 0)->count(),
             ],
             'orders' => [
                 'total' => Order::count(),
@@ -218,7 +239,7 @@ class AdminDashboardController extends Controller
             'notifications' => [
                 'unread_conversations' => Conversation::where('is_read_by_admin', false)->count(),
                 'pending_testimonials' => Testimonial::where('status', 'pending')->count(),
-                'low_stock_products' => Product::where('stock_quantity', '<=', 5)->count(),
+                'low_stock_products' => Product::where('stock', '<=', 5)->count(),
                 'pending_orders' => Order::where('status', 'pending')->count(),
             ]
         ];
@@ -231,6 +252,11 @@ class AdminDashboardController extends Controller
      */
     public function exportDashboardData()
     {
+        // تحقق من الأدمن
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
         $stats = $this->getDashboardStats();
         
         $headers = [

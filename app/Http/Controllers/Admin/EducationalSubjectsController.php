@@ -6,12 +6,22 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\EducationalSubject;
 use App\Models\EducationalGeneration;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth; // إضافة هذا السطر
 
 class EducationalSubjectsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'admin']);
+        $this->middleware(['auth']);
+        
+        // إضافة تحقق من الأدمن
+        $this->middleware(function ($request, $next) {
+            if (!Auth::user() || Auth::user()->role !== 'admin') {
+                abort(403, 'Access denied. Admin only.');
+            }
+            return $next($request);
+        });
     }
 
     public function index(Request $request)
@@ -90,7 +100,7 @@ class EducationalSubjectsController extends Controller
         $orderStats = [
             'total_orders' => $educationalSubject->orderItems()->count(),
             'total_quantity' => $educationalSubject->orderItems()->sum('quantity'),
-            'total_revenue' => $educationalSubject->orderItems()->sum(\DB::raw('price * quantity'))
+            'total_revenue' => $educationalSubject->orderItems()->sum(DB::raw('price * quantity'))
         ];
 
         return view('admin.educational-subjects.show', compact('educationalSubject', 'orderStats'));
