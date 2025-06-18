@@ -40,6 +40,7 @@ use App\Http\Controllers\Admin\ConversationController as AdminConversationContro
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\EducationalSubjectsController;
 use App\Http\Controllers\Admin\GenerationsController;
+use App\Http\Controllers\Admin\EducationalCardOrdersController;
 // النظام الجديد
 use App\Http\Controllers\Admin\TeachersController;
 use App\Http\Controllers\Admin\PlatformsController;
@@ -221,6 +222,30 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('educational-subjects', EducationalSubjectsController::class);
     Route::post('/educational-subjects/{educationalSubject}/toggle-status', [EducationalSubjectsController::class, 'toggleStatus'])->name('educational-subjects.toggle-status');
     Route::get('/educational-subjects/generation/{generation}', [EducationalSubjectsController::class, 'getByGeneration'])->name('educational-subjects.by-generation');
+    
+    // Educational Cards Management - إضافة المسارات المفقودة
+    Route::prefix('educational-cards')->name('educational-cards.')->group(function () {
+        Route::get('/', function() { 
+            return redirect()->route('admin.educational-card-orders.index'); 
+        })->name('index');
+        Route::get('/create', function() { 
+            return redirect()->route('admin.generations.create'); 
+        })->name('create');
+        Route::post('/', function() { 
+            return redirect()->route('admin.educational-card-orders.index'); 
+        })->name('store');
+    });
+
+    // Educational Card Orders Management - طلبات البطاقات التعليمية
+    Route::prefix('educational-card-orders')->name('educational-card-orders.')->group(function () {
+        Route::get('/', [EducationalCardOrdersController::class, 'index'])->name('index');
+        Route::get('/{educationalCardOrder}', [EducationalCardOrdersController::class, 'show'])->name('show');
+        Route::patch('/{educationalCardOrder}/status', [EducationalCardOrdersController::class, 'updateStatus'])->name('update-status');
+        Route::delete('/{educationalCardOrder}', [EducationalCardOrdersController::class, 'destroy'])->name('destroy');
+        Route::post('/bulk-update', [EducationalCardOrdersController::class, 'bulkUpdate'])->name('bulk-update');
+        Route::get('/export/csv', [EducationalCardOrdersController::class, 'export'])->name('export');
+        Route::get('/stats/quick', [EducationalCardOrdersController::class, 'quickStats'])->name('quick-stats');
+    });
     
     // Teachers Management - جديد
     Route::resource('teachers', TeachersController::class);

@@ -561,11 +561,11 @@
         <span class="quick-action-text">{{ __('Add Product') }}</span>
     </a>
     
-    <a href="{{ route('admin.educational-cards.create') }}" class="quick-action fade-in">
+    <a href="{{ route('admin.categories.create') }}" class="quick-action fade-in">
         <div class="quick-action-icon">
-            <i class="fas fa-graduation-cap"></i>
+            <i class="fas fa-tags"></i>
         </div>
-        <span class="quick-action-text">{{ __('Add Educational Card') }}</span>
+        <span class="quick-action-text">{{ __('Add Category') }}</span>
     </a>
     
     <a href="{{ route('admin.orders.index') }}" class="quick-action fade-in">

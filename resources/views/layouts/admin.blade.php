@@ -67,6 +67,7 @@
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
             
             /* Transitions */
             --transition-fast: 150ms ease;
@@ -752,68 +753,6 @@
                     </div>
                 </div>
                 
-             {{-- إضافة هذا القسم في navbar الأدمن في ملف resources/views/layouts/admin.blade.php --}}
-{{-- استبدل قسم "Educational System" الموجود بهذا الكود الجديد --}}
-
-<!-- Educational System -->
-<div class="nav-section">
-    <div class="nav-section-title">{{ __('Educational System') }}</div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.generations.index') }}" class="nav-link {{ request()->routeIs('admin.generations.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-graduation-cap"></i>
-            {{ __('Generations') }}
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational-subjects.index') }}" class="nav-link {{ request()->routeIs('admin.educational-subjects.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-book"></i>
-            {{ __('Subjects & Pricing') }}
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational-card-orders.index') }}" class="nav-link {{ request()->routeIs('admin.educational-card-orders.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-file-alt"></i>
-            {{ __('Educational Orders') }}
-            @php
-                $pendingEducationalOrders = \App\Models\EducationalCardOrder::pending()->count();
-            @endphp
-            @if($pendingEducationalOrders > 0)
-                <span class="nav-badge">{{ $pendingEducationalOrders }}</span>
-            @endif
-        </a>
-    </div>
-    
-    {{-- حافظ على الروابط القديمة إذا كانت موجودة --}}
-    @if(Route::has('admin.platforms.index'))
-    <div class="nav-item">
-        <a href="{{ route('admin.platforms.index') }}" class="nav-link {{ request()->routeIs('admin.platforms.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-desktop"></i>
-            {{ __('Platforms') }}
-        </a>
-    </div>
-    @endif
-    
-    @if(Route::has('admin.grades.index'))
-    <div class="nav-item">
-        <a href="{{ route('admin.grades.index') }}" class="nav-link {{ request()->routeIs('admin.grades.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-layer-group"></i>
-            {{ __('Grades') }}
-        </a>
-    </div>
-    @endif
-    
-    @if(Route::has('admin.educational-cards.index'))
-    <div class="nav-item">
-        <a href="{{ route('admin.educational-cards.index') }}" class="nav-link {{ request()->routeIs('admin.educational-cards.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-id-card"></i>
-            {{ __('Educational Cards') }}
-        </a>
-    </div>
-    @endif
-</div>
                 <!-- Order Management -->
                 <div class="nav-section">
                     <div class="nav-section-title">{{ __('Orders') }}</div>
@@ -878,7 +817,101 @@
             <header class="admin-header">
                 <div class="header-left">
                     <button class="sidebar-toggle" id="sidebarToggle">
-                        <i class="fas fa-bars"></i>
+                        <i class="fas fa-check-circle"></i>
+                        {{ session('success') }}
+                    </div>
+                </div>
+
+            @if(session('error'))
+                <div class="content-area" style="padding-bottom: 0;">
+                    <div class="alert alert-error fade-in">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ session('error') }}
+                    </div>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="content-area" style="padding-bottom: 0;">
+                    <div class="alert alert-error fade-in">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <ul style="margin: 0; padding-left: var(--space-lg);">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+            
+            <!-- Content -->
+            <main class="content-area">
+                @yield('content')
+            </main>
+        </div>
+    </div>
+    
+    @stack('scripts')
+    
+    <script>
+        // Sidebar toggle functionality
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('expanded');
+        });
+        
+        // Dropdown functionality
+        function toggleDropdown(element) {
+            const dropdown = element.closest('.dropdown');
+            const isOpen = dropdown.classList.contains('open');
+            
+            // Close all dropdowns
+            document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+            
+            // Toggle current dropdown
+            if (!isOpen) {
+                dropdown.classList.add('open');
+            }
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+            }
+        });
+        
+        // Initialize fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 300);
+            });
+        }, 5000);
+    </script>
+</body>
+</html> fa-bars"></i>
                     </button>
                     
                     <div>
@@ -948,7 +981,7 @@
             @if(session('success'))
                 <div class="content-area" style="padding-bottom: 0;">
                     <div class="alert alert-success fade-in">
-                        <i class="fas fa-check-circle"></i>
+<i class="fas fa-check-circle"></i>
                         {{ session('success') }}
                     </div>
                 </div>
