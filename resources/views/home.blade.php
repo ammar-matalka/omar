@@ -296,17 +296,24 @@
     <div class="container">
         <div class="hero-content fade-in">
             <h1 class="hero-title">{{ __('Welcome to') }} {{ config('app.name') }}</h1>
-            <p class="hero-subtitle">{{ __('Discover amazing products and educational materials to enhance your learning journey') }}</p>
+            <p class="hero-subtitle">{{ __('Discover amazing products to enhance your shopping experience') }}</p>
             
             <div class="hero-buttons">
                 <a href="{{ route('products.index') }}" class="hero-btn hero-btn-primary">
                     <i class="fas fa-shopping-bag"></i>
                     {{ __('Shop Products') }}
                 </a>
-                <a href="{{ route('educational-cards.index') }}" class="hero-btn hero-btn-secondary">
-                    <i class="fas fa-graduation-cap"></i>
-                    {{ __('Educational Cards') }}
+                @auth
+                <a href="{{ route('user.conversations.create') }}" class="hero-btn hero-btn-secondary">
+                    <i class="fas fa-headset"></i>
+                    {{ __('Contact Support') }}
                 </a>
+                @else
+                <a href="{{ route('register') }}" class="hero-btn hero-btn-secondary">
+                    <i class="fas fa-user-plus"></i>
+                    {{ __('Join Us') }}
+                </a>
+                @endauth
             </div>
         </div>
     </div>
@@ -316,7 +323,7 @@
 <section class="features-section">
     <div class="container">
         <h2 class="section-title">{{ __('Why Choose Us?') }}</h2>
-        <p class="section-subtitle">{{ __('We provide high-quality products and educational materials with excellent customer service') }}</p>
+        <p class="section-subtitle">{{ __('We provide high-quality products with excellent customer service') }}</p>
         
         <div class="grid grid-cols-3">
             <div class="feature-card fade-in">
@@ -349,7 +356,7 @@
 <!-- Stats Section -->
 <section class="stats-section">
     <div class="container">
-        <div class="grid grid-cols-4">
+        <div class="grid grid-cols-3">
             <div class="stat-item fade-in">
                 <div class="stat-number">1000+</div>
                 <div class="stat-label">{{ __('Happy Customers') }}</div>
@@ -358,11 +365,6 @@
             <div class="stat-item fade-in">
                 <div class="stat-number">500+</div>
                 <div class="stat-label">{{ __('Products') }}</div>
-            </div>
-            
-            <div class="stat-item fade-in">
-                <div class="stat-number">100+</div>
-                <div class="stat-label">{{ __('Educational Cards') }}</div>
             </div>
             
             <div class="stat-item fade-in">
@@ -378,7 +380,7 @@
     <div class="container">
         <div class="cta-content">
             <h2 class="cta-title">{{ __('Ready to Get Started?') }}</h2>
-            <p class="cta-description">{{ __('Join thousands of satisfied customers and start your learning journey today') }}</p>
+            <p class="cta-description">{{ __('Join thousands of satisfied customers and start your shopping journey today') }}</p>
             
             @auth
                 <a href="{{ route('products.index') }}" class="cta-btn">

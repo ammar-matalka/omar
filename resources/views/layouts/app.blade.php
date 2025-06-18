@@ -714,11 +714,7 @@
                 <ul class="nav-links">
                     <li><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
                     <li><a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">Products</a></li>
-                        <li class="dropdown" style="position: relative;">
-        <a href="{{ route('educational-cards.index') }}" class="nav-link {{ request()->routeIs('educational-cards.*') ? 'active' : '' }}">
-            <i class="fas fa-graduation-cap"></i>
-            Education
-        </a>        
+                    
                     @auth
                         <!-- Conversations -->
                         <li>
@@ -825,7 +821,7 @@
             <div class="grid grid-cols-4">
                 <div>
                     <h3 style="margin-bottom: var(--space-md); color: white;">{{ config('app.name') }}</h3>
-                    <p style="color: var(--gray-400);">Your trusted partner for educational products and services.</p>
+                    <p style="color: var(--gray-400);">Your trusted partner for quality products and excellent customer service.</p>
                 </div>
                 <div>
                     <h4 style="margin-bottom: var(--space-md); color: white;">Quick Links</h4>

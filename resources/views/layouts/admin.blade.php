@@ -817,101 +817,7 @@
             <header class="admin-header">
                 <div class="header-left">
                     <button class="sidebar-toggle" id="sidebarToggle">
-                        <i class="fas fa-check-circle"></i>
-                        {{ session('success') }}
-                    </div>
-                </div>
-
-            @if(session('error'))
-                <div class="content-area" style="padding-bottom: 0;">
-                    <div class="alert alert-error fade-in">
-                        <i class="fas fa-exclamation-circle"></i>
-                        {{ session('error') }}
-                    </div>
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div class="content-area" style="padding-bottom: 0;">
-                    <div class="alert alert-error fade-in">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <ul style="margin: 0; padding-left: var(--space-lg);">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            @endif
-            
-            <!-- Content -->
-            <main class="content-area">
-                @yield('content')
-            </main>
-        </div>
-    </div>
-    
-    @stack('scripts')
-    
-    <script>
-        // Sidebar toggle functionality
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            
-            sidebar.classList.toggle('open');
-            mainContent.classList.toggle('expanded');
-        });
-        
-        // Dropdown functionality
-        function toggleDropdown(element) {
-            const dropdown = element.closest('.dropdown');
-            const isOpen = dropdown.classList.contains('open');
-            
-            // Close all dropdowns
-            document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
-            
-            // Toggle current dropdown
-            if (!isOpen) {
-                dropdown.classList.add('open');
-            }
-        }
-        
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.dropdown')) {
-                document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
-            }
-        });
-        
-        // Initialize fade-in animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-        
-        document.querySelectorAll('.fade-in').forEach(el => {
-            observer.observe(el);
-        });
-        
-        // Auto-hide alerts after 5 seconds
-        setTimeout(() => {
-            document.querySelectorAll('.alert').forEach(alert => {
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-20px)';
-                setTimeout(() => {
-                    if (alert.parentNode) {
-                        alert.parentNode.removeChild(alert);
-                    }
-                }, 300);
-            });
-        }, 5000);
-    </script>
-</body>
-</html> fa-bars"></i>
+                        <i class="fas fa-bars"></i>
                     </button>
                     
                     <div>
@@ -981,7 +887,7 @@
             @if(session('success'))
                 <div class="content-area" style="padding-bottom: 0;">
                     <div class="alert alert-success fade-in">
-<i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check-circle"></i>
                         {{ session('success') }}
                     </div>
                 </div>
