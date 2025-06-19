@@ -61,6 +61,15 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/products/{product}/images', [ProductController::class, 'getImages'])->name('products.images');
 
+// Educational Cards (Temporary redirect to products)
+Route::get('/educational-cards', function() {
+    return redirect()->route('products.index');
+})->name('educational-cards.index');
+
+Route::get('/educational-cards/{id}', function($id) {
+    return redirect()->route('products.index');
+})->name('educational-cards.show');
+
 // ====================================
 // AUTHENTICATION ROUTES
 // ====================================
@@ -98,10 +107,10 @@ Route::middleware(['auth'])->group(function () {
     // Home/Dashboard
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     
-    // Cart Management
+    // Cart Management - FIX: تصحيح أسماء routes
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');
-        Route::post('/add', [CartController::class, 'addItem'])->name('add');
+        Route::post('/add-item', [CartController::class, 'addItem'])->name('addItem'); // Fixed: was 'add'
         Route::patch('/update/{cartItem}', [CartController::class, 'update'])->name('update');
         Route::delete('/remove/{cartItem}', [CartController::class, 'remove'])->name('remove');
         Route::delete('/clear', [CartController::class, 'clear'])->name('clear');

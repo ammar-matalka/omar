@@ -35,10 +35,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role',
-        'phone',         // Add phone field
-        'address',       // Add address field
-        'profile_image', // Add profile image field
-        'email_verified_at', // Add this for manual verification
+        'phone',
+        'address',
+        'profile_image',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -48,8 +48,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        // ❌ Remove this line - it causes double hashing!
-        // 'password' => 'hashed',
     ];
 
     // ====================================
@@ -272,21 +270,4 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $query->where('updated_at', '>=', now()->subDays($days));
     }
-    // أضف هذه العلاقة في User Model
-
-/**
- * Educational card orders relationship
- */
-public function educationalCardOrders()
-{
-    return $this->hasMany(EducationalCardOrder::class);
-}
-
-/**
- * Get pending educational card orders
- */
-public function pendingEducationalCardOrders()
-{
-    return $this->educationalCardOrders()->where('status', 'pending');
-}
 }

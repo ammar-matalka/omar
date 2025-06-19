@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use App\Models\Cart;
 
 class CheckoutController extends Controller
 {
@@ -24,6 +23,9 @@ class CheckoutController extends Controller
         $this->couponService = $couponService;
     }
     
+    /**
+     * Display checkout page
+     */
     public function index()
     {
         $cart = Auth::user()->cart;
@@ -37,7 +39,11 @@ class CheckoutController extends Controller
         $categories = Category::all();
         
         // Featured products for recommendations
-        $featuredProducts = Product::where('is_active', true)->latest()->take(4)->get();
+        $featuredProducts = Product::where('is_active', true)
+            ->where('featured', true)
+            ->latest()
+            ->take(4)
+            ->get();
         
         // Get available coupons for the user
         $availableCoupons = Coupon::where('user_id', Auth::id())
@@ -46,10 +52,9 @@ class CheckoutController extends Controller
             ->get();
             
         // Calculate cart total
-        $cartTotal = 0;
-        foreach ($cart->cartItems as $item) {
-            $cartTotal += $item->item_price * $item->quantity;
-        }
+        $cartTotal = $cart->cartItems->sum(function ($item) {
+            return $item->quantity * $item->item_price;
+        });
         
         // Check for applied coupon in session
         $appliedCoupon = null;
@@ -76,6 +81,9 @@ class CheckoutController extends Controller
         ));
     }
     
+    /**
+     * Apply coupon to cart
+     */
     public function applyCoupon(Request $request)
     {
         $request->validate([
@@ -89,10 +97,9 @@ class CheckoutController extends Controller
                 ->with('error', __('Your cart is empty.'));
         }
         
-        $cartTotal = 0;
-        foreach ($cart->cartItems as $item) {
-            $cartTotal += $item->item_price * $item->quantity;
-        }
+        $cartTotal = $cart->cartItems->sum(function ($item) {
+            return $item->quantity * $item->item_price;
+        });
         
         $validation = $this->couponService->validateCoupon(
             $request->coupon_code,
@@ -110,20 +117,26 @@ class CheckoutController extends Controller
         return back()->with('success', __('Coupon applied successfully!'));
     }
     
+    /**
+     * Remove applied coupon
+     */
     public function removeCoupon()
     {
         Session::forget('coupon_code');
         return back()->with('success', __('Coupon removed successfully!'));
     }
     
+    /**
+     * Process checkout and create order
+     */
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
                 'payment_method' => 'required|in:cash',
-                'shipping_address' => 'required|string',
-                'billing_address' => 'required|string',
-                'phone_number' => 'required|string',
+                'shipping_address' => 'required|string|max:500',
+                'billing_address' => 'required|string|max:500',
+                'phone_number' => 'required|string|max:20',
             ]);
             
             $cart = Auth::user()->cart;
@@ -135,18 +148,24 @@ class CheckoutController extends Controller
             
             $totalAmount = 0;
             
-            // Validate stock for all items
+            // Validate stock and calculate total for all items
             foreach ($cart->cartItems as $item) {
-                $itemStock = $item->type === 'educational_card' 
-                    ? $item->educationalCard->stock 
-                    : $item->product->stock;
-                    
-                if ($itemStock < $item->quantity) {
-                    $itemName = $item->item_name;
-                    return back()->with('error', __("Not enough stock for :item.", ['item' => $itemName]));
+                if (!$item->product) {
+                    return back()->with('error', __('One or more products in your cart are no longer available.'));
                 }
                 
-                $totalAmount += $item->item_price * $item->quantity;
+                if (!$item->product->is_active) {
+                    return back()->with('error', __('Product ":name" is no longer available.', ['name' => $item->product->name]));
+                }
+                
+                if ($item->product->stock < $item->quantity) {
+                    return back()->with('error', __('Not enough stock for ":name". Available: :stock', [
+                        'name' => $item->product->name,
+                        'stock' => $item->product->stock
+                    ]));
+                }
+                
+                $totalAmount += $item->quantity * $item->product->price;
             }
             
             // Handle coupon discount
@@ -174,6 +193,7 @@ class CheckoutController extends Controller
             
             DB::beginTransaction();
             
+            // Create order
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'total_amount' => $totalAmount,
@@ -183,31 +203,24 @@ class CheckoutController extends Controller
                 'shipping_address' => $validated['shipping_address'],
                 'billing_address' => $validated['billing_address'],
                 'phone_number' => $validated['phone_number'],
-                'coupon_details' => $couponDetails ? json_encode($couponDetails) : null, // Store coupon info
+                'coupon_details' => $couponDetails ? json_encode($couponDetails) : null,
             ]);
             
+            // Create order items and update stock
             foreach ($cart->cartItems as $item) {
                 // Create order item
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
-                    'educational_card_id' => $item->educational_card_id,
                     'quantity' => $item->quantity,
-                    'price' => $item->item_price,
-                    'type' => $item->type,
-                    'item_name' => $item->item_name, // Store name at purchase time
+                    'price' => $item->product->price,
+                    'item_name' => $item->product->name, // Store name at purchase time
                 ]);
                 
-                // Update stock
-                if ($item->type === 'educational_card') {
-                    $item->educationalCard->update([
-                        'stock' => $item->educationalCard->stock - $item->quantity,
-                    ]);
-                } else {
-                    $item->product->update([
-                        'stock' => $item->product->stock - $item->quantity,
-                    ]);
-                }
+                // Update product stock
+                $item->product->update([
+                    'stock' => $item->product->stock - $item->quantity,
+                ]);
             }
             
             // Apply coupon if one was used
@@ -219,16 +232,17 @@ class CheckoutController extends Controller
             // Generate a reward coupon for the order if eligible
             $rewardCoupon = $this->couponService->generateCouponForOrder($order);
             
-            // Store reward coupon in session to display on the thank you page
+            // Store reward coupon in session to display on thank you page
             if ($rewardCoupon) {
                 Session::put('reward_coupon', $rewardCoupon->id);
             }
             
+            // Clear cart
             $cart->cartItems()->delete();
             
             DB::commit();
             
-            // Redirect to testimonial form with coupon info
+            // Redirect to testimonial form
             return redirect()->route('testimonials.create', ['order' => $order->id])
                 ->with('success', __('Order placed successfully! Please share your experience with us.'));
                 
@@ -238,10 +252,11 @@ class CheckoutController extends Controller
             // Log the error for debugging
             Log::error('Checkout error', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
             ]);
             
-            return back()->with('error', __('An error occurred while processing your order: :message', ['message' => $e->getMessage()]));
+            return back()->with('error', __('An error occurred while processing your order. Please try again.'));
         }
     }
 }

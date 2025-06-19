@@ -21,9 +21,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \App\Http\Middleware\SetLocale::class, // تأكد من وجود هذا السطر
-        \App\Http\Middleware\ShareConversationData::class, // Add this line
-
+        \App\Http\Middleware\SetLocale::class,
+        \App\Http\Middleware\ShareConversationData::class,
     ];
 
     /**
@@ -39,7 +38,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\SetLocale::class, // إضافة middleware اللغة
+            \App\Http\Middleware\SetLocale::class,
         ],
 
         'api' => [
@@ -68,11 +67,7 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-
-
-        // Custom Middleware
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'locale' => \App\Http\Middleware\SetLocale::class,
-        'admin' => \App\Http\Middleware\CheckAdmin::class,
     ];
 }

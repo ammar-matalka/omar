@@ -1,9 +1,5 @@
 <?php
 
-// ==============================================
-// Updated CartItem.php Model
-// ==============================================
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,71 +12,98 @@ class CartItem extends Model
     protected $fillable = [
         'cart_id', 
         'product_id', 
-        'educational_card_id',
         'quantity',
-        'type' // 'product' or 'educational_card'
     ];
 
+    // ====================================
+    // RELATIONSHIPS
+    // ====================================
+
+    /**
+     * Get the cart that owns the cart item
+     */
     public function cart()
     {
         return $this->belongsTo(Cart::class);
     }
 
+    /**
+     * Get the product that is in the cart
+     */
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
     
-    public function educationalCard()
-    {
-        return $this->belongsTo(EducationalCard::class);
-    }
+    // ====================================
+    // ACCESSORS
+    // ====================================
     
-    // Get the item (product or educational card)
-    public function getItemAttribute()
-    {
-        if ($this->type === 'educational_card') {
-            return $this->educationalCard;
-        }
-        return $this->product;
-    }
-    
-    // Get item name
+    /**
+     * Get item name
+     */
     public function getItemNameAttribute()
     {
-        $item = $this->item;
-        if (!$item) return 'Unknown Item';
-        
-        if ($this->type === 'educational_card') {
-            return app()->getLocale() === 'ar' && $item->title_ar ? $item->title_ar : $item->title;
-        }
-        
-        return $item->name;
+        return $this->product ? $this->product->name : 'Unknown Item';
     }
     
-    // Get item price
+    /**
+     * Get item price
+     */
     public function getItemPriceAttribute()
     {
-        $item = $this->item;
-        return $item ? $item->price : 0;
+        return $this->product ? $this->product->price : 0;
     }
     
-    // Get item image
+    /**
+     * Get item image
+     */
     public function getItemImageAttribute()
     {
-        $item = $this->item;
-        if (!$item) return asset('images/no-image.jpg');
-        
-        if ($this->type === 'educational_card') {
-            return $item->main_image_url;
-        }
-        
-        return $item->main_image_url;
+        return $this->product ? $this->product->main_image_url : asset('images/no-image.jpg');
     }
     
-    // Calculate subtotal for each item
+    /**
+     * Calculate subtotal for each item
+     */
+    public function getSubtotalAttribute()
+    {
+        return $this->quantity * $this->item_price;
+    }
+
+    /**
+     * Calculate subtotal for each item (method version)
+     */
     public function subtotal()
     {
         return $this->quantity * $this->item_price;
+    }
+
+    // ====================================
+    // HELPER METHODS
+    // ====================================
+
+    /**
+     * Check if the product is still available
+     */
+    public function isAvailable(): bool
+    {
+        return $this->product && $this->product->is_active && $this->product->stock >= $this->quantity;
+    }
+
+    /**
+     * Get available stock for this product
+     */
+    public function getAvailableStock(): int
+    {
+        return $this->product ? $this->product->stock : 0;
+    }
+
+    /**
+     * Check if requested quantity exceeds available stock
+     */
+    public function exceedsStock(): bool
+    {
+        return $this->quantity > $this->getAvailableStock();
     }
 }

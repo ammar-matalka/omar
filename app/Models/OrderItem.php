@@ -12,56 +12,107 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
-        'educational_card_id',
         'quantity',
         'price',
-        'type', // 'product' or 'educational_card'
         'item_name' // Store name at time of purchase
     ];
 
+    protected $casts = [
+        'price' => 'decimal:2',
+        'quantity' => 'integer',
+    ];
+
+    // ====================================
+    // RELATIONSHIPS
+    // ====================================
+
+    /**
+     * Get the order that owns the order item
+     */
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * Get the product (may be null if product was deleted)
+     */
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
     
-    public function educationalCard()
-    {
-        return $this->belongsTo(EducationalCard::class);
-    }
+    // ====================================
+    // ACCESSORS
+    // ====================================
     
-    // Get the item (product or educational card)
-    public function getItemAttribute()
-    {
-        if ($this->type === 'educational_card') {
-            return $this->educationalCard;
-        }
-        return $this->product;
-    }
-    
-    // Get display name (fallback to stored name if item deleted)
+    /**
+     * Get display name (fallback to stored name if product deleted)
+     */
     public function getDisplayNameAttribute()
     {
-        $item = $this->item;
-        
-        if ($item) {
-            if ($this->type === 'educational_card') {
-                return app()->getLocale() === 'ar' && $item->title_ar ? $item->title_ar : $item->title;
-            }
-            return $item->name;
+        // If product still exists, use its current name
+        if ($this->product) {
+            return $this->product->name;
         }
         
-        // Fallback to stored name if item was deleted
-        return $this->item_name ?: 'Deleted Item';
+        // Fallback to stored name if product was deleted
+        return $this->item_name ?: 'Deleted Product';
+    }
+
+    /**
+     * Get product image (fallback if product deleted)
+     */
+    public function getDisplayImageAttribute()
+    {
+        if ($this->product) {
+            return $this->product->main_image_url;
+        }
+        
+        return asset('images/no-image.jpg');
     }
     
-    // Calculate total for this order item
+    /**
+     * Calculate total for this order item
+     */
+    public function getTotalAttribute()
+    {
+        return $this->quantity * $this->price;
+    }
+
+    /**
+     * Calculate total for this order item (method version)
+     */
     public function total()
     {
         return $this->quantity * $this->price;
+    }
+
+    // ====================================
+    // HELPER METHODS
+    // ====================================
+
+    /**
+     * Check if the original product still exists
+     */
+    public function hasProduct(): bool
+    {
+        return !is_null($this->product);
+    }
+
+    /**
+     * Get formatted price
+     */
+    public function getFormattedPriceAttribute(): string
+    {
+        return number_format($this->price, 2);
+    }
+
+    /**
+     * Get formatted total
+     */
+    public function getFormattedTotalAttribute(): string
+    {
+        return number_format($this->total, 2);
     }
 }

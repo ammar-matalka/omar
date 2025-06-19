@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
-use App\Models\EducationalCard;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
+    /**
+     * Display the shopping cart
+     */
     public function index()
     {
         $cart = $this->getCart();
@@ -20,105 +22,130 @@ class CartController extends Controller
         return view('cart.index', compact('cart', 'categories'));
     }
 
+    /**
+     * Add item to cart
+     */
     public function addItem(Request $request)
     {
-        // Validate the request
         $validated = $request->validate([
-            'product_id' => 'required_without:educational_card_id|exists:products,id',
-            'educational_card_id' => 'required_without:product_id|exists:educational_cards,id',
+            'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
-            'type' => 'required|in:product,educational_card'
         ]);
 
         $cart = $this->getCart();
-        $type = $validated['type'];
-        $quantity = $validated['quantity'];
+        $product = Product::findOrFail($validated['product_id']);
 
-        if ($type === 'product') {
-            $item = Product::findOrFail($validated['product_id']);
-            $existingCartItem = $cart->cartItems()
-                ->where('product_id', $validated['product_id'])
-                ->where('type', 'product')
-                ->first();
-        } else {
-            $item = EducationalCard::findOrFail($validated['educational_card_id']);
-            $existingCartItem = $cart->cartItems()
-                ->where('educational_card_id', $validated['educational_card_id'])
-                ->where('type', 'educational_card')
-                ->first();
+        // Check if product is active
+        if (!$product->is_active) {
+            return back()->with('error', __('This product is currently unavailable.'));
         }
 
-        // Check if item is active
-        if (!$item->is_active) {
-            return back()->with('error', __('This item is currently unavailable.'));
-        }
+        // Check for existing cart item
+        $existingCartItem = $cart->cartItems()
+            ->where('product_id', $validated['product_id'])
+            ->first();
 
         $existingQuantity = $existingCartItem ? $existingCartItem->quantity : 0;
-        $totalQuantity = $quantity + $existingQuantity;
+        $totalQuantity = $validated['quantity'] + $existingQuantity;
 
-        // Check stock
-        if ($totalQuantity > $item->stock) {
-            return back()->with('error', __('The quantity ordered exceeds the available stock.'));
+        // Check stock availability
+        if ($totalQuantity > $product->stock) {
+            return back()->with('error', __('The quantity requested exceeds available stock. Available: :stock', ['stock' => $product->stock]));
         }
 
         if ($existingCartItem) {
-            // Update the quantity
+            // Update existing item quantity
             $existingCartItem->update(['quantity' => $totalQuantity]);
         } else {
-            // Add new item
-            $data = [
-                'quantity' => $quantity,
-                'type' => $type
-            ];
-            
-            if ($type === 'product') {
-                $data['product_id'] = $validated['product_id'];
-            } else {
-                $data['educational_card_id'] = $validated['educational_card_id'];
-            }
-            
-            $cart->cartItems()->create($data);
+            // Create new cart item
+            $cart->cartItems()->create([
+                'product_id' => $validated['product_id'],
+                'quantity' => $validated['quantity']
+            ]);
         }
 
-        return back()->with('success', __('The item has been added to the cart.'));
+        return back()->with('success', __('Product added to cart successfully.'));
     }
 
+    /**
+     * Update cart item quantity
+     */
     public function update(Request $request, CartItem $cartItem)
     {
         $validated = $request->validate([
             'quantity' => 'required|integer|min:1',
         ]);
 
+        // Ensure the cart item belongs to the authenticated user
         if ($cartItem->cart->user_id !== Auth::id()) {
-            abort(403);
+            abort(403, 'Unauthorized action.');
         }
 
-        $item = $cartItem->item;
+        $product = $cartItem->product;
         
-        if (!$item) {
-            return back()->with('error', __('Item not found.'));
+        if (!$product) {
+            return back()->with('error', __('Product not found.'));
         }
 
-        if ($item->stock < $validated['quantity']) {
-            return back()->with('error', __('The requested quantity is currently unavailable.'));
+        // Check if product is still active
+        if (!$product->is_active) {
+            return back()->with('error', __('This product is no longer available.'));
+        }
+
+        // Check stock availability
+        if ($product->stock < $validated['quantity']) {
+            return back()->with('error', __('Requested quantity not available. Available stock: :stock', ['stock' => $product->stock]));
         }
 
         $cartItem->update(['quantity' => $validated['quantity']]);
 
-        return back()->with('success', __('The cart has been updated.'));
+        return back()->with('success', __('Cart updated successfully.'));
     }
 
+    /**
+     * Remove item from cart
+     */
     public function remove(CartItem $cartItem)
     {
+        // Ensure the cart item belongs to the authenticated user
         if ($cartItem->cart->user_id !== Auth::id()) {
-            abort(403);
+            abort(403, 'Unauthorized action.');
         }
 
         $cartItem->delete();
 
-        return back()->with('success', __('The item has been removed from the cart.'));
+        return back()->with('success', __('Item removed from cart.'));
     }
 
+    /**
+     * Clear entire cart
+     */
+    public function clear()
+    {
+        $cart = $this->getCart();
+        $cart->cartItems()->delete();
+        
+        return back()->with('success', __('Cart cleared successfully.'));
+    }
+
+    /**
+     * Get cart count for header badge (AJAX)
+     */
+    public function getCartCount()
+    {
+        $cart = Auth::user()->cart;
+        $count = $cart ? $cart->cartItems->sum('quantity') : 0;
+        
+        return response()->json(['count' => $count]);
+    }
+
+    // ====================================
+    // PRIVATE HELPER METHODS
+    // ====================================
+
+    /**
+     * Get or create user's cart
+     */
     private function getCart()
     {
         /** @var \App\Models\User $user */
@@ -132,28 +159,6 @@ class CartController extends Controller
             ]);
         }
 
-        return $cart->load(['cartItems.product', 'cartItems.educationalCard']);
-    }
-    
-    /**
-     * Get cart count for header badge
-     */
-    public function getCartCount()
-    {
-        $cart = Auth::user()->cart;
-        $count = $cart ? $cart->cartItems->sum('quantity') : 0;
-        
-        return response()->json(['count' => $count]);
-    }
-    
-    /**
-     * Clear entire cart
-     */
-    public function clear()
-    {
-        $cart = $this->getCart();
-        $cart->cartItems()->delete();
-        
-        return back()->with('success', __('Cart has been cleared.'));
+        return $cart->load(['cartItems.product']);
     }
 }
