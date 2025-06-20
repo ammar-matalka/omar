@@ -1,24 +1,35 @@
 @extends('layouts.admin')
 
-@section('title', __('Create Product'))
-@section('page-title', __('Create Product'))
+@section('title', 'إضافة منتج جديد')
+@section('page-title', 'إضافة منتج جديد')
 
 @section('breadcrumb')
     <div class="breadcrumb-item">
-        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">{{ __('Dashboard') }}</a>
+        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">لوحة التحكم</a>
     </div>
     <div class="breadcrumb-item">
-        <i class="fas fa-chevron-right"></i>
-        <a href="{{ route('admin.products.index') }}" class="breadcrumb-link">{{ __('Products') }}</a>
+        <i class="fas fa-chevron-left"></i>
+        <a href="{{ route('admin.products.index') }}" class="breadcrumb-link">المنتجات</a>
     </div>
     <div class="breadcrumb-item">
-        <i class="fas fa-chevron-right"></i>
-        {{ __('Create') }}
+        <i class="fas fa-chevron-left"></i>
+        إضافة جديد
     </div>
 @endsection
 
 @push('styles')
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
+    * {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    body {
+        font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    }
+    
     .create-product-container {
         max-width: 1000px;
         margin: 0 auto;
@@ -26,64 +37,95 @@
     
     .form-card {
         background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         overflow: hidden;
-        border: 1px solid var(--admin-secondary-200);
+        border: 1px solid #e2e8f0;
+        position: relative;
     }
     
     .form-header {
-        background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
         color: white;
-        padding: var(--space-xl);
+        padding: 3rem 2rem;
         text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
     }
     
     .form-title {
-        font-size: 1.5rem;
-        font-weight: 700;
+        font-size: 2rem;
+        font-weight: 900;
         margin: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: var(--space-sm);
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
     }
     
     .form-subtitle {
-        margin: var(--space-sm) 0 0 0;
+        margin: 1rem 0 0 0;
         opacity: 0.9;
-        font-size: 0.875rem;
+        font-size: 1rem;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
     }
     
     .form-body {
-        padding: var(--space-2xl);
+        padding: 3rem;
     }
     
     .form-section {
-        margin-bottom: var(--space-2xl);
+        margin-bottom: 3rem;
     }
     
     .section-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--admin-secondary-900);
-        margin-bottom: var(--space-lg);
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 2rem;
         display: flex;
         align-items: center;
-        gap: var(--space-sm);
-        border-bottom: 2px solid var(--admin-secondary-200);
-        padding-bottom: var(--space-sm);
+        gap: 1rem;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        border-radius: 2px;
     }
     
     .form-grid {
         display: grid;
-        gap: var(--space-lg);
+        gap: 2rem;
     }
     
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--space-lg);
+        gap: 2rem;
     }
     
     .form-row.single {
@@ -96,190 +138,230 @@
     }
     
     .form-label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--admin-secondary-700);
-        margin-bottom: var(--space-sm);
+        font-size: 1rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 0.75rem;
         display: flex;
         align-items: center;
-        gap: var(--space-xs);
+        gap: 0.5rem;
     }
     
     .required {
-        color: var(--error-500);
+        color: #ef4444;
+        font-weight: 900;
     }
     
     .form-input,
     .form-textarea,
     .form-select {
-        padding: var(--space-md);
-        border: 1px solid var(--admin-secondary-300);
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-        font-family: inherit;
-        transition: all var(--transition-fast);
+        padding: 1rem 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        font-size: 1rem;
+        font-family: 'Cairo', sans-serif;
+        transition: all 0.3s ease;
         background: white;
+        font-weight: 500;
     }
     
     .form-input:focus,
     .form-textarea:focus,
     .form-select:focus {
         outline: none;
-        border-color: var(--admin-primary-500);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        transform: translateY(-2px);
     }
     
     .form-textarea {
         resize: vertical;
-        min-height: 120px;
+        min-height: 140px;
+        line-height: 1.6;
     }
     
     .form-help {
-        font-size: 0.75rem;
-        color: var(--admin-secondary-500);
-        margin-top: var(--space-xs);
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+        font-weight: 500;
     }
     
     .checkbox-group {
         display: flex;
         align-items: center;
-        gap: var(--space-sm);
-        margin-top: var(--space-sm);
+        gap: 1rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 1rem;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-group:hover {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
     }
     
     .checkbox-input {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--admin-primary-500);
+        width: 24px;
+        height: 24px;
+        accent-color: #3b82f6;
     }
     
     .checkbox-label {
-        font-size: 0.875rem;
-        color: var(--admin-secondary-700);
+        font-size: 1rem;
+        color: #374151;
         margin: 0;
+        font-weight: 600;
     }
     
     .images-upload-area {
-        border: 2px dashed var(--admin-secondary-300);
-        border-radius: var(--radius-lg);
-        padding: var(--space-xl);
+        border: 3px dashed #cbd5e1;
+        border-radius: 1.5rem;
+        padding: 3rem;
         text-align: center;
-        transition: all var(--transition-fast);
+        transition: all 0.3s ease;
         cursor: pointer;
         position: relative;
         overflow: hidden;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
     }
     
     .images-upload-area:hover {
-        border-color: var(--admin-primary-500);
-        background: var(--admin-primary-50);
-    }
-    
-    .images-upload-area.dragover {
-        border-color: var(--admin-primary-500);
-        background: var(--admin-primary-50);
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
         transform: scale(1.02);
     }
     
+    .images-upload-area.dragover {
+        border-color: #2563eb;
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        transform: scale(1.05);
+        box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.25);
+    }
+    
     .upload-icon {
-        font-size: 3rem;
-        color: var(--admin-secondary-400);
-        margin-bottom: var(--space-md);
+        font-size: 4rem;
+        color: #94a3b8;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .images-upload-area:hover .upload-icon {
+        color: #3b82f6;
+        transform: scale(1.1);
     }
     
     .upload-text {
-        color: var(--admin-secondary-600);
-        margin-bottom: var(--space-sm);
-        font-weight: 500;
+        color: #374151;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        font-size: 1.1rem;
     }
     
     .upload-hint {
-        font-size: 0.75rem;
-        color: var(--admin-secondary-500);
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
     }
     
     .images-preview {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: var(--space-md);
-        margin-top: var(--space-lg);
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
     }
     
     .image-preview-item {
         position: relative;
-        border-radius: var(--radius-md);
+        border-radius: 1rem;
         overflow: hidden;
-        border: 1px solid var(--admin-secondary-200);
+        border: 2px solid #e2e8f0;
         background: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .image-preview-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
     }
     
     .preview-image {
         width: 100%;
-        height: 120px;
+        height: 140px;
         object-fit: cover;
     }
     
     .image-controls {
         position: absolute;
-        top: var(--space-xs);
-        right: var(--space-xs);
+        top: 0.75rem;
+        left: 0.75rem;
         display: flex;
-        gap: var(--space-xs);
+        gap: 0.5rem;
     }
     
     .image-control-btn {
-        width: 24px;
-        height: 24px;
+        width: 32px;
+        height: 32px;
         border: none;
         border-radius: 50%;
         cursor: pointer;
-        font-size: 0.75rem;
+        font-size: 0.9rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all var(--transition-fast);
+        transition: all 0.3s ease;
         color: white;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     
     .btn-primary-image {
-        background: var(--admin-primary-500);
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
     }
     
     .btn-primary-image:hover {
-        background: var(--admin-primary-600);
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
         transform: scale(1.1);
     }
     
     .btn-primary-image.active {
-        background: var(--success-500);
+        background: linear-gradient(135deg, #10b981, #059669);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
     }
     
     .btn-remove-image {
-        background: var(--error-500);
+        background: linear-gradient(135deg, #ef4444, #dc2626);
     }
     
     .btn-remove-image:hover {
-        background: var(--error-600);
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
         transform: scale(1.1);
     }
     
     .image-info {
-        padding: var(--space-sm);
-        background: var(--admin-secondary-50);
-        font-size: 0.75rem;
-        color: var(--admin-secondary-600);
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        font-size: 0.85rem;
+        color: #64748b;
         text-align: center;
+        font-weight: 600;
     }
     
     .primary-badge {
-        background: var(--success-500);
+        background: linear-gradient(135deg, #10b981, #059669);
         color: white;
-        padding: 2px 6px;
-        border-radius: var(--radius-sm);
-        font-size: 0.625rem;
-        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
     }
     
     .price-input-group {
@@ -288,15 +370,16 @@
     
     .price-currency {
         position: absolute;
-        left: var(--space-md);
+        right: 1.5rem;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--admin-secondary-500);
-        font-weight: 600;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 1.1rem;
     }
     
     .price-input {
-        padding-left: calc(var(--space-md) + 20px);
+        padding-right: 3rem;
     }
     
     .stock-input-group {
@@ -305,46 +388,171 @@
     
     .stock-unit {
         position: absolute;
-        right: var(--space-md);
+        left: 1.5rem;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--admin-secondary-500);
-        font-size: 0.875rem;
+        color: #64748b;
+        font-size: 1rem;
+        font-weight: 600;
     }
     
     .stock-input {
-        padding-right: calc(var(--space-md) + 40px);
+        padding-left: 4rem;
     }
     
     .form-actions {
-        background: var(--admin-secondary-50);
-        padding: var(--space-xl);
-        border-top: 1px solid var(--admin-secondary-200);
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        padding: 2rem;
+        border-top: 1px solid #e2e8f0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: var(--space-md);
+        gap: 1rem;
+        position: relative;
+    }
+    
+    .form-actions::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
     }
     
     .btn-group {
         display: flex;
-        gap: var(--space-md);
+        gap: 1rem;
     }
     
     .error-message {
-        color: var(--error-500);
-        font-size: 0.75rem;
-        margin-top: var(--space-xs);
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
         display: flex;
         align-items: center;
-        gap: var(--space-xs);
+        gap: 0.5rem;
+        font-weight: 600;
     }
     
     .form-input.error,
     .form-textarea.error,
     .form-select.error {
-        border-color: var(--error-500);
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        border: 2px solid transparent;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Cairo', sans-serif;
+    }
+    
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn:hover::before {
+        left: 100%;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.6);
+        transform: translateY(-3px);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #374151;
+        border-color: #d1d5db;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-secondary:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+        transform: translateY(-2px);
+    }
+    
+    /* RTL Adjustments */
+    .fas {
+        margin-left: 0.5rem;
+        margin-right: 0;
+    }
+    
+    .btn .fas {
+        margin-left: 0;
+        margin-right: 0.75rem;
+    }
+    
+    .section-title .fas {
+        margin-left: 0;
+        margin-right: 1rem;
+    }
+    
+    .form-label .fas {
+        margin-left: 0;
+        margin-right: 0.5rem;
+    }
+    
+    /* Animations */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease-out;
+    }
+    
+    .fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
     }
     
     @media (max-width: 768px) {
@@ -366,7 +574,19 @@
         }
         
         .images-preview {
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+        
+        .form-body {
+            padding: 2rem;
+        }
+        
+        .form-header {
+            padding: 2rem;
+        }
+        
+        .form-title {
+            font-size: 1.5rem;
         }
     }
 </style>
@@ -378,9 +598,9 @@
         <div class="form-header">
             <h1 class="form-title">
                 <i class="fas fa-plus"></i>
-                {{ __('Create New Product') }}
+                إضافة منتج جديد
             </h1>
-            <p class="form-subtitle">{{ __('Add a new product to your inventory') }}</p>
+            <p class="form-subtitle">أضف منتجاً جديداً إلى مخزونك</p>
         </div>
         
         <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" id="productForm">
@@ -391,14 +611,14 @@
                 <div class="form-section">
                     <h2 class="section-title">
                         <i class="fas fa-info-circle"></i>
-                        {{ __('Basic Information') }}
+                        المعلومات الأساسية
                     </h2>
                     
                     <div class="form-grid">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="name" class="form-label">
-                                    {{ __('Product Name') }}
+                                    اسم المنتج
                                     <span class="required">*</span>
                                 </label>
                                 <input 
@@ -407,7 +627,7 @@
                                     name="name" 
                                     class="form-input @error('name') error @enderror"
                                     value="{{ old('name') }}"
-                                    placeholder="{{ __('Enter product name') }}"
+                                    placeholder="أدخل اسم المنتج"
                                     required
                                 >
                                 @error('name')
@@ -416,12 +636,12 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                <div class="form-help">{{ __('Choose a clear, descriptive name for your product') }}</div>
+                                <div class="form-help">اختر اسماً واضحاً ووصفياً للمنتج</div>
                             </div>
                             
                             <div class="form-group">
                                 <label for="category_id" class="form-label">
-                                    {{ __('Category') }}
+                                    التصنيف
                                     <span class="required">*</span>
                                 </label>
                                 <select 
@@ -430,7 +650,7 @@
                                     class="form-select @error('category_id') error @enderror"
                                     required
                                 >
-                                    <option value="">{{ __('Select Category') }}</option>
+                                    <option value="">اختر التصنيف</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                             {{ $category->name }}
@@ -443,21 +663,21 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                <div class="form-help">{{ __('Select the category this product belongs to') }}</div>
+                                <div class="form-help">اختر التصنيف الذي ينتمي إليه هذا المنتج</div>
                             </div>
                         </div>
                         
                         <div class="form-row single">
                             <div class="form-group">
                                 <label for="description" class="form-label">
-                                    {{ __('Description') }}
+                                    الوصف
                                     <span class="required">*</span>
                                 </label>
                                 <textarea 
                                     id="description" 
                                     name="description" 
                                     class="form-textarea @error('description') error @enderror"
-                                    placeholder="{{ __('Enter product description') }}"
+                                    placeholder="أدخل وصف المنتج"
                                     required
                                 >{{ old('description') }}</textarea>
                                 @error('description')
@@ -466,7 +686,7 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                <div class="form-help">{{ __('Provide a detailed description of the product features and benefits') }}</div>
+                                <div class="form-help">قدم وصفاً مفصلاً لميزات المنتج وفوائده</div>
                             </div>
                         </div>
                     </div>
@@ -476,14 +696,14 @@
                 <div class="form-section">
                     <h2 class="section-title">
                         <i class="fas fa-dollar-sign"></i>
-                        {{ __('Pricing & Inventory') }}
+                        التسعير والمخزون
                     </h2>
                     
                     <div class="form-grid">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="price" class="form-label">
-                                    {{ __('Price') }}
+                                    السعر
                                     <span class="required">*</span>
                                 </label>
                                 <div class="price-input-group">
@@ -506,12 +726,12 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                <div class="form-help">{{ __('Set the selling price for this product') }}</div>
+                                <div class="form-help">حدد سعر البيع لهذا المنتج</div>
                             </div>
                             
                             <div class="form-group">
                                 <label for="stock" class="form-label">
-                                    {{ __('Stock Quantity') }}
+                                    كمية المخزون
                                     <span class="required">*</span>
                                 </label>
                                 <div class="stock-input-group">
@@ -525,7 +745,7 @@
                                         min="0"
                                         required
                                     >
-                                    <span class="stock-unit">{{ __('units') }}</span>
+                                    <span class="stock-unit">قطعة</span>
                                 </div>
                                 @error('stock')
                                     <div class="error-message">
@@ -533,7 +753,7 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                <div class="form-help">{{ __('Available quantity in inventory') }}</div>
+                                <div class="form-help">الكمية المتوفرة في المخزون</div>
                             </div>
                         </div>
                         
@@ -549,10 +769,10 @@
                                         {{ old('is_active', true) ? 'checked' : '' }}
                                     >
                                     <label for="is_active" class="checkbox-label">
-                                        {{ __('Active Product') }}
+                                        منتج نشط
                                     </label>
                                 </div>
-                                <div class="form-help">{{ __('Check this box to make the product available for purchase') }}</div>
+                                <div class="form-help">ضع علامة في هذا المربع لجعل المنتج متاحاً للشراء</div>
                             </div>
                         </div>
                     </div>
@@ -562,14 +782,14 @@
                 <div class="form-section">
                     <h2 class="section-title">
                         <i class="fas fa-images"></i>
-                        {{ __('Product Images') }}
+                        صور المنتج
                     </h2>
                     
                     <div class="form-grid">
                         <div class="form-row single">
                             <div class="form-group">
                                 <label for="images" class="form-label">
-                                    {{ __('Upload Images') }}
+                                    رفع الصور
                                 </label>
                                 <div class="images-upload-area" onclick="document.getElementById('images').click()">
                                     <input 
@@ -585,8 +805,8 @@
                                         <div class="upload-icon">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                         </div>
-                                        <div class="upload-text">{{ __('Click to upload or drag and drop') }}</div>
-                                        <div class="upload-hint">{{ __('PNG, JPG, GIF up to 2MB each. You can select multiple images.') }}</div>
+                                        <div class="upload-text">انقر للرفع أو اسحب وأفلت</div>
+                                        <div class="upload-hint">PNG, JPG, GIF حتى 2 ميجابايت لكل صورة. يمكنك اختيار عدة صور.</div>
                                     </div>
                                 </div>
                                 @error('images')
@@ -601,7 +821,7 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                <div class="form-help">{{ __('Upload multiple product images. The first image will be set as primary.') }}</div>
+                                <div class="form-help">ارفع عدة صور للمنتج. الصورة الأولى ستكون الصورة الأساسية.</div>
                                 
                                 <div id="imagesPreview" class="images-preview"></div>
                             </div>
@@ -613,20 +833,20 @@
             <div class="form-actions">
                 <div>
                     <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i>
-                        {{ __('Back to Products') }}
+                        <i class="fas fa-arrow-right"></i>
+                        العودة للمنتجات
                     </a>
                 </div>
                 
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="resetForm()">
                         <i class="fas fa-undo"></i>
-                        {{ __('Reset') }}
+                        إعادة تعيين
                     </button>
                     
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i>
-                        {{ __('Create Product') }}
+                        إنشاء المنتج
                     </button>
                 </div>
             </div>
@@ -656,7 +876,7 @@
             
             // Validate file size (2MB max)
             if (file.size > 2 * 1024 * 1024) {
-                alert(`{{ __("File") }} ${file.name} {{ __("is too large. Maximum size is 2MB.") }}`);
+                alert(`الملف ${file.name} كبير جداً. الحد الأقصى هو 2 ميجابايت.`);
                 input.value = '';
                 selectedFiles = [];
                 document.getElementById('imagesPreview').innerHTML = '';
@@ -665,7 +885,7 @@
             
             // Validate file type
             if (!file.type.match('image.*')) {
-                alert(`{{ __("File") }} ${file.name} {{ __("is not an image.") }}`);
+                alert(`الملف ${file.name} ليس صورة.`);
                 input.value = '';
                 selectedFiles = [];
                 document.getElementById('imagesPreview').innerHTML = '';
@@ -683,19 +903,19 @@
                 const previewItem = document.createElement('div');
                 previewItem.className = 'image-preview-item';
                 previewItem.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview ${index + 1}" class="preview-image">
+                    <img src="${e.target.result}" alt="معاينة ${index + 1}" class="preview-image">
                     <div class="image-controls">
                         <button type="button" class="image-control-btn btn-primary-image ${index === primaryImageIndex ? 'active' : ''}" 
-                                onclick="setPrimaryImage(${index})" title="{{ __('Set as primary') }}">
+                                onclick="setPrimaryImage(${index})" title="تعيين كصورة أساسية">
                             <i class="fas fa-star"></i>
                         </button>
                         <button type="button" class="image-control-btn btn-remove-image" 
-                                onclick="removeImage(${index})" title="{{ __('Remove image') }}">
+                                onclick="removeImage(${index})" title="حذف الصورة">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                     <div class="image-info">
-                        ${index === primaryImageIndex ? '<span class="primary-badge">Primary</span>' : `Image ${index + 1}`}
+                        ${index === primaryImageIndex ? '<span class="primary-badge">أساسية</span>' : `صورة ${index + 1}`}
                     </div>
                 `;
                 previewContainer.appendChild(previewItem);
@@ -757,7 +977,7 @@
     
     // Reset form
     function resetForm() {
-        if (confirm('{{ __("Are you sure you want to reset the form? All entered data will be lost.") }}')) {
+        if (confirm('هل أنت متأكد من إعادة تعيين النموذج؟ ستفقد جميع البيانات المدخلة.')) {
             document.getElementById('productForm').reset();
             selectedFiles = [];
             primaryImageIndex = 0;
@@ -800,35 +1020,35 @@
         // Basic validation
         if (!name) {
             e.preventDefault();
-            alert('{{ __("Please enter a product name") }}');
+            alert('يرجى إدخال اسم المنتج');
             document.getElementById('name').focus();
             return;
         }
         
         if (!category) {
             e.preventDefault();
-            alert('{{ __("Please select a category") }}');
+            alert('يرجى اختيار التصنيف');
             document.getElementById('category_id').focus();
             return;
         }
         
         if (!description) {
             e.preventDefault();
-            alert('{{ __("Please enter a product description") }}');
+            alert('يرجى إدخال وصف المنتج');
             document.getElementById('description').focus();
             return;
         }
         
         if (!price || price <= 0) {
             e.preventDefault();
-            alert('{{ __("Please enter a valid price") }}');
+            alert('يرجى إدخال سعر صحيح');
             document.getElementById('price').focus();
             return;
         }
         
         if (!stock || stock < 0) {
             e.preventDefault();
-            alert('{{ __("Please enter a valid stock quantity") }}');
+            alert('يرجى إدخال كمية مخزون صحيحة');
             document.getElementById('stock').focus();
             return;
         }
@@ -836,7 +1056,7 @@
         // Show loading state
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("Creating...") }}';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الإنشاء...';
         submitBtn.disabled = true;
         
         // Re-enable button after 10 seconds in case of error
@@ -868,48 +1088,27 @@
             entries.forEach((entry, index) => {
                 if (entry.isIntersecting) {
                     setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }, index * 100);
+                        entry.target.classList.add('visible');
+                    }, index * 150);
                     observer.unobserve(entry.target);
                 }
             });
         }, { threshold: 0.1 });
         
         document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'all 0.6s ease-out';
             observer.observe(el);
         });
     });
     
-    // Enhanced category selection
-    const categorySelect = document.getElementById('category_id');
-    if (categorySelect) {
-        categorySelect.addEventListener('change', function() {
-            console.log('Category selected:', this.value);
+    // Enhanced form interactions
+    document.querySelectorAll('.form-input, .form-textarea, .form-select').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
         });
-    }
-    
-    // Price calculation helpers
-    document.getElementById('price').addEventListener('input', function() {
-        const price = parseFloat(this.value);
-        if (price && price > 0) {
-            console.log('Price set:', price);
-        }
-    });
-    
-    // Stock management helpers
-    document.getElementById('stock').addEventListener('input', function() {
-        const stock = parseInt(this.value);
-        if (stock !== undefined && stock >= 0) {
-            if (stock <= 5 && stock > 0) {
-                console.log('Low stock warning for quantity:', stock);
-            } else if (stock === 0) {
-                console.log('Out of stock - consider updating status');
-            }
-        }
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = '';
+        });
     });
 </script>
 @endpush

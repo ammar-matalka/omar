@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Auth;
 class AdminDashboardController extends Controller
 {
     /**
-     * Display the dashboard page.
+     * عرض صفحة لوحة التحكم.
      *
      * @return \Illuminate\View\View
      */
@@ -26,29 +26,29 @@ class AdminDashboardController extends Controller
     {
         // تحقق من الأدمن
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Access denied. Admin privileges required.');
+            abort(403, 'تم رفض الوصول. صلاحيات المدير مطلوبة.');
         }
 
-        // Get counts for dashboard cards
+        // الحصول على العدادات لبطاقات لوحة التحكم
         $totalProducts = Product::count();
         $totalOrders = Order::count();
         $totalUsers = User::where('role', 'customer')->count();
         
-        // Calculate total revenue from delivered orders
+        // حساب إجمالي الإيرادات من الطلبات المسلمة
         $totalRevenue = Order::where('status', 'delivered')->sum('total_amount');
         
-        // Get recent orders for the orders table
+        // الحصول على أحدث الطلبات لجدول الطلبات
         $recentOrders = Order::with('user')
             ->latest()
             ->take(5)
             ->get();
         
-        // Get testimonial counts by status
+        // الحصول على عدادات الشهادات حسب الحالة
         $pendingTestimonialsCount = Testimonial::where('status', 'pending')->count();
         $approvedTestimonialsCount = Testimonial::where('status', 'approved')->count();
         $rejectedTestimonialsCount = Testimonial::where('status', 'rejected')->count();
         
-        // Get recent testimonials for the testimonials table
+        // الحصول على أحدث الشهادات لجدول الشهادات
         $recentTestimonials = Testimonial::with(['user', 'order'])
             ->latest()
             ->take(5)
@@ -58,14 +58,14 @@ class AdminDashboardController extends Controller
         $unreadConversationsCount = Conversation::where('is_read_by_admin', false)->count();
         $totalConversationsCount = Conversation::count();
         
-        // Get recent conversations for display
+        // الحصول على المحادثات الحديثة للعرض
         $recentConversations = Conversation::with(['user', 'lastMessage'])
             ->where('is_read_by_admin', false)
             ->latest('updated_at')
             ->take(5)
             ->get();
         
-        // Coupon statistics
+        // إحصائيات القسائم
         $activeCouponsCount = Coupon::where('is_used', false)
             ->where('valid_until', '>=', now())
             ->count();
@@ -79,9 +79,9 @@ class AdminDashboardController extends Controller
         
         $totalDiscounts = Order::sum('discount_amount');
         
-        // === DATA FOR CHARTS ===
+        // === بيانات الرسوم البيانية ===
         
-        // 1. Sales by Category Chart Data (Fixed for SQLite)
+        // 1. بيانات مخطط المبيعات حسب الفئة (محسّن لـ SQLite)
         $salesByCategory = DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
@@ -90,14 +90,14 @@ class AdminDashboardController extends Controller
             ->groupBy('categories.id', 'categories.name')
             ->get();
         
-        // Prepare data for Chart.js
+        // إعداد البيانات لـ Chart.js
         $categoryLabels = $salesByCategory->pluck('name');
         $categoryData = $salesByCategory->pluck('total_sales');
         
-        // 2. Monthly Revenue Chart Data (Fixed for SQLite - last 6 months)
+        // 2. بيانات مخطط الإيرادات الشهرية (محسّن لـ SQLite - آخر 6 أشهر)
         $monthlyRevenue = collect();
         
-        // Get data using SQLite compatible date functions
+        // الحصول على البيانات باستخدام دوال التاريخ المتوافقة مع SQLite
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $startOfMonth = $date->startOfMonth()->format('Y-m-d H:i:s');
@@ -112,11 +112,11 @@ class AdminDashboardController extends Controller
             ]);
         }
         
-        // Prepare monthly data for Chart.js
+        // إعداد البيانات الشهرية لـ Chart.js
         $monthlyLabels = $monthlyRevenue->pluck('month');
         $monthlyData = $monthlyRevenue->pluck('revenue');
         
-        // Return the view with all variables including notification counts
+        // إرجاع العرض مع جميع المتغيرات بما في ذلك عدادات الإشعارات
         return view('admin.dashboard', compact(
             'totalProducts',
             'totalOrders',
@@ -142,7 +142,7 @@ class AdminDashboardController extends Controller
     }
     
     /**
-     * Get notification counts for AJAX requests
+     * الحصول على عدادات الإشعارات لطلبات AJAX
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -163,7 +163,7 @@ class AdminDashboardController extends Controller
     }
     
     /**
-     * Mark all conversations as read
+     * تحديد جميع المحادثات كمقروءة
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -177,11 +177,11 @@ class AdminDashboardController extends Controller
         Conversation::where('is_read_by_admin', false)
             ->update(['is_read_by_admin' => true]);
         
-        return redirect()->back()->with('success', 'All conversations marked as read.');
+        return redirect()->back()->with('success', 'تم تحديد جميع المحادثات كمقروءة.');
     }
     
     /**
-     * Mark all testimonials as reviewed
+     * تحديد جميع الشهادات كمراجعة
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -192,13 +192,13 @@ class AdminDashboardController extends Controller
             abort(403);
         }
 
-        // This is just for clearing the notification badge
-        // You might want to add a 'reviewed' status or handle differently
-        return redirect()->back()->with('success', 'All testimonials notifications cleared.');
+        // هذا فقط لمسح شارة الإشعار
+        // قد تريد إضافة حالة "مراجع" أو التعامل بشكل مختلف
+        return redirect()->back()->with('success', 'تم مسح جميع إشعارات الشهادات.');
     }
     
     /**
-     * Get dashboard statistics for widgets
+     * الحصول على إحصائيات لوحة التحكم للعناصر المصغرة
      *
      * @return array
      */
@@ -246,7 +246,7 @@ class AdminDashboardController extends Controller
     }
     
     /**
-     * Export dashboard data to CSV
+     * تصدير بيانات لوحة التحكم إلى CSV
      *
      * @return \Symfony\Component\HttpFoundation\StreamedResponse
      */
@@ -267,10 +267,10 @@ class AdminDashboardController extends Controller
         $callback = function() use ($stats) {
             $file = fopen('php://output', 'w');
             
-            // Add CSV headers
-            fputcsv($file, ['Metric', 'Value', 'Category']);
+            // إضافة عناوين CSV
+            fputcsv($file, ['المقياس', 'القيمة', 'الفئة']);
             
-            // Add data rows
+            // إضافة صفوف البيانات
             foreach ($stats as $category => $data) {
                 foreach ($data as $metric => $value) {
                     fputcsv($file, [ucfirst(str_replace('_', ' ', $metric)), $value, ucfirst($category)]);

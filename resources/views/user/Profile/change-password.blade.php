@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
-@section('title', __('Change Password') . ' - ' . config('app.name'))
+@section('title', __('تغيير كلمة المرور') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+
     .password-hero {
         background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
         color: white;
@@ -51,6 +57,7 @@
         font-size: 0.875rem;
         opacity: 0.9;
         flex-wrap: wrap;
+        flex-direction: row-reverse;
     }
     
     .breadcrumb-link {
@@ -87,6 +94,7 @@
         font-weight: 600;
         transition: all var(--transition-fast);
         margin-bottom: var(--space-xl);
+        flex-direction: row-reverse;
     }
     
     .back-button:hover {
@@ -139,6 +147,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .security-tips {
@@ -156,6 +165,7 @@
         color: var(--warning-600);
         font-size: 0.875rem;
         line-height: 1.5;
+        flex-direction: row-reverse;
     }
     
     .security-tips li::before {
@@ -174,6 +184,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .form-grid {
@@ -194,6 +205,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .form-label.required::after {
@@ -209,7 +221,8 @@
     .form-input {
         width: 100%;
         padding: var(--space-md);
-        padding-right: var(--space-3xl);
+        padding-left: var(--space-3xl);
+        padding-right: var(--space-md);
         border: 2px solid var(--border-color);
         border-radius: var(--radius-lg);
         background: var(--surface);
@@ -217,6 +230,7 @@
         font-size: 1rem;
         transition: all var(--transition-fast);
         font-family: inherit;
+        text-align: right;
     }
     
     .form-input:focus {
@@ -236,7 +250,8 @@
     
     .toggle-password {
         position: absolute;
-        right: var(--space-md);
+        left: var(--space-md);
+        right: auto;
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -255,6 +270,10 @@
         font-size: 0.75rem;
         color: var(--on-surface-variant);
         line-height: 1.4;
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+        flex-direction: row-reverse;
     }
     
     .form-error {
@@ -263,6 +282,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-xs);
+        flex-direction: row-reverse;
     }
     
     .form-success {
@@ -271,6 +291,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-xs);
+        flex-direction: row-reverse;
     }
     
     .password-strength {
@@ -351,6 +372,7 @@
         font-size: 0.75rem;
         color: var(--on-surface-variant);
         transition: color var(--transition-fast);
+        flex-direction: row-reverse;
     }
     
     .requirement-item.met {
@@ -378,7 +400,7 @@
     .form-actions {
         display: flex;
         gap: var(--space-lg);
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-top: var(--space-2xl);
         padding-top: var(--space-xl);
         border-top: 1px solid var(--border-color);
@@ -398,6 +420,7 @@
         cursor: pointer;
         transition: all var(--transition-fast);
         min-width: 120px;
+        flex-direction: row-reverse;
     }
     
     .btn:focus {
@@ -484,18 +507,18 @@
             <nav class="breadcrumb">
                 <a href="{{ route('home') }}" class="breadcrumb-link">
                     <i class="fas fa-home"></i>
-                    {{ __('Home') }}
+                    {{ __('الرئيسية') }}
                 </a>
                 <span class="breadcrumb-separator">/</span>
                 <a href="{{ route('user.profile.show') }}" class="breadcrumb-link">
-                    {{ __('Profile') }}
+                    {{ __('الملف الشخصي') }}
                 </a>
                 <span class="breadcrumb-separator">/</span>
-                <span>{{ __('Change Password') }}</span>
+                <span>{{ __('تغيير كلمة المرور') }}</span>
             </nav>
             
-            <h1 class="hero-title">{{ __('Change Password') }}</h1>
-            <p class="hero-subtitle">{{ __('Update your password to keep your account secure') }}</p>
+            <h1 class="hero-title">{{ __('تغيير كلمة المرور') }}</h1>
+            <p class="hero-subtitle">{{ __('قم بتحديث كلمة المرور الخاصة بك للحفاظ على أمان حسابك') }}</p>
         </div>
     </div>
 </section>
@@ -506,7 +529,7 @@
         <!-- Back Button -->
         <a href="{{ route('user.profile.show') }}" class="back-button fade-in">
             <i class="fas fa-arrow-left"></i>
-            {{ __('Back to Profile') }}
+            {{ __('العودة إلى الملف الشخصي') }}
         </a>
         
         <div class="password-content">
@@ -514,13 +537,13 @@
             <div class="security-section fade-in">
                 <h3 class="security-title">
                     <i class="fas fa-shield-alt"></i>
-                    {{ __('Password Security Tips') }}
+                    {{ __('نصائح أمان كلمة المرور') }}
                 </h3>
                 <ul class="security-tips">
-                    <li>{{ __('Use at least 8 characters with a mix of letters, numbers, and symbols') }}</li>
-                    <li>{{ __('Avoid using personal information like your name or birthdate') }}</li>
-                    <li>{{ __('Don\'t reuse passwords from other accounts') }}</li>
-                    <li>{{ __('Consider using a password manager for better security') }}</li>
+                    <li>{{ __('استخدم 8 أحرف على الأقل مع مزيج من الحروف والأرقام والرموز') }}</li>
+                    <li>{{ __('تجنب استخدام المعلومات الشخصية مثل اسمك أو تاريخ ميلادك') }}</li>
+                    <li>{{ __('لا تعيد استخدام كلمات المرور من حسابات أخرى') }}</li>
+                    <li>{{ __('فكر في استخدام مدير كلمات المرور لأمان أفضل') }}</li>
                 </ul>
             </div>
             
@@ -532,7 +555,7 @@
                     
                     <h2 class="form-title">
                         <i class="fas fa-key"></i>
-                        {{ __('Update Password') }}
+                        {{ __('تحديث كلمة المرور') }}
                     </h2>
                     
                     <div class="form-grid">
@@ -540,7 +563,7 @@
                         <div class="form-group">
                             <label for="current_password" class="form-label required">
                                 <i class="fas fa-lock"></i>
-                                {{ __('Current Password') }}
+                                {{ __('كلمة المرور الحالية') }}
                             </label>
                             <div class="password-input-wrapper">
                                 <input 
@@ -561,14 +584,14 @@
                                     {{ $message }}
                                 </div>
                             @enderror
-                            <div class="form-help">{{ __('Enter your current password to verify your identity') }}</div>
+                            <div class="form-help">{{ __('أدخل كلمة المرور الحالية للتحقق من هويتك') }}</div>
                         </div>
                         
                         <!-- New Password -->
                         <div class="form-group">
                             <label for="password" class="form-label required">
                                 <i class="fas fa-key"></i>
-                                {{ __('New Password') }}
+                                {{ __('كلمة المرور الجديدة') }}
                             </label>
                             <div class="password-input-wrapper">
                                 <input 
@@ -596,31 +619,31 @@
                                 <div class="strength-meter">
                                     <div class="strength-fill" id="strength-fill"></div>
                                 </div>
-                                <div class="strength-text" id="strength-text">{{ __('Enter a password') }}</div>
+                                <div class="strength-text" id="strength-text">{{ __('أدخل كلمة مرور') }}</div>
                                 
                                 <!-- Password Requirements -->
                                 <div class="strength-requirements">
-                                    <div class="requirements-title">{{ __('Password must contain:') }}</div>
+                                    <div class="requirements-title">{{ __('يجب أن تحتوي كلمة المرور على:') }}</div>
                                     <ul class="requirements-list">
                                         <li class="requirement-item" id="req-length">
                                             <span class="requirement-icon"></span>
-                                            {{ __('At least 8 characters') }}
+                                            {{ __('8 أحرف على الأقل') }}
                                         </li>
                                         <li class="requirement-item" id="req-uppercase">
                                             <span class="requirement-icon"></span>
-                                            {{ __('One uppercase letter') }}
+                                            {{ __('حرف كبير واحد على الأقل') }}
                                         </li>
                                         <li class="requirement-item" id="req-lowercase">
                                             <span class="requirement-icon"></span>
-                                            {{ __('One lowercase letter') }}
+                                            {{ __('حرف صغير واحد على الأقل') }}
                                         </li>
                                         <li class="requirement-item" id="req-number">
                                             <span class="requirement-icon"></span>
-                                            {{ __('One number') }}
+                                            {{ __('رقم واحد على الأقل') }}
                                         </li>
                                         <li class="requirement-item" id="req-special">
                                             <span class="requirement-icon"></span>
-                                            {{ __('One special character') }}
+                                            {{ __('رمز خاص واحد على الأقل') }}
                                         </li>
                                     </ul>
                                 </div>
@@ -631,7 +654,7 @@
                         <div class="form-group">
                             <label for="password_confirmation" class="form-label required">
                                 <i class="fas fa-check-double"></i>
-                                {{ __('Confirm New Password') }}
+                                {{ __('تأكيد كلمة المرور الجديدة') }}
                             </label>
                             <div class="password-input-wrapper">
                                 <input 
@@ -648,7 +671,7 @@
                                 </button>
                             </div>
                             <div id="password-match-message"></div>
-                            <div class="form-help">{{ __('Re-enter your new password to confirm') }}</div>
+                            <div class="form-help">{{ __('أعد إدخال كلمة المرور الجديدة للتأكيد') }}</div>
                         </div>
                     </div>
                     
@@ -656,11 +679,11 @@
                     <div class="form-actions">
                         <a href="{{ route('user.profile.show') }}" class="btn btn-secondary">
                             <i class="fas fa-times"></i>
-                            {{ __('Cancel') }}
+                            {{ __('إلغاء') }}
                         </a>
                         <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
                             <i class="fas fa-save"></i>
-                            {{ __('Update Password') }}
+                            {{ __('تحديث كلمة المرور') }}
                         </button>
                     </div>
                 </form>
@@ -739,23 +762,23 @@
         let strengthLabel = '';
         
         if (password.length === 0) {
-            strengthLabel = '{{ __("Enter a password") }}';
+            strengthLabel = '{{ __("أدخل كلمة مرور") }}';
         } else if (metRequirements <= 2) {
             strength = 1;
             strengthClass = 'strength-weak';
-            strengthLabel = '{{ __("Weak") }}';
+            strengthLabel = '{{ __("ضعيفة") }}';
         } else if (metRequirements === 3) {
             strength = 2;
             strengthClass = 'strength-fair';
-            strengthLabel = '{{ __("Fair") }}';
+            strengthLabel = '{{ __("متوسطة") }}';
         } else if (metRequirements === 4) {
             strength = 3;
             strengthClass = 'strength-good';
-            strengthLabel = '{{ __("Good") }}';
+            strengthLabel = '{{ __("جيدة") }}';
         } else if (metRequirements === 5) {
             strength = 4;
             strengthClass = 'strength-strong';
-            strengthLabel = '{{ __("Strong") }}';
+            strengthLabel = '{{ __("قوية") }}';
         }
         
         // Update UI
@@ -778,11 +801,11 @@
             messageElement.innerHTML = '';
             confirmationInput.classList.remove('error', 'success');
         } else if (password === confirmation) {
-            messageElement.innerHTML = '<div class="form-success"><i class="fas fa-check-circle"></i> {{ __("Passwords match") }}</div>';
+            messageElement.innerHTML = '<div class="form-success"><i class="fas fa-check-circle"></i> {{ __("كلمات المرور متطابقة") }}</div>';
             confirmationInput.classList.remove('error');
             confirmationInput.classList.add('success');
         } else {
-            messageElement.innerHTML = '<div class="form-error"><i class="fas fa-exclamation-circle"></i> {{ __("Passwords do not match") }}</div>';
+            messageElement.innerHTML = '<div class="form-error"><i class="fas fa-exclamation-circle"></i> {{ __("كلمات المرور غير متطابقة") }}</div>';
             confirmationInput.classList.remove('success');
             confirmationInput.classList.add('error');
         }
@@ -824,7 +847,7 @@
         const submitBtn = document.getElementById('submit-btn');
         
         // Show loading state
-        submitBtn.innerHTML = '<div class="loading-spinner"></div> {{ __("Updating...") }}';
+        submitBtn.innerHTML = '<div class="loading-spinner"></div> {{ __("جاري التحديث...") }}';
         submitBtn.disabled = true;
     });
     
@@ -848,7 +871,7 @@
         
         // Cancel with Escape
         if (e.key === 'Escape') {
-            if (confirm('{{ __("Are you sure you want to cancel? Any changes will be lost.") }}')) {
+            if (confirm('{{ __("هل أنت متأكد أنك تريد الإلغاء؟ أي تغييرات غير محفوظة سيتم فقدانها.") }}')) {
                 window.location.href = '{{ route("user.profile.show") }}';
             }
         }
@@ -866,7 +889,7 @@
     window.addEventListener('beforeunload', function(e) {
         if (formChanged) {
             e.preventDefault();
-            e.returnValue = '{{ __("You have unsaved changes. Are you sure you want to leave?") }}';
+            e.returnValue = '{{ __("لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد المغادرة؟") }}';
             return e.returnValue;
         }
     });
@@ -903,7 +926,7 @@
         generateBtn.type = 'button';
         generateBtn.className = 'btn btn-secondary';
         generateBtn.style.cssText = 'margin-top: var(--space-sm); font-size: 0.875rem; padding: var(--space-sm) var(--space-md);';
-        generateBtn.innerHTML = '<i class="fas fa-magic"></i> {{ __("Generate Strong Password") }}';
+        generateBtn.innerHTML = '<i class="fas fa-magic"></i> {{ __("إنشاء كلمة مرور قوية") }}';
         generateBtn.onclick = function() {
             const newPassword = generateStrongPassword();
             passwordInput.value = newPassword;
@@ -925,7 +948,7 @@
                 document.getElementById('password_confirmation_icon').className = 'fas fa-eye';
             }, 3000);
             
-            showNotification('{{ __("Strong password generated and filled in both fields") }}', 'success');
+            showNotification('{{ __("تم إنشاء كلمة مرور قوية وملء الحقول") }}', 'success');
         };
         
         passwordInput.parentNode.parentNode.appendChild(generateBtn);
@@ -938,7 +961,8 @@
         notification.style.cssText = `
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
+            right: auto;
             z-index: 9999;
             max-width: 300px;
             box-shadow: var(--shadow-xl);
@@ -960,3 +984,25 @@
             }, 300);
         }, 3000);
     }
+</script>
+
+<style>
+    @keyframes slideIn {
+        from {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        to {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+    }
+</style>
+@endpush

@@ -7,18 +7,19 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of users.
+     * عرض قائمة المستخدمين.
      */
     public function index(Request $request)
     {
         $query = User::query();
 
-        // Search filter
+        // فلتر البحث
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -27,12 +28,12 @@ class UserController extends Controller
             });
         }
 
-        // Role filter
+        // فلتر الدور
         if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
 
-        // Status filter
+        // فلتر الحالة
         if ($request->filled('status')) {
             if ($request->status === 'verified') {
                 $query->whereNotNull('email_verified_at');
@@ -41,7 +42,7 @@ class UserController extends Controller
             }
         }
 
-        // Date filter
+        // فلتر التاريخ
         if ($request->filled('date_filter')) {
             switch ($request->date_filter) {
                 case 'today':
@@ -60,7 +61,7 @@ class UserController extends Controller
             }
         }
 
-        // Sorting
+        // الترتيب
         $sortField = $request->get('sort', 'name');
         $sortOrder = $request->get('order', 'asc');
 
@@ -83,7 +84,7 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for creating a new user.
+     * عرض نموذج إنشاء مستخدم جديد.
      */
     public function create()
     {
@@ -91,7 +92,7 @@ class UserController extends Controller
     }
 
     /**
-     * Store a newly created user in storage.
+     * حفظ مستخدم جديد في قاعدة البيانات.
      */
     public function store(Request $request)
     {
@@ -100,19 +101,39 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:user,admin',
+            'role' => 'required|in:customer,admin',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'email_verified' => 'boolean',
             'send_welcome_email' => 'boolean',
+        ], [
+            'name.required' => 'الاسم مطلوب.',
+            'name.string' => 'الاسم يجب أن يكون نص.',
+            'name.max' => 'الاسم لا يجب أن يتجاوز 255 حرف.',
+            'email.required' => 'البريد الإلكتروني مطلوب.',
+            'email.string' => 'البريد الإلكتروني يجب أن يكون نص.',
+            'email.email' => 'البريد الإلكتروني يجب أن يكون صحيح.',
+            'email.max' => 'البريد الإلكتروني لا يجب أن يتجاوز 255 حرف.',
+            'email.unique' => 'هذا البريد الإلكتروني مستخدم بالفعل.',
+            'phone.string' => 'رقم الهاتف يجب أن يكون نص.',
+            'phone.max' => 'رقم الهاتف لا يجب أن يتجاوز 20 حرف.',
+            'password.required' => 'كلمة المرور مطلوبة.',
+            'password.string' => 'كلمة المرور يجب أن تكون نص.',
+            'password.min' => 'كلمة المرور يجب أن تكون على الأقل 8 أحرف.',
+            'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
+            'role.required' => 'دور المستخدم مطلوب.',
+            'role.in' => 'دور المستخدم يجب أن يكون مستخدم أو مدير.',
+            'avatar.image' => 'الصورة الشخصية يجب أن تكون صورة.',
+            'avatar.mimes' => 'الصورة الشخصية يجب أن تكون من نوع: jpeg, png, jpg, gif.',
+            'avatar.max' => 'حجم الصورة الشخصية يجب ألا يتجاوز 2 ميجابايت.',
         ]);
 
-        // Handle avatar upload
+        // التعامل مع رفع الصورة الشخصية
         $avatarPath = null;
         if ($request->hasFile('avatar')) {
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
         }
 
-        // Create user
+        // إنشاء المستخدم
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -123,18 +144,18 @@ class UserController extends Controller
             'email_verified_at' => $request->boolean('email_verified') ? now() : null,
         ]);
 
-        // Send welcome email if requested
+        // إرسال بريد ترحيب إذا تم طلبه
         if ($request->boolean('send_welcome_email')) {
-            // You can implement email sending logic here
+            // يمكنك تنفيذ منطق إرسال البريد الإلكتروني هنا
             // Mail::to($user)->send(new WelcomeEmail($user));
         }
 
         return redirect()->route('admin.users.index')
-            ->with('success', __('User created successfully.'));
+            ->with('success', 'تم إنشاء المستخدم بنجاح.');
     }
 
     /**
-     * Display the specified user.
+     * عرض المستخدم المحدد.
      */
     public function show(User $user)
     {
@@ -143,7 +164,7 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for editing the specified user.
+     * عرض نموذج تعديل المستخدم المحدد.
      */
     public function edit(User $user)
     {
@@ -151,7 +172,7 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified user in storage.
+     * تحديث المستخدم المحدد في قاعدة البيانات.
      */
     public function update(Request $request, User $user)
     {
@@ -159,89 +180,108 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => 'nullable|string|max:20',
-            'role' => 'required|in:user,admin',
+            'role' => 'required|in:customer,admin',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'password' => 'nullable|string|min:8|confirmed',
             'email_verified' => 'boolean',
             'remove_avatar' => 'boolean',
+        ], [
+            'name.required' => 'الاسم مطلوب.',
+            'name.string' => 'الاسم يجب أن يكون نص.',
+            'name.max' => 'الاسم لا يجب أن يتجاوز 255 حرف.',
+            'email.required' => 'البريد الإلكتروني مطلوب.',
+            'email.string' => 'البريد الإلكتروني يجب أن يكون نص.',
+            'email.email' => 'البريد الإلكتروني يجب أن يكون صحيح.',
+            'email.max' => 'البريد الإلكتروني لا يجب أن يتجاوز 255 حرف.',
+            'email.unique' => 'هذا البريد الإلكتروني مستخدم بالفعل.',
+            'phone.string' => 'رقم الهاتف يجب أن يكون نص.',
+            'phone.max' => 'رقم الهاتف لا يجب أن يتجاوز 20 حرف.',
+            'role.required' => 'دور المستخدم مطلوب.',
+            'role.in' => 'دور المستخدم يجب أن يكون مستخدم أو مدير.',
+            'avatar.image' => 'الصورة الشخصية يجب أن تكون صورة.',
+            'avatar.mimes' => 'الصورة الشخصية يجب أن تكون من نوع: jpeg, png, jpg, gif.',
+            'avatar.max' => 'حجم الصورة الشخصية يجب ألا يتجاوز 2 ميجابايت.',
+            'password.string' => 'كلمة المرور يجب أن تكون نص.',
+            'password.min' => 'كلمة المرور يجب أن تكون على الأقل 8 أحرف.',
+            'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
         ]);
 
-        // Prevent users from changing their own role
-        if ($user->id === auth()->id()) {
+        // منع المستخدمين من تغيير دورهم الخاص
+        if ($user->id === Auth::id()) {
             unset($validated['role']);
         }
 
-        // Handle avatar upload/removal
+        // التعامل مع رفع/إزالة الصورة الشخصية
         if ($request->boolean('remove_avatar') && $user->avatar) {
             Storage::disk('public')->delete($user->avatar);
             $validated['avatar'] = null;
         } elseif ($request->hasFile('avatar')) {
-            // Delete old avatar
+            // حذف الصورة الشخصية القديمة
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         } else {
-            // Keep existing avatar
+            // الاحتفاظ بالصورة الشخصية الموجودة
             unset($validated['avatar']);
         }
 
-        // Handle password update
+        // التعامل مع تحديث كلمة المرور
         if ($request->filled('password')) {
             $validated['password'] = Hash::make($validated['password']);
         } else {
             unset($validated['password']);
         }
 
-        // Handle email verification
+        // التعامل مع تأكيد البريد الإلكتروني
         if ($request->boolean('email_verified') && !$user->email_verified_at) {
             $validated['email_verified_at'] = now();
         } elseif (!$request->boolean('email_verified') && $user->email_verified_at) {
             $validated['email_verified_at'] = null;
         }
 
-        // Remove email_verified from validated data as we handle it separately
+        // إزالة email_verified من البيانات المعتمدة حيث نتعامل معها بشكل منفصل
         unset($validated['email_verified'], $validated['remove_avatar']);
 
-        // Update user
+        // تحديث المستخدم
         $user->update($validated);
 
         return redirect()->route('admin.users.index')
-            ->with('success', __('User updated successfully.'));
+            ->with('success', 'تم تحديث المستخدم بنجاح.');
     }
 
     /**
-     * Remove the specified user from storage.
+     * حذف المستخدم المحدد من قاعدة البيانات.
      */
     public function destroy(User $user)
     {
-        // Prevent users from deleting themselves
-        if ($user->id === auth()->id()) {
+        // منع المستخدمين من حذف أنفسهم
+        if ($user->id === Auth::id()) {
             return redirect()->route('admin.users.index')
-                ->with('error', __('You cannot delete your own account.'));
+                ->with('error', 'لا يمكنك حذف حسابك الخاص.');
         }
 
-        // Delete avatar if exists
+        // حذف الصورة الشخصية إذا كانت موجودة
         if ($user->avatar) {
             Storage::disk('public')->delete($user->avatar);
         }
 
-        // Delete user
+        // حذف المستخدم
         $user->delete();
 
         return redirect()->route('admin.users.index')
-            ->with('success', __('User deleted successfully.'));
+            ->with('success', 'تم حذف المستخدم بنجاح.');
     }
 
     /**
-     * Toggle user status (activate/deactivate)
+     * تبديل حالة المستخدم (تفعيل/إلغاء تفعيل)
      */
     public function toggleStatus(User $user)
     {
-        if ($user->id === auth()->id()) {
+        if ($user->id === Auth::id()) {
             return response()->json([
                 'success' => false,
-                'message' => __('You cannot change your own status.')
+                'message' => 'لا يمكنك تغيير حالة حسابك الخاص.'
             ], 403);
         }
 
@@ -251,19 +291,19 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => __('User status updated successfully.'),
+            'message' => 'تم تحديث حالة المستخدم بنجاح.',
             'is_active' => $user->is_active
         ]);
     }
 
     /**
-     * Verify user email
+     * تأكيد بريد المستخدم الإلكتروني
      */
     public function verifyEmail(User $user)
     {
         if ($user->email_verified_at) {
             return redirect()->back()
-                ->with('info', __('Email is already verified.'));
+                ->with('info', 'البريد الإلكتروني مؤكد بالفعل.');
         }
 
         $user->update([
@@ -271,23 +311,23 @@ class UserController extends Controller
         ]);
 
         return redirect()->back()
-            ->with('success', __('Email verified successfully.'));
+            ->with('success', 'تم تأكيد البريد الإلكتروني بنجاح.');
     }
 
     /**
-     * Send password reset email
+     * إرسال بريد إعادة تعيين كلمة المرور
      */
     public function sendPasswordReset(User $user)
     {
-        // Generate password reset token and send email
-        // This is a placeholder - implement actual password reset logic
+        // توليد رمز إعادة تعيين كلمة المرور وإرسال البريد الإلكتروني
+        // هذا نموذج أولي - قم بتنفيذ منطق إعادة تعيين كلمة المرور الفعلي
         
         return redirect()->back()
-            ->with('success', __('Password reset email sent successfully.'));
+            ->with('success', 'تم إرسال بريد إعادة تعيين كلمة المرور بنجاح.');
     }
 
     /**
-     * Get user statistics for dashboard
+     * الحصول على إحصائيات المستخدمين للوحة التحكم
      */
     public function getStatistics()
     {
@@ -305,16 +345,16 @@ class UserController extends Controller
     }
 
     /**
-     * Export users data
+     * تصدير بيانات المستخدمين
      */
     public function export(Request $request)
     {
-        // This is a placeholder for export functionality
-        // You can implement CSV, Excel, or PDF export here
+        // هذا نموذج أولي لوظيفة التصدير
+        // يمكنك تنفيذ تصدير CSV أو Excel أو PDF هنا
         
         $users = User::all();
         
-        // Example: Generate CSV
+        // مثال: توليد CSV
         $filename = 'users_export_' . now()->format('Y_m_d_H_i_s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
@@ -324,20 +364,20 @@ class UserController extends Controller
         $callback = function () use ($users) {
             $file = fopen('php://output', 'w');
             
-            // CSV headers
-            fputcsv($file, ['ID', 'Name', 'Email', 'Phone', 'Role', 'Email Verified', 'Created At', 'Last Login']);
+            // عناوين CSV
+            fputcsv($file, ['المعرف', 'الاسم', 'البريد الإلكتروني', 'الهاتف', 'الدور', 'البريد مؤكد', 'تاريخ الإنشاء', 'آخر دخول']);
             
-            // CSV data
+            // بيانات CSV
             foreach ($users as $user) {
                 fputcsv($file, [
                     $user->id,
                     $user->name,
                     $user->email,
                     $user->phone,
-                    $user->role ?? 'user',
-                    $user->email_verified_at ? 'Yes' : 'No',
+                    $user->role ?? 'customer',
+                    $user->email_verified_at ? 'نعم' : 'لا',
                     $user->created_at->format('Y-m-d H:i:s'),
-                    $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i:s') : 'Never',
+                    $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i:s') : 'أبداً',
                 ]);
             }
             

@@ -1,25 +1,25 @@
 @extends('layouts.admin')
 
-@section('title', 'Conversation Details')
-@section('page-title', 'Conversation with ' . $conversation->user->name)
+@section('title', 'تفاصيل المحادثة')
+@section('page-title', 'محادثة مع ' . $conversation->user->name)
 
 @section('breadcrumb')
 <div class="breadcrumb-item">
-    <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">Dashboard</a>
+    <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">لوحة التحكم</a>
 </div>
 <div class="breadcrumb-item">
-    <i class="fas fa-chevron-right"></i>
-    <a href="{{ route('admin.conversations.index') }}" class="breadcrumb-link">Conversations</a>
+    <i class="fas fa-chevron-left"></i>
+    <a href="{{ route('admin.conversations.index') }}" class="breadcrumb-link">المحادثات</a>
 </div>
 <div class="breadcrumb-item">
-    <i class="fas fa-chevron-right"></i>
+    <i class="fas fa-chevron-left"></i>
     {{ Str::limit($conversation->title, 30) }}
 </div>
 @endsection
 
 @push('styles')
 <style>
-/* متغيرات CSS للأدمن */
+/* متغيرات التصميم */
 :root {
     --admin-primary-500: #3b82f6;
     --admin-primary-600: #2563eb;
@@ -65,6 +65,12 @@
     --transition-normal: 300ms ease-in-out;
 }
 
+/* تنسيقات عامة للصفحة */
+body {
+    direction: rtl;
+    text-align: right;
+}
+
 /* تحسينات CSS للرسائل الفورية */
 .message-sending {
     opacity: 0.7;
@@ -74,7 +80,7 @@
 .new-message-indicator {
     position: fixed;
     bottom: 100px;
-    right: 20px;
+    left: 20px;
     background: var(--admin-primary-500);
     color: white;
     padding: var(--space-sm) var(--space-md);
@@ -156,7 +162,7 @@
 .auto-scroll-indicator {
     position: absolute;
     bottom: 10px;
-    right: 10px;
+    left: 10px;
     background: var(--admin-primary-500);
     color: white;
     padding: 0.5rem;
@@ -373,24 +379,24 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2xl);">
         <div>
             <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-sm);">
-                <i class="fas fa-comment-dots" style="color: var(--admin-primary-500); margin-right: var(--space-sm);"></i>
+                <i class="fas fa-comment-dots" style="color: var(--admin-primary-500); margin-left: var(--space-sm);"></i>
                 {{ $conversation->title }}
                 @if(!$conversation->is_read_by_admin)
-                    <span class="badge badge-danger">Unread</span>
+                    <span class="badge badge-danger">غير مقروء</span>
                 @else
-                    <span class="badge badge-success">Read</span>
+                    <span class="badge badge-success">مقروء</span>
                 @endif
                 <span class="unread-count" id="unreadCount" style="display: none;">0</span>
             </h1>
             <p style="color: var(--admin-secondary-600); font-size: 0.875rem;">
-                Conversation with {{ $conversation->user->name }} • <span id="messageCount">{{ $messages->count() }}</span> messages
+                محادثة مع {{ $conversation->user->name }} • <span id="messageCount">{{ $messages->count() }}</span> رسائل
             </p>
         </div>
         
         <div style="display: flex; gap: var(--space-md);">
             <a href="{{ route('admin.conversations.index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i>
-                Back to Conversations
+                <i class="fas fa-arrow-right"></i>
+                العودة للمحادثات
             </a>
             @if(!$conversation->is_read_by_admin)
             <form action="{{ route('admin.conversations.mark-read', $conversation) }}" method="POST" style="display: inline;">
@@ -398,13 +404,13 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                 @method('PATCH')
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-check"></i>
-                    Mark as Read
+                    تعليم كمقروء
                 </button>
             </form>
             @endif
             <span id="connectionStatus" class="connection-status">
                 <div class="connection-dot connected"></div>
-                <span>Connected</span>
+                <span>متصل</span>
             </span>
         </div>
     </div>
@@ -424,11 +430,11 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-comments"></i>
-                        Conversation Messages
+                        رسائل المحادثة
                     </h3>
                     <button onclick="scrollToBottom()" class="btn btn-sm btn-secondary">
                         <i class="fas fa-arrow-down"></i>
-                        Latest
+                        أحدث الرسائل
                     </button>
                 </div>
                 
@@ -450,7 +456,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                             <!-- Sender Info -->
                             <div style="font-size: 0.8rem; font-weight: 600; color: var(--admin-secondary-600); margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-sm); {{ $message->is_from_admin ? 'justify-content: flex-end;' : '' }}">
                                 @if($message->is_from_admin)
-                                    <span style="padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; background: var(--success-100); color: var(--success-700);">Admin</span>
+                                    <span style="padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; background: var(--success-100); color: var(--success-700);">المشرف</span>
                                 @else
                                     <span style="padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; background: var(--admin-primary-100); color: var(--admin-primary-700);">{{ $conversation->user->name }}</span>
                                 @endif
@@ -461,7 +467,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                             </div>
                             
                             <!-- Message Bubble -->
-                            <div style="padding: var(--space-md) var(--space-lg); border-radius: var(--radius-xl); margin-bottom: var(--space-xs); word-wrap: break-word; line-height: 1.6; position: relative; box-shadow: var(--shadow-sm); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, var(--success-500), var(--success-600)); color: white; border-bottom-right-radius: var(--radius-sm);' : 'background: white; color: var(--admin-secondary-900); border: 1px solid var(--admin-secondary-200); border-bottom-left-radius: var(--radius-sm);' }}">
+                            <div style="padding: var(--space-md) var(--space-lg); border-radius: var(--radius-xl); margin-bottom: var(--space-xs); word-wrap: break-word; line-height: 1.6; position: relative; box-shadow: var(--shadow-sm); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, var(--success-500), var(--success-600)); color: white; border-bottom-left-radius: var(--radius-sm);' : 'background: white; color: var(--admin-secondary-900); border: 1px solid var(--admin-secondary-200); border-bottom-right-radius: var(--radius-sm);' }}">
                                 {{ $message->message }}
                             </div>
                         </div>
@@ -471,7 +477,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                     <!-- Typing Indicator -->
                     <div id="typingIndicator" class="typing-indicator">
                         <i class="fas fa-pencil-alt"></i>
-                        Customer is typing...
+                        العميل يكتب الآن...
                     </div>
                 </div>
                 
@@ -480,21 +486,21 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                     <i class="fas fa-arrow-down"></i>
                 </div>
                 
-                <!-- Reply Form - FIXED VERSION -->
+                <!-- Reply Form -->
                 <div style="border-top: 1px solid var(--admin-secondary-200); padding: var(--space-lg); background: var(--admin-secondary-50);">
                     <form action="{{ route('admin.conversations.reply', $conversation) }}" method="POST" id="messageForm">
                         @csrf
                         <div style="margin-bottom: var(--space-md);">
                             <label style="display: block; margin-bottom: var(--space-sm); font-weight: 500; color: var(--admin-secondary-700);">
                                 <i class="fas fa-reply"></i>
-                                Your Reply
+                                ردك
                             </label>
                             <textarea 
                                 name="message" 
                                 id="messageTextarea"
                                 class="form-input"
                                 style="width: 100%; min-height: 100px; padding: var(--space-md); border: 2px solid var(--admin-secondary-300); border-radius: var(--radius-lg); font-family: inherit; resize: vertical; transition: all var(--transition-fast);"
-                                placeholder="Type your reply here..."
+                                placeholder="اكتب ردك هنا..."
                                 required
                                 onkeydown="handleKeyDown(event)"
                                 oninput="autoResize(this)"
@@ -505,7 +511,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                             <!-- Error Display -->
                             @if ($errors->any())
                             <div style="margin-top: var(--space-sm); padding: var(--space-sm); background: var(--error-50); border: 1px solid var(--error-200); border-radius: var(--radius-md); color: var(--error-700);">
-                                <ul style="margin: 0; padding-left: var(--space-md);">
+                                <ul style="margin: 0; padding-right: var(--space-md);">
                                     @foreach ($errors->all() as $error)
                                         <li>{{ $error }}</li>
                                     @endforeach
@@ -516,20 +522,20 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="font-size: 0.875rem; color: var(--admin-secondary-600);">
                                 <i class="fas fa-info-circle"></i>
-                                This will be sent to {{ $conversation->user->name }}
-                                <span id="sendingStatus" style="display: none; margin-left: var(--space-sm); color: var(--admin-primary-500);">
+                                سيتم إرسال هذا إلى {{ $conversation->user->name }}
+                                <span id="sendingStatus" style="display: none; margin-right: var(--space-sm); color: var(--admin-primary-500);">
                                     <i class="fas fa-spinner fa-spin"></i>
-                                    Sending...
+                                    جاري الإرسال...
                                 </span>
                             </div>
                             <div style="display: flex; gap: var(--space-sm); align-items: center;">
                                 <button type="button" onclick="toggleRealTimeMessaging()" id="realTimeToggle" class="btn btn-sm btn-secondary">
                                     <i class="fas fa-sync-alt"></i>
-                                    <span>Disable Auto-refresh</span>
+                                    <span>تعطيل التحديث التلقائي</span>
                                 </button>
                                 <button type="submit" id="sendButton" class="btn btn-primary">
                                     <i class="fas fa-paper-plane"></i>
-                                    Send Reply
+                                    إرسال الرد
                                 </button>
                             </div>
                         </div>
@@ -545,7 +551,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-user"></i>
-                        Customer Information
+                        معلومات العميل
                     </h3>
                 </div>
                 <div class="card-body">
@@ -563,12 +569,12 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                     
                     <div style="border-top: 1px solid var(--admin-secondary-200); padding-top: var(--space-lg);">
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Member Since:</span>
+                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">عضو منذ:</span>
                             <span style="color: var(--admin-secondary-900); font-size: 0.875rem;">{{ $conversation->user->created_at->format('M d, Y') }}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
-                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Role:</span>
-                            <span class="badge badge-secondary">{{ ucfirst($conversation->user->role ?? 'customer') }}</span>
+                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">الدور:</span>
+                            <span class="badge badge-secondary">{{ ucfirst($conversation->user->role ?? 'عميل') }}</span>
                         </div>
                     </div>
                 </div>
@@ -579,30 +585,30 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-info-circle"></i>
-                        Conversation Details
+                        تفاصيل المحادثة
                     </h3>
                 </div>
                 <div class="card-body">
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Status:</span>
+                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">الحالة:</span>
                         <span>
                             @if(!$conversation->is_read_by_admin)
-                                <span class="badge badge-warning">Needs Attention</span>
+                                <span class="badge badge-warning">بحاجة لاهتمام</span>
                             @else
-                                <span class="badge badge-success">Handled</span>
+                                <span class="badge badge-success">تمت معالجته</span>
                             @endif
                         </span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Messages:</span>
+                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">الرسائل:</span>
                         <span style="color: var(--admin-secondary-900); font-size: 0.875rem;" id="sidebarMessageCount">{{ $messages->count() }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Started:</span>
+                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">بدأت في:</span>
                         <span style="color: var(--admin-secondary-900); font-size: 0.875rem;">{{ $conversation->created_at->format('M d, Y h:i A') }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
-                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Last Updated:</span>
+                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">آخر تحديث:</span>
                         <span style="color: var(--admin-secondary-900); font-size: 0.875rem;" id="lastReplyTime">{{ $conversation->updated_at->diffForHumans() }}</span>
                     </div>
                 </div>
@@ -613,7 +619,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-bolt"></i>
-                        Quick Actions
+                        إجراءات سريعة
                     </h3>
                 </div>
                 <div class="card-body">
@@ -624,24 +630,24 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                             @method('PATCH')
                             <button type="submit" class="btn btn-success" style="width: 100%;">
                                 <i class="fas fa-check"></i>
-                                Mark as Read
+                                تعليم كمقروء
                             </button>
                         </form>
                         @endif
                         
                         <a href="{{ route('admin.users.show', $conversation->user) }}" class="btn btn-secondary" style="width: 100%; text-decoration: none;">
                             <i class="fas fa-user"></i>
-                            View Customer Profile
+                            عرض ملف العميل
                         </a>
                         
                         <a href="{{ route('admin.conversations.index') }}" class="btn btn-secondary" style="width: 100%; text-decoration: none;">
-                            <i class="fas fa-arrow-left"></i>
-                            Back to Conversations
+                            <i class="fas fa-arrow-right"></i>
+                            العودة للمحادثات
                         </a>
                         
                         <button onclick="window.print()" class="btn btn-secondary" style="width: 100%;">
                             <i class="fas fa-print"></i>
-                            Print Conversation
+                            طباعة المحادثة
                         </button>
                     </div>
                 </div>
@@ -652,26 +658,26 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-question-circle"></i>
-                        Support Guidelines
+                        إرشادات الدعم
                     </h3>
                 </div>
                 <div class="card-body">
                     <div style="font-size: 0.875rem; color: var(--admin-secondary-700); line-height: 1.6;">
                         <div style="margin-bottom: var(--space-md);">
-                            <strong>Response Goals:</strong>
+                            <strong>أهداف الرد:</strong>
                             <ul style="margin: var(--space-sm) 0 0 var(--space-lg); padding: 0;">
-                                <li>First response: < 2 hours</li>
-                                <li>Resolution: < 24 hours</li>
-                                <li>Follow-up: Within 48 hours</li>
+                                <li>الرد الأول: أقل من ساعتين</li>
+                                <li>الحل: أقل من 24 ساعة</li>
+                                <li>المتابعة: خلال 48 ساعة</li>
                             </ul>
                         </div>
                         <div>
-                            <strong>Tips:</strong>
+                            <strong>نصائح:</strong>
                             <ul style="margin: var(--space-sm) 0 0 var(--space-lg); padding: 0;">
-                                <li>Be empathetic and professional</li>
-                                <li>Provide clear, actionable solutions</li>
-                                <li>Ask for clarification if needed</li>
-                                <li>Follow up to ensure satisfaction</li>
+                                <li>كن متعاطفًا ومحترفًا</li>
+                                <li>قدم حلولًا واضحة وقابلة للتنفيذ</li>
+                                <li>اطلب التوضيح إذا لزم الأمر</li>
+                                <li>تابع للتأكد من الرضا</li>
                             </ul>
                         </div>
                     </div>
@@ -685,7 +691,7 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
 @push('scripts')
 <script type="text/javascript">
 // ========================================
-// Real-time Messaging System for Admin (مُحسن مع التمرير التلقائي)
+// نظام الرسائل الفورية للأدمن (نسخة عربية)
 // ========================================
 
 class RealTimeMessaging {
@@ -719,7 +725,7 @@ class RealTimeMessaging {
         // إعداد مراقبة التمرير
         this.setupScrollDetection();
         
-        console.log('Real-time messaging initialized for admin');
+        console.log('تم تهيئة نظام الرسائل الفورية للأدمن');
     }
 
     getLatestMessageId() {
@@ -819,7 +825,7 @@ class RealTimeMessaging {
                 this.updateConnectionStatus(false);
             }
         } catch (error) {
-            console.error('Error checking for new messages:', error);
+            console.error('خطأ في التحقق من الرسائل الجديدة:', error);
             this.updateConnectionStatus(false);
         }
     }
@@ -832,7 +838,7 @@ class RealTimeMessaging {
             // تحقق من عدم وجود الرسالة مسبقاً
             const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
             if (existingMessage) {
-                console.log('Message already exists, skipping:', message.id);
+                console.log('الرسالة موجودة بالفعل، تخطي:', message.id);
                 return;
             }
 
@@ -919,7 +925,7 @@ class RealTimeMessaging {
         
         if (message.is_from_admin) {
             senderBadge.style.cssText += 'background: var(--success-100); color: var(--success-700);';
-            senderBadge.textContent = 'Admin';
+            senderBadge.textContent = 'المشرف';
         } else {
             senderBadge.style.cssText += 'background: var(--admin-primary-100); color: var(--admin-primary-700);';
             senderBadge.textContent = message.user_name;
@@ -943,13 +949,13 @@ class RealTimeMessaging {
         if (message.is_from_admin) {
             messageBubble.style.cssText += `
                 background: linear-gradient(135deg, var(--success-500), var(--success-600)); 
-                color: white; border-bottom-right-radius: var(--radius-sm);
+                color: white; border-bottom-left-radius: var(--radius-sm);
             `;
         } else {
             messageBubble.style.cssText += `
                 background: white; color: var(--admin-secondary-900); 
                 border: 1px solid var(--admin-secondary-200); 
-                border-bottom-left-radius: var(--radius-sm);
+                border-bottom-right-radius: var(--radius-sm);
             `;
         }
         
@@ -981,7 +987,7 @@ class RealTimeMessaging {
             
             const message = textarea.value.trim();
             if (!message) {
-                alert('Please enter a message before sending.');
+                alert('الرجاء إدخال رسالة قبل الإرسال.');
                 return;
             }
 
@@ -999,8 +1005,8 @@ class RealTimeMessaging {
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                 formData.append('message', message);
                 
-                console.log('Admin sending message:', message);
-                console.log('Form action:', form.action);
+                console.log('الأدمن يرسل رسالة:', message);
+                console.log('مسار النموذج:', form.action);
 
                 const response = await fetch(form.action, {
                     method: 'POST',
@@ -1010,11 +1016,11 @@ class RealTimeMessaging {
                     }
                 });
 
-                console.log('Response status:', response.status);
+                console.log('حالة الاستجابة:', response.status);
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Response data:', data);
+                    console.log('بيانات الاستجابة:', data);
                     
                     if (data.success && data.message) {
                         // إضافة الرسالة فوراً
@@ -1034,21 +1040,21 @@ class RealTimeMessaging {
                             this.scrollToBottom(true);
                         }, 100);
                     } else {
-                        throw new Error(data.error || 'Failed to send message');
+                        throw new Error(data.error || 'فشل في إرسال الرسالة');
                     }
                 } else {
                     const errorData = await response.json();
-                    console.error('Error response:', errorData);
+                    console.error('استجابة الخطأ:', errorData);
                     throw new Error(errorData.error || `HTTP ${response.status}`);
                 }
             } catch (error) {
-                console.error('Error sending message:', error);
+                console.error('خطأ في إرسال الرسالة:', error);
                 alert('خطأ في إرسال الرسالة: ' + error.message + '. يرجى المحاولة مرة أخرى.');
             } finally {
                 // إعادة تفعيل الـ form
                 isSubmitting = false;
                 submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reply';
+                submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الرد';
                 textarea.disabled = false;
                 textarea.focus();
                 if (sendingStatus) sendingStatus.style.display = 'none';
@@ -1113,10 +1119,10 @@ class RealTimeMessaging {
             
             if (connected) {
                 dot.className = 'connection-dot connected';
-                text.textContent = 'Connected';
+                text.textContent = 'متصل';
             } else {
                 dot.className = 'connection-dot disconnected';
-                text.textContent = 'Disconnected';
+                text.textContent = 'غير متصل';
             }
         }
     }
@@ -1160,11 +1166,11 @@ class RealTimeMessaging {
             const span = toggleButton.querySelector('span');
             if (this.isRealTimeEnabled) {
                 this.startPolling();
-                span.textContent = 'Disable Auto-refresh';
+                span.textContent = 'تعطيل التحديث التلقائي';
                 toggleButton.style.background = '';
             } else {
                 this.stopPolling();
-                span.textContent = 'Enable Auto-refresh';
+                span.textContent = 'تمكين التحديث التلقائي';
                 toggleButton.style.background = 'var(--warning-100)';
             }
         }
@@ -1178,7 +1184,7 @@ class RealTimeMessaging {
 }
 
 // ========================================
-// Helper Functions
+// دوال مساعدة
 // ========================================
 
 function scrollToBottom(smooth = true) {
@@ -1211,10 +1217,10 @@ function toggleRealTimeMessaging() {
 }
 
 // ========================================
-// Auto-initialization
+// التهيئة التلقائية
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Admin page DOM loaded, initializing...');
+    console.log('تم تحميل الصفحة، جاري التهيئة...');
     
     // استخراج معرف المحادثة من الـ URL
     const pathParts = window.location.pathname.split('/');
@@ -1223,14 +1229,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // التحقق من وجود صفحة المحادثة
     const messagesList = document.getElementById('messagesList');
     
-    console.log('Admin Conversation ID:', conversationId);
-    console.log('Messages list found:', !!messagesList);
+    console.log('معرف المحادثة:', conversationId);
+    console.log('تم العثور على قائمة الرسائل:', !!messagesList);
     
     if (messagesList && conversationId && !isNaN(conversationId)) {
         // إنشاء مثيل من نظام الرسائل الفورية للأدمن
         window.realTimeMessaging = new RealTimeMessaging(conversationId, true);
         
-        console.log('Real-time messaging started for admin conversation:', conversationId);
+        console.log('بدأ نظام الرسائل الفورية لمحادثة الأدمن:', conversationId);
         
         // التمرير إلى أسفل عند التحميل
         setTimeout(() => {
@@ -1243,7 +1249,7 @@ document.addEventListener('DOMContentLoaded', function() {
             textarea.focus();
         }
     } else {
-        console.error('Failed to initialize admin real-time messaging:', {
+        console.error('فشل في تهيئة نظام الرسائل الفورية للأدمن:', {
             messagesList: !!messagesList,
             conversationId,
             isValidId: !isNaN(conversationId)

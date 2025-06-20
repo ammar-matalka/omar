@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('My Wishlist') . ' - ' . config('app.name'))
+@section('title', 'قائمة المفضلة' . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
@@ -16,8 +16,8 @@
         content: '';
         position: absolute;
         top: 0;
-        left: 0;
         right: 0;
+        left: 0;
         bottom: 0;
         background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,0 1000,0 1000,80 0,100"/></svg>');
         background-size: cover;
@@ -161,7 +161,7 @@
         cursor: pointer;
         transition: all var(--transition-fast);
         appearance: none;
-        padding-right: var(--space-xl);
+        padding-left: var(--space-xl);
     }
     
     .sort-select:focus {
@@ -173,13 +173,13 @@
     .sort-dropdown::after {
         content: '';
         position: absolute;
-        right: var(--space-md);
+        left: var(--space-md);
         top: 50%;
         transform: translateY(-50%);
         width: 0;
         height: 0;
-        border-left: 4px solid transparent;
         border-right: 4px solid transparent;
+        border-left: 4px solid transparent;
         border-top: 4px solid var(--on-surface-variant);
         pointer-events: none;
     }
@@ -229,8 +229,8 @@
     .item-overlay {
         position: absolute;
         top: 0;
-        left: 0;
         right: 0;
+        left: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.3);
         opacity: 0;
@@ -280,7 +280,7 @@
     .item-badge {
         position: absolute;
         top: var(--space-md);
-        left: var(--space-md);
+        right: var(--space-md);
         background: var(--primary-500);
         color: white;
         padding: var(--space-xs) var(--space-sm);
@@ -451,7 +451,7 @@
     .remove-btn {
         position: absolute;
         top: var(--space-md);
-        right: var(--space-md);
+        left: var(--space-md);
         width: 32px;
         height: 32px;
         border-radius: 50%;
@@ -505,8 +505,8 @@
         line-height: 1.6;
         margin-bottom: var(--space-xl);
         max-width: 400px;
-        margin-left: auto;
         margin-right: auto;
+        margin-left: auto;
     }
     
     .empty-cta {
@@ -642,18 +642,18 @@
             <nav class="breadcrumb">
                 <a href="{{ route('home') }}" class="breadcrumb-link">
                     <i class="fas fa-home"></i>
-                    {{ __('Home') }}
+                    الرئيسية
                 </a>
                 <span class="breadcrumb-separator">/</span>
                 <a href="{{ route('user.profile.show') }}" class="breadcrumb-link">
-                    {{ __('Profile') }}
+                    الملف الشخصي
                 </a>
                 <span class="breadcrumb-separator">/</span>
-                <span>{{ __('Wishlist') }}</span>
+                <span>المفضلة</span>
             </nav>
             
-            <h1 class="hero-title">{{ __('My Wishlist') }}</h1>
-            <p class="hero-subtitle">{{ __('Keep track of your favorite products and never miss a deal') }}</p>
+            <h1 class="hero-title">قائمة المفضلة</h1>
+            <p class="hero-subtitle">تتبع منتجاتك المفضلة ولا تفوت أي عرض</p>
         </div>
     </div>
 </section>
@@ -664,36 +664,36 @@
         <!-- Wishlist Header -->
         <div class="wishlist-header fade-in">
             <div class="wishlist-count">
-                {{ __('Wishlist Items') }}: <strong>{{ $wishlistItems->count() }}</strong>
+                عناصر المفضلة: <strong>{{ $wishlistItems->count() }}</strong>
             </div>
             
             <div class="wishlist-actions">
                 @if($wishlistItems->count() > 0)
                     <button class="action-btn btn-secondary" onclick="toggleBulkActions()">
                         <i class="fas fa-check-square"></i>
-                        {{ __('Select Multiple') }}
+                        تحديد متعدد
                     </button>
                     
                     <div class="sort-dropdown">
                         <select class="sort-select" onchange="sortWishlist(this.value)">
-                            <option value="newest">{{ __('Newest First') }}</option>
-                            <option value="oldest">{{ __('Oldest First') }}</option>
-                            <option value="name_asc">{{ __('Name A-Z') }}</option>
-                            <option value="name_desc">{{ __('Name Z-A') }}</option>
-                            <option value="price_low">{{ __('Price Low to High') }}</option>
-                            <option value="price_high">{{ __('Price High to Low') }}</option>
+                            <option value="newest">الأحدث أولاً</option>
+                            <option value="oldest">الأقدم أولاً</option>
+                            <option value="name_asc">الاسم أ-ي</option>
+                            <option value="name_desc">الاسم ي-أ</option>
+                            <option value="price_low">السعر من الأقل للأعلى</option>
+                            <option value="price_high">السعر من الأعلى للأقل</option>
                         </select>
                     </div>
                     
                     <button class="action-btn btn-danger" onclick="clearWishlist()">
                         <i class="fas fa-trash"></i>
-                        {{ __('Clear All') }}
+                        مسح الكل
                     </button>
                 @endif
                 
                 <a href="{{ route('products.index') }}" class="action-btn btn-primary">
                     <i class="fas fa-plus"></i>
-                    {{ __('Add More Items') }}
+                    إضافة المزيد
                 </a>
             </div>
         </div>
@@ -702,20 +702,20 @@
         <div class="bulk-actions" id="bulk-actions">
             <div class="bulk-header">
                 <div class="bulk-title">
-                    <span id="selected-count">0</span> {{ __('items selected') }}
+                    <span id="selected-count">0</span> عنصر محدد
                 </div>
                 <div class="bulk-buttons">
                     <button class="action-btn btn-primary" onclick="addSelectedToCart()">
                         <i class="fas fa-shopping-cart"></i>
-                        {{ __('Add to Cart') }}
+                        إضافة للسلة
                     </button>
                     <button class="action-btn btn-danger" onclick="removeSelected()">
                         <i class="fas fa-trash"></i>
-                        {{ __('Remove Selected') }}
+                        حذف المحدد
                     </button>
                     <button class="action-btn btn-secondary" onclick="cancelBulkActions()">
                         <i class="fas fa-times"></i>
-                        {{ __('Cancel') }}
+                        إلغاء
                     </button>
                 </div>
             </div>
@@ -732,7 +732,7 @@
                         </button>
                         
                         <!-- Bulk Selection Checkbox -->
-                        <input type="checkbox" class="bulk-checkbox" style="display: none; position: absolute; top: var(--space-md); left: var(--space-md); z-index: 3;" onchange="updateBulkSelection()">
+                        <input type="checkbox" class="bulk-checkbox" style="display: none; position: absolute; top: var(--space-md); right: var(--space-md); z-index: 3;" onchange="updateBulkSelection()">
                         
                         <!-- Item Image -->
                         <div class="item-image">
@@ -746,24 +746,24 @@
                             
                             <!-- Badges -->
                             @if($item->product->stock <= 0)
-                                <div class="item-badge badge-out-of-stock">{{ __('Out of Stock') }}</div>
+                                <div class="item-badge badge-out-of-stock">نفذ المخزون</div>
                             @elseif($item->product->created_at->diffInDays() < 30)
-                                <div class="item-badge badge-new">{{ __('New') }}</div>
+                                <div class="item-badge badge-new">جديد</div>
                             @endif
                             
                             <!-- Overlay Actions -->
                             <div class="item-overlay">
-                                <button class="overlay-btn" onclick="quickView('{{ $item->product->id }}')" title="{{ __('Quick View') }}">
+                                <button class="overlay-btn" onclick="quickView('{{ $item->product->id }}')" title="عرض سريع">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 
                                 @if($item->product->stock > 0)
-                                    <button class="overlay-btn" onclick="addToCart('{{ $item->product->id }}')" title="{{ __('Add to Cart') }}">
+                                    <button class="overlay-btn" onclick="addToCart('{{ $item->product->id }}')" title="أضف للسلة">
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
                                 @endif
                                 
-                                <button class="overlay-btn remove" onclick="removeFromWishlist('{{ $item->product->id }}')" title="{{ __('Remove from Wishlist') }}">
+                                <button class="overlay-btn remove" onclick="removeFromWishlist('{{ $item->product->id }}')" title="حذف من المفضلة">
                                     <i class="fas fa-heart-broken"></i>
                                 </button>
                             </div>
@@ -795,16 +795,16 @@
                             <div class="item-meta">
                                 <div class="meta-item">
                                     <i class="fas fa-calendar-alt"></i>
-                                    {{ __('Added') }} {{ $item->created_at->diffForHumans() }}
+                                    أُضيف {{ $item->created_at->diffForHumans() }}
                                 </div>
                                 <div class="meta-item stock-status {{ $item->product->stock <= 0 ? 'out-of-stock' : ($item->product->stock < 10 ? 'low-stock' : 'in-stock') }}">
                                     <i class="fas fa-box"></i>
                                     @if($item->product->stock <= 0)
-                                        {{ __('Out of Stock') }}
+                                        نفذ المخزون
                                     @elseif($item->product->stock < 10)
-                                        {{ __('Low Stock') }} ({{ $item->product->stock }})
+                                        مخزون قليل ({{ $item->product->stock }})
                                     @else
-                                        {{ __('In Stock') }} ({{ $item->product->stock }})
+                                        متوفر ({{ $item->product->stock }})
                                     @endif
                                 </div>
                             </div>
@@ -812,18 +812,18 @@
                             <div class="item-actions">
                                 <a href="{{ route('products.show', $item->product) }}" class="item-btn">
                                     <i class="fas fa-eye"></i>
-                                    {{ __('View') }}
+                                    عرض
                                 </a>
                                 
                                 @if($item->product->stock > 0)
                                     <button class="item-btn primary" onclick="addToCart('{{ $item->product->id }}')">
                                         <i class="fas fa-shopping-cart"></i>
-                                        {{ __('Add to Cart') }}
+                                        أضف للسلة
                                     </button>
                                 @else
                                     <button class="item-btn" disabled>
                                         <i class="fas fa-ban"></i>
-                                        {{ __('Out of Stock') }}
+                                        نفذ المخزون
                                     </button>
                                 @endif
                             </div>
@@ -837,13 +837,13 @@
                 <div class="empty-icon">
                     <i class="fas fa-heart"></i>
                 </div>
-                <h2 class="empty-title">{{ __('Your Wishlist is Empty') }}</h2>
+                <h2 class="empty-title">قائمة المفضلة فارغة</h2>
                 <p class="empty-text">
-                    {{ __('Start adding products to your wishlist to keep track of items you love and want to purchase later.') }}
+                    ابدأ بإضافة المنتجات إلى قائمة المفضلة لتتبع العناصر التي تحبها وتريد شراؤها لاحقاً.
                 </p>
                 <a href="{{ route('products.index') }}" class="empty-cta">
                     <i class="fas fa-shopping-bag"></i>
-                    {{ __('Browse Products') }}
+                    تصفح المنتجات
                 </a>
             </div>
         @endif
@@ -917,7 +917,7 @@
         });
         
         if (productIds.length === 0) {
-            showNotification('{{ __("Please select items to add to cart") }}', 'warning');
+            showNotification('يرجى تحديد عناصر لإضافتها للسلة', 'warning');
             return;
         }
         
@@ -931,7 +931,7 @@
                 addToCart(productRealId).then(() => {
                     completed++;
                     if (completed === productIds.length) {
-                        showNotification(`{{ __("Added") }} ${productIds.length} {{ __("items to cart") }}`, 'success');
+                        showNotification(`تم إضافة ${productIds.length} عنصر للسلة`, 'success');
                         cancelBulkActions();
                     }
                 });
@@ -945,11 +945,11 @@
         const items = Array.from(checkedBoxes).map(checkbox => checkbox.closest('.wishlist-item'));
         
         if (items.length === 0) {
-            showNotification('{{ __("Please select items to remove") }}', 'warning');
+            showNotification('يرجى تحديد عناصر للحذف', 'warning');
             return;
         }
         
-        if (!confirm(`{{ __("Remove") }} ${items.length} {{ __("items from wishlist?") }}`)) {
+        if (!confirm(`حذف ${items.length} عنصر من المفضلة؟`)) {
             return;
         }
         
@@ -1005,7 +1005,7 @@
     
     // Clear entire wishlist
     function clearWishlist() {
-        if (!confirm('{{ __("Are you sure you want to clear your entire wishlist?") }}')) {
+        if (!confirm('هل أنت متأكد من رغبتك في مسح قائمة المفضلة بالكامل؟')) {
             return;
         }
         
@@ -1019,23 +1019,23 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showNotification('{{ __("Wishlist cleared successfully") }}', 'success');
+                showNotification('تم مسح المفضلة بنجاح', 'success');
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
             } else {
-                showNotification(data.message || '{{ __("Failed to clear wishlist") }}', 'error');
+                showNotification(data.message || 'فشل في مسح المفضلة', 'error');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            showNotification('{{ __("An error occurred") }}', 'error');
+            console.error('خطأ:', error);
+            showNotification('حدث خطأ', 'error');
         });
     }
     
     // Remove item from wishlist
     function removeFromWishlist(productId) {
-        if (!confirm('{{ __("Remove this item from your wishlist?") }}')) {
+        if (!confirm('حذف هذا العنصر من المفضلة؟')) {
             return;
         }
         
@@ -1058,14 +1058,14 @@
                         updateWishlistCount();
                     }, 300);
                 }
-                showNotification('{{ __("Item removed from wishlist") }}', 'success');
+                showNotification('تم حذف العنصر من المفضلة', 'success');
             } else {
-                showNotification(data.message || '{{ __("Failed to remove item") }}', 'error');
+                showNotification(data.message || 'فشل في حذف العنصر', 'error');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            showNotification('{{ __("An error occurred") }}', 'error');
+            console.error('خطأ:', error);
+            showNotification('حدث خطأ', 'error');
         });
     }
     
@@ -1086,16 +1086,16 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showNotification('{{ __("Item added to cart") }}', 'success');
+                showNotification('تم إضافة العنصر للسلة', 'success');
                 updateCartCount();
             } else {
-                showNotification(data.message || '{{ __("Failed to add item to cart") }}', 'error');
+                showNotification(data.message || 'فشل في إضافة العنصر للسلة', 'error');
             }
             return data;
         })
         .catch(error => {
-            console.error('Error:', error);
-            showNotification('{{ __("An error occurred") }}', 'error');
+            console.error('خطأ:', error);
+            showNotification('حدث خطأ', 'error');
             throw error;
         });
     }
@@ -1134,7 +1134,7 @@
             }
         })
         .catch(error => {
-            console.log('Failed to update cart count:', error);
+            console.log('فشل في تحديث عداد السلة:', error);
         });
     }
     
@@ -1145,7 +1145,7 @@
         notification.style.cssText = `
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
             z-index: 9999;
             max-width: 300px;
             box-shadow: var(--shadow-xl);
@@ -1191,12 +1191,14 @@
             cancelBulkActions();
         }
     });
+
+    console.log('💝 تم تحميل صفحة المفضلة بنجاح');
 </script>
 
 <style>
     @keyframes slideIn {
         from {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
         to {
@@ -1207,7 +1209,7 @@
     
     @keyframes slideOut {
         to {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
     }

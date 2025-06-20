@@ -10,14 +10,16 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Auth::user()->orders()->latest()->paginate(10);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $orders = $user->orders()->latest()->paginate(10);
         return view('orders.index', compact('orders'));
     }
     
     public function show(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
-            abort(403);
+            abort(403, 'وصول غير مخول لهذا الطلب.');
         }
         
         $order->load('orderItems.product');

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Conversations')
+@section('title', 'محادثاتي')
 
 @push('styles')
 <style>
@@ -83,7 +83,7 @@
 }
 
 .conversation-card.unread {
-    border-left: 4px solid var(--primary-500);
+    border-right: 4px solid var(--primary-500);
     background: linear-gradient(90deg, rgba(14, 165, 233, 0.02), var(--surface));
 }
 
@@ -201,14 +201,14 @@
     color: var(--on-surface-variant);
     margin-bottom: var(--space-xl);
     max-width: 400px;
-    margin-left: auto;
     margin-right: auto;
+    margin-left: auto;
 }
 
 .new-conversation-badge {
     position: absolute;
     top: var(--space-md);
-    right: var(--space-md);
+    left: var(--space-md);
     background: var(--primary-500);
     color: white;
     padding: 0.25rem 0.5rem;
@@ -264,37 +264,37 @@
     <!-- Page Header -->
     <div class="page-header">
         <h1 class="page-title">
-            <i class="fas fa-comments" style="color: var(--primary-500); margin-right: var(--space-sm);"></i>
-            My Conversations
+            <i class="fas fa-comments" style="color: var(--primary-500); margin-left: var(--space-sm);"></i>
+            محادثاتي
         </h1>
         <p class="page-subtitle">
-            Manage your conversations and get support from our team
+            إدارة محادثاتك والحصول على الدعم من فريقنا
         </p>
     </div>
 
     <!-- Action Bar -->
     <div class="action-bar">
         <div class="action-bar-info">
-            <h2>Your Support Conversations</h2>
+            <h2>محادثات الدعم الفني</h2>
             <div class="action-bar-stats">
                 <div class="stat-item">
                     <i class="fas fa-comments"></i>
-                    <span>{{ $conversations && method_exists($conversations, 'total') ? $conversations->total() : ($conversations ? $conversations->count() : 0) }} Total</span>
+                    <span>{{ $conversations && method_exists($conversations, 'total') ? $conversations->total() : ($conversations ? $conversations->count() : 0) }} المجموع</span>
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-envelope"></i>
-                    <span>{{ $conversations && method_exists($conversations, 'where') ? $conversations->where('is_read_by_user', false)->count() : 0 }} Unread</span>
+                    <span>{{ $conversations && method_exists($conversations, 'where') ? $conversations->where('is_read_by_user', false)->count() : 0 }} غير مقروءة</span>
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-clock"></i>
-                    <span>Active Support</span>
+                    <span>دعم نشط</span>
                 </div>
             </div>
         </div>
         
         <a href="{{ route('user.conversations.create') }}" class="btn btn-primary btn-lg">
             <i class="fas fa-plus"></i>
-            Start New Conversation
+            بدء محادثة جديدة
         </a>
     </div>
 
@@ -306,27 +306,27 @@
                 
                 @if(!($conversation->is_read_by_user ?? true))
                 <div class="new-conversation-badge">
-                    NEW
+                    جديد
                 </div>
                 @endif
 
                 <div class="conversation-header">
                     <div class="conversation-title">
                         <i class="fas fa-comment-dots" style="color: var(--primary-500);"></i>
-                        {{ $conversation->title ?? 'Untitled Conversation' }}
+                        {{ $conversation->title ?? 'محادثة بدون عنوان' }}
                     </div>
                     <div class="conversation-meta">
                         <div class="meta-item">
                             <i class="fas fa-calendar-alt"></i>
-                            <span>Started {{ isset($conversation->created_at) ? $conversation->created_at->diffForHumans() : 'recently' }}</span>
+                            <span>بدأت {{ isset($conversation->created_at) ? $conversation->created_at->diffForHumans() : 'مؤخراً' }}</span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-clock"></i>
-                            <span>Updated {{ isset($conversation->updated_at) ? $conversation->updated_at->diffForHumans() : 'recently' }}</span>
+                            <span>محدثة {{ isset($conversation->updated_at) ? $conversation->updated_at->diffForHumans() : 'مؤخراً' }}</span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-comment"></i>
-                            <span>{{ isset($conversation->messages) ? $conversation->messages->count() : 0 }} messages</span>
+                            <span>{{ isset($conversation->messages) ? $conversation->messages->count() : 0 }} رسالة</span>
                         </div>
                     </div>
                 </div>
@@ -334,7 +334,7 @@
                 @if(isset($conversation->lastMessage) && $conversation->lastMessage)
                 <div class="conversation-preview">
                     <strong>
-                        {{ $conversation->lastMessage->is_from_admin ? 'Support Team' : 'You' }}:
+                        {{ $conversation->lastMessage->is_from_admin ? 'فريق الدعم' : 'أنت' }}:
                     </strong>
                     <span class="last-message">
                         "{{ Str::limit($conversation->lastMessage->message, 120) }}"
@@ -346,17 +346,17 @@
                     <div class="conversation-status">
                         <div class="status-dot {{ ($conversation->is_read_by_user ?? true) ? 'read' : 'unread' }}"></div>
                         <span>
-                            {{ ($conversation->is_read_by_user ?? true) ? 'Read' : 'New messages available' }}
+                            {{ ($conversation->is_read_by_user ?? true) ? 'مقروءة' : 'رسائل جديدة متاحة' }}
                         </span>
                     </div>
                     <div class="action-buttons">
                         <a href="{{ route('user.conversations.show', $conversation->id ?? 1) }}" class="btn btn-primary">
                             <i class="fas fa-eye"></i>
-                            View Conversation
+                            عرض المحادثة
                         </a>
                         @if(!($conversation->is_read_by_user ?? true))
                         <span class="badge badge-info">
-                            New Reply
+                            رد جديد
                         </span>
                         @endif
                     </div>
@@ -377,14 +377,14 @@
             <div class="empty-icon">
                 <i class="fas fa-comments"></i>
             </div>
-            <h3 class="empty-title">No Conversations Yet</h3>
+            <h3 class="empty-title">لا توجد محادثات بعد</h3>
             <p class="empty-description">
-                You haven't started any conversations with our support team yet. 
-                Need help with something? Start a conversation and we'll be happy to assist you!
+                لم تبدأ أي محادثات مع فريق الدعم الفني بعد. 
+                تحتاج مساعدة في شيء ما؟ ابدأ محادثة وسنكون سعداء لمساعدتك!
             </p>
             <a href="{{ route('user.conversations.create') }}" class="btn btn-primary btn-lg">
                 <i class="fas fa-plus"></i>
-                Start Your First Conversation
+                ابدأ محادثتك الأولى
             </a>
         </div>
     @endif
@@ -416,9 +416,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // You can implement AJAX call here to check for new messages
         // For now, just update the page title if there are unread messages
         if (unreadCount > 0) {
-            document.title = `(${unreadCount}) My Conversations - {{ config('app.name') }}`;
+            document.title = `(${unreadCount}) محادثاتي - {{ config('app.name') }}`;
         } else {
-            document.title = `My Conversations - {{ config('app.name') }}`;
+            document.title = `محادثاتي - {{ config('app.name') }}`;
         }
     }, 30000);
     
@@ -428,6 +428,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updateConversationsBadge();
     }
     @endauth
+
+    console.log('💬 تم تحميل صفحة المحادثات بنجاح');
 });
 </script>
 @endpush

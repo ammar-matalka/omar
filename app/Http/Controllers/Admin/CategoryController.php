@@ -12,7 +12,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        // Important: Use Laravel paginator not Collection
+        // مهم: استخدم Laravel paginator وليس Collection
         $categories = Category::orderBy('id', 'desc')->paginate(10);
         return view('admin.categories.index', compact('categories'));
     }
@@ -28,11 +28,19 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'name.required' => 'اسم الفئة مطلوب.',
+            'name.string' => 'اسم الفئة يجب أن يكون نص.',
+            'name.max' => 'اسم الفئة لا يجب أن يتجاوز 255 حرف.',
+            'description.string' => 'الوصف يجب أن يكون نص.',
+            'image.image' => 'يجب أن يكون الملف صورة.',
+            'image.mimes' => 'يجب أن تكون الصورة من نوع: jpeg, png, jpg, gif.',
+            'image.max' => 'حجم الصورة يجب ألا يتجاوز 2 ميجابايت.',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
         
-        // Handle image upload
+        // التعامل مع رفع الصورة
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('categories', 'public');
             $validated['image'] = $imagePath;
@@ -41,7 +49,7 @@ class CategoryController extends Controller
         Category::create($validated);
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Category created successfully.');
+            ->with('success', 'تم إنشاء الفئة بنجاح.');
     }
 
     public function edit(Category $category)
@@ -55,13 +63,21 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'name.required' => 'اسم الفئة مطلوب.',
+            'name.string' => 'اسم الفئة يجب أن يكون نص.',
+            'name.max' => 'اسم الفئة لا يجب أن يتجاوز 255 حرف.',
+            'description.string' => 'الوصف يجب أن يكون نص.',
+            'image.image' => 'يجب أن يكون الملف صورة.',
+            'image.mimes' => 'يجب أن تكون الصورة من نوع: jpeg, png, jpg, gif.',
+            'image.max' => 'حجم الصورة يجب ألا يتجاوز 2 ميجابايت.',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
         
-        // Handle image upload
+        // التعامل مع رفع الصورة
         if ($request->hasFile('image')) {
-            // Delete old image if exists
+            // حذف الصورة القديمة إذا كانت موجودة
             if ($category->image) {
                 Storage::disk('public')->delete($category->image);
             }
@@ -73,17 +89,17 @@ class CategoryController extends Controller
         $category->update($validated);
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Category updated successfully.');
+            ->with('success', 'تم تحديث الفئة بنجاح.');
     }
 
     public function destroy(Category $category)
     {
         if ($category->products()->count() > 0) {
             return redirect()->route('admin.categories.index')
-                ->with('error', 'Cannot delete category with associated products.');
+                ->with('error', 'لا يمكن حذف الفئة التي تحتوي على منتجات مرتبطة بها.');
         }
 
-        // Delete the image if it exists
+        // حذف الصورة إذا كانت موجودة
         if ($category->image) {
             Storage::disk('public')->delete($category->image);
         }
@@ -91,6 +107,6 @@ class CategoryController extends Controller
         $category->delete();
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Category deleted successfully.');
+            ->with('success', 'تم حذف الفئة بنجاح.');
     }
 }

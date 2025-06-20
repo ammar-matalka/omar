@@ -4,6 +4,12 @@
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    html[dir="rtl"] {
+        direction: rtl;
+        text-align: right;
+    }
+
     .product-container {
         padding: var(--space-2xl) 0;
     }
@@ -63,7 +69,7 @@
     .image-zoom {
         position: absolute;
         top: var(--space-md);
-        right: var(--space-md);
+        left: var(--space-md);
         width: 40px;
         height: 40px;
         background: var(--surface);
@@ -576,9 +582,9 @@
 <div class="container product-container">
     <!-- Breadcrumb -->
     <nav class="breadcrumb fade-in">
-        <a href="{{ route('home') }}" class="breadcrumb-link">{{ __('Home') }}</a>
+        <a href="{{ route('home') }}" class="breadcrumb-link">{{ __('الرئيسية') }}</a>
         <span class="breadcrumb-separator">/</span>
-        <a href="{{ route('products.index') }}" class="breadcrumb-link">{{ __('Products') }}</a>
+        <a href="{{ route('products.index') }}" class="breadcrumb-link">{{ __('المنتجات') }}</a>
         <span class="breadcrumb-separator">/</span>
         <a href="{{ route('products.index', ['category' => $product->category->id]) }}" class="breadcrumb-link">{{ $product->category->name }}</a>
         <span class="breadcrumb-separator">/</span>
@@ -620,7 +626,7 @@
                         <i class="fas fa-star star {{ $i <= 4 ? '' : 'empty' }}"></i>
                     @endfor
                 </div>
-                <span class="rating-text">(4.0) • 23 {{ __('reviews') }}</span>
+                <span class="rating-text">(4.0) • 23 {{ __('تقييمات') }}</span>
             </div>
             
             <!-- Product Price -->
@@ -628,7 +634,7 @@
                 ${{ number_format($product->price, 2) }}
                 @if(rand(0, 1))
                     <span class="original-price">${{ number_format($product->price * 1.3, 2) }}</span>
-                    <span class="discount-badge">23% {{ __('OFF') }}</span>
+                    <span class="discount-badge">23% {{ __('خصم') }}</span>
                 @endif
             </div>
             
@@ -636,13 +642,13 @@
             <div class="stock-status {{ $product->stock > 10 ? 'stock-in' : ($product->stock > 0 ? 'stock-low' : 'stock-out') }}">
                 @if($product->stock > 10)
                     <i class="stock-icon fas fa-check-circle"></i>
-                    <span>{{ __('In Stock') }} ({{ $product->stock }} {{ __('available') }})</span>
+                    <span>{{ __('متوفر') }} ({{ $product->stock }} {{ __('متاح') }})</span>
                 @elseif($product->stock > 0)
                     <i class="stock-icon fas fa-exclamation-triangle"></i>
-                    <span>{{ __('Low Stock') }} ({{ __('Only') }} {{ $product->stock }} {{ __('left') }})</span>
+                    <span>{{ __('كمية محدودة') }} ({{ __('باقي فقط') }} {{ $product->stock }})</span>
                 @else
                     <i class="stock-icon fas fa-times-circle"></i>
-                    <span>{{ __('Out of Stock') }}</span>
+                    <span>{{ __('غير متوفر') }}</span>
                 @endif
             </div>
             
@@ -655,7 +661,7 @@
             <div class="product-actions">
                 @if($product->stock > 0)
                     <div class="quantity-selector">
-                        <label class="quantity-label">{{ __('Quantity') }}</label>
+                        <label class="quantity-label">{{ __('الكمية') }}</label>
                         <div class="quantity-control">
                             <button class="quantity-btn" onclick="changeQuantity(-1)" id="decreaseBtn">
                                 <i class="fas fa-minus"></i>
@@ -671,13 +677,13 @@
                         @auth
                             <button class="add-to-cart-btn" onclick="addToCart()" id="addToCartBtn">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span id="cartBtnText">{{ __('Add to Cart') }}</span>
+                                <span id="cartBtnText">{{ __('إضافة إلى السلة') }}</span>
                                 <div class="loading-spinner" id="cartSpinner" style="display: none;"></div>
                             </button>
                         @else
                             <a href="{{ route('login') }}" class="add-to-cart-btn">
                                 <i class="fas fa-sign-in-alt"></i>
-                                {{ __('Login to Purchase') }}
+                                {{ __('تسجيل الدخول للشراء') }}
                             </a>
                         @endauth
                         
@@ -686,19 +692,19 @@
                                 <button class="wishlist-btn {{ Auth::user()->hasInWishlist($product->id) ? 'active' : '' }}" onclick="toggleWishlist()">
                                     <i class="fas fa-heart"></i>
                                     <span id="wishlistText">
-                                        {{ Auth::user()->hasInWishlist($product->id) ? __('Remove from Wishlist') : __('Add to Wishlist') }}
+                                        {{ Auth::user()->hasInWishlist($product->id) ? __('إزالة من المفضلة') : __('إضافة إلى المفضلة') }}
                                     </span>
                                 </button>
                             @else
                                 <a href="{{ route('login') }}" class="wishlist-btn">
                                     <i class="fas fa-heart"></i>
-                                    {{ __('Add to Wishlist') }}
+                                    {{ __('إضافة إلى المفضلة') }}
                                 </a>
                             @endauth
                             
                             <button class="share-btn" onclick="shareProduct()">
                                 <i class="fas fa-share-alt"></i>
-                                {{ __('Share') }}
+                                {{ __('مشاركة') }}
                             </button>
                         </div>
                     </div>
@@ -706,12 +712,12 @@
                     <div class="action-buttons">
                         <button class="add-to-cart-btn" disabled>
                             <i class="fas fa-times"></i>
-                            {{ __('Out of Stock') }}
+                            {{ __('غير متوفر') }}
                         </button>
                         
                         <button class="wishlist-btn" onclick="notifyWhenAvailable()">
                             <i class="fas fa-bell"></i>
-                            {{ __('Notify When Available') }}
+                            {{ __('إعلامي عند التوفر') }}
                         </button>
                     </div>
                 @endif
@@ -721,24 +727,24 @@
             <div class="product-features">
                 <h3 class="features-title">
                     <i class="fas fa-check-circle"></i>
-                    {{ __('Product Features') }}
+                    {{ __('ميزات المنتج') }}
                 </h3>
                 <ul class="features-list">
                     <li class="feature-item">
                         <i class="feature-icon fas fa-shipping-fast"></i>
-                        {{ __('Free shipping on orders over $50') }}
+                        {{ __('شحن مجاني للطلبات فوق $50') }}
                     </li>
                     <li class="feature-item">
                         <i class="feature-icon fas fa-undo"></i>
-                        {{ __('30-day return policy') }}
+                        {{ __('سياسة إرجاع لمدة 30 يومًا') }}
                     </li>
                     <li class="feature-item">
                         <i class="feature-icon fas fa-shield-alt"></i>
-                        {{ __('1-year warranty') }}
+                        {{ __('ضمان لمدة سنة') }}
                     </li>
                     <li class="feature-item">
                         <i class="feature-icon fas fa-headset"></i>
-                        {{ __('24/7 customer support') }}
+                        {{ __('دعم عملاء 24/7') }}
                     </li>
                 </ul>
             </div>
@@ -749,8 +755,8 @@
     @if($relatedProducts->count() > 0)
         <section class="related-products">
             <div class="section-header">
-                <h2 class="section-title">{{ __('Related Products') }}</h2>
-                <p class="section-subtitle">{{ __('You might also like these products') }}</p>
+                <h2 class="section-title">{{ __('منتجات ذات صلة') }}</h2>
+                <p class="section-subtitle">{{ __('قد يعجبك أيضًا هذه المنتجات') }}</p>
             </div>
             
             <div class="products-grid">
@@ -767,7 +773,7 @@
                             </h3>
                             <div class="card-price">${{ number_format($relatedProduct->price, 2) }}</div>
                             <a href="{{ route('products.show', $relatedProduct) }}" class="card-btn">
-                                {{ __('View Details') }}
+                                {{ __('عرض التفاصيل') }}
                             </a>
                         </div>
                     </div>
@@ -857,13 +863,13 @@
             const data = await response.json();
             
             if (data.success) {
-                showNotification('{{ __("Product added to cart!") }}', 'success');
+                showNotification('{{ __("تمت إضافة المنتج إلى السلة!") }}', 'success');
                 updateCartCount();
             } else {
-                showNotification(data.message || '{{ __("Error adding to cart") }}', 'error');
+                showNotification(data.message || '{{ __("خطأ في إضافة المنتج إلى السلة") }}', 'error');
             }
         } catch (error) {
-            showNotification('{{ __("Error adding to cart") }}', 'error');
+            showNotification('{{ __("خطأ في إضافة المنتج إلى السلة") }}', 'error');
         } finally {
             // Reset button state
             btn.disabled = false;
@@ -894,13 +900,13 @@
                 
                 btn.classList.toggle('active', data.in_wishlist);
                 text.textContent = data.in_wishlist ? 
-                    '{{ __("Remove from Wishlist") }}' : 
-                    '{{ __("Add to Wishlist") }}';
+                    '{{ __("إزالة من المفضلة") }}' : 
+                    '{{ __("إضافة إلى المفضلة") }}';
                 
                 showNotification(data.message, 'success');
             }
         } catch (error) {
-            showNotification('{{ __("Error updating wishlist") }}', 'error');
+            showNotification('{{ __("خطأ في تحديث المفضلة") }}', 'error');
         }
     }
     
@@ -915,16 +921,16 @@
         } else {
             // Fallback - copy to clipboard
             navigator.clipboard.writeText(window.location.href).then(() => {
-                showNotification('{{ __("Product link copied to clipboard!") }}', 'success');
+                showNotification('{{ __("تم نسخ رابط المنتج!") }}', 'success');
             }).catch(() => {
-                showNotification('{{ __("Unable to share product") }}', 'error');
+                showNotification('{{ __("تعذر مشاركة المنتج") }}', 'error');
             });
         }
     }
     
     // Notify when available (for out of stock products)
     function notifyWhenAvailable() {
-        showNotification('{{ __("You will be notified when this product is back in stock") }}', 'info');
+        showNotification('{{ __("سيتم إعلامك عند توفر هذا المنتج") }}', 'info');
     }
     
     // Update cart count
@@ -948,7 +954,8 @@
         notification.className = `alert alert-${type} slide-in`;
         notification.style.position = 'fixed';
         notification.style.top = '20px';
-        notification.style.right = '20px';
+        notification.style.left = '20px';
+        notification.style.right = 'auto';
         notification.style.zIndex = '9999';
         notification.style.maxWidth = '300px';
         notification.innerHTML = `

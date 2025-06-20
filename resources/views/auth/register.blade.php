@@ -1,9 +1,19 @@
 @extends('layouts.app')
 
-@section('title', __('Register') . ' - ' . config('app.name'))
+@section('title', __('تسجيل حساب جديد') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* إضافة دعم RTL */
+    :root {
+        --direction: rtl;
+    }
+    
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+    
     .auth-container {
         min-height: calc(100vh - 200px);
         display: flex;
@@ -36,7 +46,7 @@
         content: '';
         position: absolute;
         top: -50%;
-        left: -50%;
+        right: -50%; /* تغيير من left إلى right */
         width: 200%;
         height: 200%;
         background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="white" opacity="0.1"><polygon points="50,15 60,40 85,40 66,55 76,80 50,65 24,80 34,55 15,40 40,40"/></svg>');
@@ -109,7 +119,7 @@
         color: var(--on-surface);
         font-size: 1rem;
         transition: all var(--transition-fast);
-        padding-left: 3rem;
+        padding-right: 3rem; /* تغيير من left إلى right */
     }
     
     .form-input:focus {
@@ -126,7 +136,7 @@
     
     .form-icon {
         position: absolute;
-        left: var(--space-md);
+        right: var(--space-md); /* تغيير من left إلى right */
         top: calc(50% + 10px);
         transform: translateY(-50%);
         color: var(--on-surface-variant);
@@ -140,7 +150,7 @@
     
     .password-toggle {
         position: absolute;
-        right: var(--space-md);
+        left: var(--space-md); /* تغيير من right إلى left */
         top: calc(50% + 10px);
         transform: translateY(-50%);
         background: none;
@@ -306,8 +316,8 @@
             <div class="auth-icon">
                 <i class="fas fa-user-plus"></i>
             </div>
-            <h1 class="auth-title">{{ __('Create Account') }}</h1>
-            <p class="auth-subtitle">{{ __('Join us today and start your journey') }}</p>
+            <h1 class="auth-title">{{ __('إنشاء حساب جديد') }}</h1>
+            <p class="auth-subtitle">{{ __('انضم إلينا اليوم وابدأ رحلتك') }}</p>
         </div>
         
         <!-- Body -->
@@ -317,7 +327,7 @@
                 
                 <!-- Name -->
                 <div class="form-group">
-                    <label for="name" class="form-label">{{ __('Full Name') }}</label>
+                    <label for="name" class="form-label">{{ __('الاسم الكامل') }}</label>
                     <input 
                         id="name" 
                         type="text" 
@@ -327,7 +337,7 @@
                         required 
                         autocomplete="name"
                         autofocus
-                        placeholder="{{ __('Enter your full name') }}"
+                        placeholder="{{ __('أدخل اسمك الكامل') }}"
                     >
                     <i class="form-icon fas fa-user"></i>
                     @error('name')
@@ -340,7 +350,7 @@
                 
                 <!-- Email -->
                 <div class="form-group">
-                    <label for="email" class="form-label">{{ __('Email Address') }}</label>
+                    <label for="email" class="form-label">{{ __('البريد الإلكتروني') }}</label>
                     <input 
                         id="email" 
                         type="email" 
@@ -349,7 +359,7 @@
                         value="{{ old('email') }}" 
                         required 
                         autocomplete="email"
-                        placeholder="{{ __('Enter your email address') }}"
+                        placeholder="{{ __('أدخل عنوان بريدك الإلكتروني') }}"
                     >
                     <i class="form-icon fas fa-envelope"></i>
                     @error('email')
@@ -363,7 +373,7 @@
                 <!-- Password Row -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="password" class="form-label">{{ __('Password') }}</label>
+                        <label for="password" class="form-label">{{ __('كلمة المرور') }}</label>
                         <input 
                             id="password" 
                             type="password" 
@@ -371,7 +381,7 @@
                             name="password" 
                             required 
                             autocomplete="new-password"
-                            placeholder="{{ __('Create password') }}"
+                            placeholder="{{ __('إنشاء كلمة مرور') }}"
                             onkeyup="checkPasswordStrength()"
                         >
                         <i class="form-icon fas fa-lock"></i>
@@ -388,7 +398,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="password_confirmation" class="form-label">{{ __('Confirm Password') }}</label>
+                        <label for="password_confirmation" class="form-label">{{ __('تأكيد كلمة المرور') }}</label>
                         <input 
                             id="password_confirmation" 
                             type="password" 
@@ -396,7 +406,7 @@
                             name="password_confirmation" 
                             required 
                             autocomplete="new-password"
-                            placeholder="{{ __('Confirm password') }}"
+                            placeholder="{{ __('تأكيد كلمة المرور') }}"
                         >
                         <i class="form-icon fas fa-lock"></i>
                         <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation')">
@@ -408,7 +418,7 @@
                 <!-- Optional Fields Row -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="phone" class="form-label">{{ __('Phone Number') }} <span style="color: var(--on-surface-variant);">({{ __('Optional') }})</span></label>
+                        <label for="phone" class="form-label">{{ __('رقم الهاتف') }} <span style="color: var(--on-surface-variant);">({{ __('اختياري') }})</span></label>
                         <input 
                             id="phone" 
                             type="tel" 
@@ -416,13 +426,13 @@
                             name="phone" 
                             value="{{ old('phone') }}" 
                             autocomplete="tel"
-                            placeholder="{{ __('Enter phone number') }}"
+                            placeholder="{{ __('أدخل رقم الهاتف') }}"
                         >
                         <i class="form-icon fas fa-phone"></i>
                     </div>
                     
                     <div class="form-group">
-                        <label for="address" class="form-label">{{ __('Address') }} <span style="color: var(--on-surface-variant);">({{ __('Optional') }})</span></label>
+                        <label for="address" class="form-label">{{ __('العنوان') }} <span style="color: var(--on-surface-variant);">({{ __('اختياري') }})</span></label>
                         <input 
                             id="address" 
                             type="text" 
@@ -430,7 +440,7 @@
                             name="address" 
                             value="{{ old('address') }}" 
                             autocomplete="address"
-                            placeholder="{{ __('Enter your address') }}"
+                            placeholder="{{ __('أدخل عنوانك') }}"
                         >
                         <i class="form-icon fas fa-map-marker-alt"></i>
                     </div>
@@ -440,7 +450,7 @@
                 <button type="submit" class="auth-btn" id="submitBtn">
                     <span class="btn-text">
                         <i class="fas fa-user-plus"></i>
-                        {{ __('Create Account') }}
+                        {{ __('إنشاء حساب') }}
                     </span>
                     <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
                 </button>
@@ -449,10 +459,10 @@
         
         <!-- Login Prompt -->
         <div class="login-prompt">
-            <p class="login-text">{{ __('Already have an account?') }}</p>
+            <p class="login-text">{{ __('لديك حساب بالفعل؟') }}</p>
             <a href="{{ route('login') }}" class="login-btn">
                 <i class="fas fa-sign-in-alt"></i>
-                {{ __('Sign In') }}
+                {{ __('تسجيل الدخول') }}
             </a>
         </div>
     </div>
@@ -493,29 +503,29 @@
         let feedback = [];
         
         if (password.length >= 8) score++;
-        else feedback.push('{{ __("At least 8 characters") }}');
+        else feedback.push('{{ __("8 أحرف على الأقل") }}');
         
         if (/[A-Z]/.test(password)) score++;
-        else feedback.push('{{ __("Uppercase letter") }}');
+        else feedback.push('{{ __("حرف كبير") }}');
         
         if (/[a-z]/.test(password)) score++;
-        else feedback.push('{{ __("Lowercase letter") }}');
+        else feedback.push('{{ __("حرف صغير") }}');
         
         if (/[0-9]/.test(password)) score++;
-        else feedback.push('{{ __("Number") }}');
+        else feedback.push('{{ __("رقم") }}');
         
         if (/[@$!%*#?&]/.test(password)) score++;
-        else feedback.push('{{ __("Special character") }}');
+        else feedback.push('{{ __("حرف خاص") }}');
         
         if (score < 3) {
             strengthDiv.className = 'password-strength weak';
-            strengthDiv.innerHTML = '{{ __("Weak password") }} - {{ __("Add") }}: ' + feedback.join(', ');
+            strengthDiv.innerHTML = '{{ __("كلمة مرور ضعيفة") }} - {{ __("أضف") }}: ' + feedback.join('، ');
         } else if (score < 5) {
             strengthDiv.className = 'password-strength medium';
-            strengthDiv.innerHTML = '{{ __("Medium password") }} - {{ __("Add") }}: ' + feedback.join(', ');
+            strengthDiv.innerHTML = '{{ __("كلمة مرور متوسطة") }} - {{ __("أضف") }}: ' + feedback.join('، ');
         } else {
             strengthDiv.className = 'password-strength strong';
-            strengthDiv.innerHTML = '{{ __("Strong password") }} ✓';
+            strengthDiv.innerHTML = '{{ __("كلمة مرور قوية") }} ✓';
         }
     }
     

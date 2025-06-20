@@ -52,10 +52,6 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// Language Switching
-Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
-Route::get('/language/current', [LanguageController::class, 'current'])->name('language.current');
-
 // Products (Public)
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
@@ -161,16 +157,19 @@ Route::middleware(['auth'])->group(function () {
             Route::patch('/change-password', [UserProfileController::class, 'updatePassword'])->name('update-password');
         });
         
-        // User Conversations
         Route::prefix('conversations')->name('conversations.')->group(function () {
-            Route::get('/', [UserConversationController::class, 'index'])->name('index');
-            Route::get('/create', [UserConversationController::class, 'create'])->name('create');
-            Route::post('/', [UserConversationController::class, 'store'])->name('store');
-            Route::get('/{conversation}', [UserConversationController::class, 'show'])->name('show');
-            Route::post('/{conversation}/reply', [UserConversationController::class, 'reply'])->name('reply');
-            Route::get('/{conversation}/check-messages', [UserConversationController::class, 'checkNewMessages'])->name('check-messages');
-            Route::post('/{conversation}/mark-read', [UserConversationController::class, 'markAsRead'])->name('mark-read');
-            Route::get('/unread/count', [UserConversationController::class, 'getUnreadCount'])->name('unread-count');
+    Route::get('/', [UserConversationController::class, 'index'])->name('index');
+    Route::get('/create', [UserConversationController::class, 'create'])->name('create');
+    Route::post('/', [UserConversationController::class, 'store'])->name('store');
+    Route::get('/{conversation}', [UserConversationController::class, 'show'])->name('show');
+    Route::post('/{conversation}/reply', [UserConversationController::class, 'reply'])->name('reply');
+    
+    // ⚡ مسارات الرسائل الفورية للمستخدم
+    Route::get('/{conversation}/check-new-messages', [UserConversationController::class, 'checkNewMessages'])->name('check-new-messages');
+    Route::get('/check-updates', [UserConversationController::class, 'checkUpdates'])->name('check-updates');
+    
+    Route::post('/{conversation}/mark-read', [UserConversationController::class, 'markAsRead'])->name('mark-read');
+    Route::get('/unread/count', [UserConversationController::class, 'getUnreadCount'])->name('unread-count');
         });
     });
 });
@@ -230,14 +229,24 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/generate/multiple', [AdminCouponController::class, 'storeMultiple'])->name('store-multiple');
     });
     
-    // Conversations Management
+    // ⚡ Conversations Management - مُحدث للرسائل الفورية
     Route::prefix('conversations')->name('conversations.')->group(function () {
+        // الصفحات الأساسية
         Route::get('/', [AdminConversationController::class, 'index'])->name('index');
         Route::get('/{conversation}', [AdminConversationController::class, 'show'])->name('show');
+        
+        // إرسال الردود
         Route::post('/{conversation}/reply', [AdminConversationController::class, 'reply'])->name('reply');
-        Route::get('/{conversation}/check-messages', [AdminConversationController::class, 'checkNewMessages'])->name('check-messages');
-        Route::post('/{conversation}/mark-read', [AdminConversationController::class, 'markAsRead'])->name('mark-read');
+        
+        // 🚀 API للرسائل الفورية
+        Route::get('/{conversation}/check-new-messages', [AdminConversationController::class, 'checkNewMessages'])->name('check-new-messages');
+        Route::get('/check-updates', [AdminConversationController::class, 'checkUpdates'])->name('check-updates');
+        
+        // إجراءات القراءة
+        Route::patch('/{conversation}/mark-read', [AdminConversationController::class, 'markAsRead'])->name('mark-read');
         Route::post('/mark-all-read', [AdminConversationController::class, 'markAllAsRead'])->name('mark-all-read');
+        
+        // إحصائيات
         Route::get('/counts/get', [AdminConversationController::class, 'getCounts'])->name('get-counts');
     });
     

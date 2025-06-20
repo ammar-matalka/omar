@@ -1,5 +1,9 @@
 <?php
 
+// ===================================
+// ProductController - وحدة تحكم المنتجات (للواجهة الأمامية)
+// ===================================
+
 namespace App\Http\Controllers;
 
 use App\Models\Product;
@@ -14,12 +18,12 @@ class ProductController extends Controller
         $query = Product::with(['category', 'images']); 
         $categories = Category::all();
         
-        // Force filter active products for everyone except admin dashboard
+        // فرض فلترة المنتجات النشطة للجميع باستثناء لوحة تحكم المدير
         if (!str_contains(request()->url(), 'admin')) {
             $query->where('is_active', 1);
         }
         
-        // Filter by category if provided
+        // فلترة حسب الفئة إذا تم توفيرها
         if ($request->has('category')) {
             $categoryParam = $request->category;
             
@@ -33,7 +37,7 @@ class ProductController extends Controller
             }
         }
         
-        // Handle search if provided
+        // التعامل مع البحث إذا تم توفيره
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -42,7 +46,7 @@ class ProductController extends Controller
             });
         }
         
-        // Pagination with show all option
+        // التصفح مع خيار عرض الكل
         $perPage = $request->get('show_all') ? $query->count() : 9;
         $products = $query->paginate($perPage);
         
@@ -51,21 +55,21 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        // Load images relationship
+        // تحميل علاقة الصور
         $product->load(['category', 'images']);
         
-        // Block access to inactive products for non-admin users
+        // منع الوصول للمنتجات غير النشطة للمستخدمين غير المديرين
         if ($product->is_active == 0 && !str_contains(request()->url(), 'admin')) {
             return redirect()->route('products.index')
-                ->with('error', __('The requested product is currently unavailable.'));
+                ->with('error', 'المنتج المطلوب غير متوفر حالياً.');
         }
         
-        // Get related products from the same category
+        // الحصول على المنتجات ذات الصلة من نفس الفئة
         $relatedQuery = Product::with(['images'])
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id);
             
-        // Only show active related products to regular users
+        // إظهار المنتجات النشطة فقط للمستخدمين العاديين
         if (!str_contains(request()->url(), 'admin')) {
             $relatedQuery->where('is_active', 1);
         }
@@ -76,7 +80,7 @@ class ProductController extends Controller
     }
     
     /**
-     * Get product images as JSON for gallery
+     * الحصول على صور المنتج كـ JSON للمعرض
      */
     public function getImages(Product $product)
     {

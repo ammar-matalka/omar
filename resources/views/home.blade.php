@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('Home') . ' - ' . config('app.name'))
+@section('title', 'الرئيسية' . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
@@ -17,8 +17,8 @@
         content: '';
         position: absolute;
         top: 0;
-        left: 0;
         right: 0;
+        left: 0;
         bottom: 0;
         background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,100 1000,0 1000,100"/></svg>');
         background-size: cover;
@@ -105,8 +105,8 @@
         color: var(--on-surface-variant);
         margin-bottom: var(--space-2xl);
         max-width: 600px;
-        margin-left: auto;
         margin-right: auto;
+        margin-left: auto;
     }
     
     .feature-card {
@@ -124,8 +124,8 @@
         content: '';
         position: absolute;
         top: 0;
-        left: 0;
         right: 0;
+        left: 0;
         height: 4px;
         background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
         transform: scaleX(0);
@@ -213,8 +213,8 @@
         content: '';
         position: absolute;
         top: 0;
-        left: 0;
         right: 0;
+        left: 0;
         bottom: 0;
         background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="white" opacity="0.1"><circle cx="50" cy="50" r="30"/><circle cx="20" cy="20" r="10"/><circle cx="80" cy="80" r="15"/></svg>');
         animation: float 20s ease-in-out infinite;
@@ -295,23 +295,23 @@
 <section class="hero-section">
     <div class="container">
         <div class="hero-content fade-in">
-            <h1 class="hero-title">{{ __('Welcome to') }} {{ config('app.name') }}</h1>
-            <p class="hero-subtitle">{{ __('Discover amazing products to enhance your shopping experience') }}</p>
+            <h1 class="hero-title">مرحباً بك في {{ config('app.name') }}</h1>
+            <p class="hero-subtitle">اكتشف منتجات رائعة لتحسين تجربة التسوق الخاصة بك</p>
             
             <div class="hero-buttons">
                 <a href="{{ route('products.index') }}" class="hero-btn hero-btn-primary">
                     <i class="fas fa-shopping-bag"></i>
-                    {{ __('Shop Products') }}
+                    تسوق المنتجات
                 </a>
                 @auth
                 <a href="{{ route('user.conversations.create') }}" class="hero-btn hero-btn-secondary">
                     <i class="fas fa-headset"></i>
-                    {{ __('Contact Support') }}
+                    تواصل مع الدعم
                 </a>
                 @else
                 <a href="{{ route('register') }}" class="hero-btn hero-btn-secondary">
                     <i class="fas fa-user-plus"></i>
-                    {{ __('Join Us') }}
+                    انضم إلينا
                 </a>
                 @endauth
             </div>
@@ -322,32 +322,32 @@
 <!-- Features Section -->
 <section class="features-section">
     <div class="container">
-        <h2 class="section-title">{{ __('Why Choose Us?') }}</h2>
-        <p class="section-subtitle">{{ __('We provide high-quality products with excellent customer service') }}</p>
+        <h2 class="section-title">لماذا تختارنا؟</h2>
+        <p class="section-subtitle">نحن نقدم منتجات عالية الجودة مع خدمة عملاء ممتازة</p>
         
         <div class="grid grid-cols-3">
             <div class="feature-card fade-in">
                 <div class="feature-icon">
                     <i class="fas fa-award"></i>
                 </div>
-                <h3 class="feature-title">{{ __('Premium Quality') }}</h3>
-                <p class="feature-description">{{ __('All our products are carefully selected to ensure the highest quality standards') }}</p>
+                <h3 class="feature-title">جودة عالية</h3>
+                <p class="feature-description">جميع منتجاتنا مختارة بعناية لضمان أعلى معايير الجودة</p>
             </div>
             
             <div class="feature-card fade-in">
                 <div class="feature-icon">
                     <i class="fas fa-shipping-fast"></i>
                 </div>
-                <h3 class="feature-title">{{ __('Fast Delivery') }}</h3>
-                <p class="feature-description">{{ __('Quick and reliable delivery service to get your orders to you as soon as possible') }}</p>
+                <h3 class="feature-title">توصيل سريع</h3>
+                <p class="feature-description">خدمة توصيل سريعة وموثوقة لإيصال طلباتك في أسرع وقت ممكن</p>
             </div>
             
             <div class="feature-card fade-in">
                 <div class="feature-icon">
                     <i class="fas fa-headset"></i>
                 </div>
-                <h3 class="feature-title">{{ __('24/7 Support') }}</h3>
-                <p class="feature-description">{{ __('Our customer support team is always ready to help you with any questions') }}</p>
+                <h3 class="feature-title">دعم 24/7</h3>
+                <p class="feature-description">فريق دعم العملاء جاهز دائماً لمساعدتك في أي استفسار</p>
             </div>
         </div>
     </div>
@@ -359,17 +359,17 @@
         <div class="grid grid-cols-3">
             <div class="stat-item fade-in">
                 <div class="stat-number">1000+</div>
-                <div class="stat-label">{{ __('Happy Customers') }}</div>
+                <div class="stat-label">عميل راضي</div>
             </div>
             
             <div class="stat-item fade-in">
                 <div class="stat-number">500+</div>
-                <div class="stat-label">{{ __('Products') }}</div>
+                <div class="stat-label">منتج</div>
             </div>
             
             <div class="stat-item fade-in">
                 <div class="stat-number">24/7</div>
-                <div class="stat-label">{{ __('Support') }}</div>
+                <div class="stat-label">دعم فني</div>
             </div>
         </div>
     </div>
@@ -379,18 +379,18 @@
 <section class="cta-section">
     <div class="container">
         <div class="cta-content">
-            <h2 class="cta-title">{{ __('Ready to Get Started?') }}</h2>
-            <p class="cta-description">{{ __('Join thousands of satisfied customers and start your shopping journey today') }}</p>
+            <h2 class="cta-title">مستعد للبدء؟</h2>
+            <p class="cta-description">انضم إلى آلاف العملاء الراضين وابدأ رحلة التسوق اليوم</p>
             
             @auth
                 <a href="{{ route('products.index') }}" class="cta-btn">
                     <i class="fas fa-rocket"></i>
-                    {{ __('Start Shopping') }}
+                    ابدأ التسوق
                 </a>
             @else
                 <a href="{{ route('register') }}" class="cta-btn">
                     <i class="fas fa-user-plus"></i>
-                    {{ __('Join Us Now') }}
+                    انضم إلينا الآن
                 </a>
             @endauth
         </div>
@@ -454,5 +454,7 @@
     document.querySelectorAll('.stat-item').forEach(item => {
         statsObserver.observe(item);
     });
+
+    console.log('🏠 تم تحميل الصفحة الرئيسية بنجاح');
 </script>
 @endpush

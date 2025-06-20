@@ -1,31 +1,54 @@
 @extends('layouts.admin')
 
-@section('title', __('Testimonial Details'))
-@section('page-title', __('Testimonial Details'))
+@section('title', 'تفاصيل الشهادة')
+@section('page-title', 'تفاصيل الشهادة')
 
 @section('breadcrumb')
     <div class="breadcrumb-item">
-        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">{{ __('Dashboard') }}</a>
+        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">لوحة التحكم</a>
     </div>
     <div class="breadcrumb-item">
-        <i class="fas fa-chevron-right"></i>
-        <a href="{{ route('admin.testimonials.index') }}" class="breadcrumb-link">{{ __('Testimonials') }}</a>
+        <i class="fas fa-chevron-left"></i>
+        <a href="{{ route('admin.testimonials.index') }}" class="breadcrumb-link">الشهادات</a>
     </div>
     <div class="breadcrumb-item">
-        <i class="fas fa-chevron-right"></i>
-        {{ __('Testimonial Details') }}
+        <i class="fas fa-chevron-left"></i>
+        تفاصيل الشهادة
     </div>
 @endsection
 
 @push('styles')
 <style>
+    * {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    body {
+        font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
     .testimonial-header {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
+        background: linear-gradient(135deg, #ffffff, #f8feff);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
         margin-bottom: 2rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         border: 1px solid #e2e8f0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .testimonial-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
+        border-radius: 50%;
+        transform: translate(50%, -50%);
     }
     
     .testimonial-title {
@@ -35,34 +58,41 @@
         margin-bottom: 1.5rem;
         flex-wrap: wrap;
         gap: 1rem;
+        position: relative;
+        z-index: 1;
     }
     
     .testimonial-info {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
     
     .testimonial-id {
-        font-size: 1.75rem;
+        font-size: 2rem;
         font-weight: 800;
         color: #0f172a;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     .testimonial-date {
-        color: #475569;
-        font-size: 0.875rem;
+        color: #64748b;
+        font-size: 0.9rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-weight: 500;
     }
     
     .testimonial-actions {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.75rem;
         align-items: flex-start;
         flex-wrap: wrap;
     }
@@ -70,32 +100,39 @@
     .status-badge {
         display: inline-flex;
         align-items: center;
-        padding: 0.5rem 1.5rem;
-        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
         font-size: 0.875rem;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
         gap: 0.5rem;
         margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+        border: 2px solid;
+        position: relative;
+        z-index: 1;
     }
     
     .status-pending {
-        background: #fef3c7;
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
         color: #92400e;
-        border: 1px solid #fde68a;
+        border-color: #f59e0b;
+        box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.3);
     }
     
     .status-approved {
-        background: #d1fae5;
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
         color: #065f46;
-        border: 1px solid #a7f3d0;
+        border-color: #10b981;
+        box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
     }
     
     .status-rejected {
-        background: #fee2e2;
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
         color: #991b1b;
-        border: 1px solid #fecaca;
+        border-color: #ef4444;
+        box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.3);
     }
     
     .testimonial-grid {
@@ -107,118 +144,150 @@
     
     .testimonial-content-section {
         background: white;
-        border-radius: 1rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e2e8f0;
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border: 1px solid #f1f5f9;
         overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .testimonial-content-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.35);
     }
     
     .section-header {
-        background: #f8fafc;
-        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        padding: 2rem;
         border-bottom: 1px solid #e2e8f0;
+        position: relative;
+    }
+    
+    .section-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
     }
     
     .section-title {
-        font-size: 1.125rem;
-        font-weight: 600;
+        font-size: 1.25rem;
+        font-weight: 700;
         color: #0f172a;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         margin: 0;
     }
     
     .content-body {
-        padding: 2rem;
+        padding: 2.5rem;
     }
     
     .testimonial-text {
-        font-size: 1.125rem;
-        line-height: 1.8;
+        font-size: 1.2rem;
+        line-height: 2;
         color: #334155;
         font-style: italic;
         position: relative;
         margin: 2rem 0;
-        padding: 2rem;
-        background: #f8fafc;
-        border-radius: 0.75rem;
-        border-left: 4px solid #3b82f6;
+        padding: 2.5rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 1rem;
+        border-right: 5px solid #3b82f6;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
     
     .testimonial-text::before {
         content: '"';
-        font-size: 4rem;
+        font-size: 5rem;
         color: #93c5fd;
         position: absolute;
         top: -10px;
-        left: 1rem;
-        font-family: serif;
+        right: 1rem;
+        font-family: 'Times New Roman', serif;
         line-height: 1;
+        opacity: 0.7;
     }
     
     .testimonial-text::after {
         content: '"';
-        font-size: 4rem;
+        font-size: 5rem;
         color: #93c5fd;
         position: absolute;
         bottom: -30px;
-        right: 1rem;
-        font-family: serif;
+        left: 1rem;
+        font-family: 'Times New Roman', serif;
         line-height: 1;
+        opacity: 0.7;
     }
     
     .rating-section {
-        background: #f8fafc;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        margin: 1.5rem 0;
+        background: linear-gradient(135deg, #f8fafc, #eff6ff);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin: 2rem 0;
         text-align: center;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e0e7ff;
     }
     
     .rating-stars {
         display: flex;
         justify-content: center;
-        gap: 0.25rem;
-        margin-bottom: 1rem;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
     }
     
     .star {
-        font-size: 2rem;
+        font-size: 2.5rem;
         color: #fbbf24;
-        transition: all 0.15s ease;
+        transition: all 0.3s ease;
+        filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.5));
     }
     
     .star.empty {
         color: #cbd5e1;
+        filter: none;
     }
     
     .star:hover {
-        transform: scale(1.1);
+        transform: scale(1.2) rotate(15deg);
+        filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.7));
     }
     
     .rating-text {
-        font-size: 1.25rem;
-        font-weight: 600;
+        font-size: 1.4rem;
+        font-weight: 700;
         color: #0f172a;
+        margin-bottom: 0.5rem;
     }
     
     .rating-subtitle {
-        font-size: 0.875rem;
-        color: #475569;
-        margin-top: 0.25rem;
+        font-size: 0.95rem;
+        color: #64748b;
+        font-weight: 500;
     }
     
     .testimonial-sidebar {
         background: white;
-        border-radius: 1rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e2e8f0;
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border: 1px solid #f1f5f9;
         height: fit-content;
+        transition: all 0.3s ease;
+    }
+    
+    .testimonial-sidebar:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.35);
     }
     
     .sidebar-content {
-        padding: 1.5rem;
+        padding: 2rem;
     }
     
     .customer-card {
@@ -226,49 +295,73 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
-        padding: 2rem;
-        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-        border-radius: 0.75rem;
-        margin-bottom: 1.5rem;
+        padding: 2.5rem;
+        background: linear-gradient(135deg, #f8fafc, #eff6ff);
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .customer-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
+        border-radius: 50%;
+        transform: translate(30%, -30%);
     }
     
     .customer-avatar {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: 800;
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 4px solid white;
+        position: relative;
+        z-index: 1;
     }
     
     .customer-name {
-        font-size: 1.25rem;
-        font-weight: 700;
+        font-size: 1.4rem;
+        font-weight: 800;
         color: #0f172a;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
     }
     
     .customer-email {
-        color: #475569;
-        font-size: 0.875rem;
-        margin-bottom: 0.5rem;
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
     }
     
     .customer-role {
-        background: #dbeafe;
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
         color: #1d4ed8;
-        padding: 0.25rem 1rem;
-        border-radius: 0.375rem;
-        font-size: 0.75rem;
-        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 1;
+        border: 2px solid #3b82f6;
     }
     
     .info-list {
@@ -281,8 +374,15 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem 0;
+        padding: 1.5rem 0;
         border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s ease;
+    }
+    
+    .info-item:hover {
+        padding-right: 0.5rem;
+        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05));
+        border-radius: 0.5rem;
     }
     
     .info-item:last-child {
@@ -290,107 +390,133 @@
     }
     
     .info-label {
-        color: #475569;
-        font-size: 0.875rem;
-        font-weight: 500;
+        color: #64748b;
+        font-size: 0.95rem;
+        font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.5rem;
     }
     
     .info-value {
-        font-weight: 600;
+        font-weight: 700;
         color: #0f172a;
-        text-align: right;
+        text-align: left;
     }
     
     .order-link {
         color: #2563eb;
         text-decoration: none;
-        font-weight: 600;
-        transition: color 0.15s ease;
+        font-weight: 700;
+        transition: all 0.2s ease;
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
     }
     
     .order-link:hover {
         color: #1d4ed8;
-        text-decoration: underline;
+        background: rgba(37, 99, 235, 0.1);
+        transform: translateX(-5px);
     }
     
     .action-buttons {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
-        margin-top: 1.5rem;
+        gap: 1rem;
+        margin-top: 2rem;
     }
     
     .btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        padding: 1rem 1.5rem;
-        border: 1px solid transparent;
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 500;
+        gap: 0.75rem;
+        padding: 1.25rem 2rem;
+        border: 2px solid transparent;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 700;
         text-decoration: none;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: all 0.3s ease;
         white-space: nowrap;
         text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn:hover::before {
+        left: 100%;
     }
     
     .btn-primary {
-        background: #2563eb;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
         color: white;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
     }
     
     .btn-primary:hover {
-        background: #1d4ed8;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transform: translateY(-1px);
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.6);
+        transform: translateY(-3px);
     }
     
     .btn-success {
-        background: #10b981;
+        background: linear-gradient(135deg, #10b981, #059669);
         color: white;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
     }
     
     .btn-success:hover {
-        background: #059669;
-        transform: translateY(-1px);
+        background: linear-gradient(135deg, #059669, #047857);
+        box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.6);
+        transform: translateY(-3px);
     }
     
     .btn-danger {
-        background: #ef4444;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
         color: white;
+        box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
     }
     
     .btn-danger:hover {
-        background: #dc2626;
-        transform: translateY(-1px);
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        box-shadow: 0 20px 25px -5px rgba(239, 68, 68, 0.6);
+        transform: translateY(-3px);
     }
     
     .btn-secondary {
         background: white;
-        color: #334155;
-        border-color: #cbd5e1;
+        color: #374151;
+        border-color: #d1d5db;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     
     .btn-secondary:hover {
-        background: #f8fafc;
-        border-color: #94a3b8;
+        background: #f9fafb;
+        border-color: #9ca3af;
+        transform: translateY(-2px);
     }
     
     .timeline-section {
         background: white;
-        border-radius: 1rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e2e8f0;
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border: 1px solid #f1f5f9;
         overflow: hidden;
         margin-top: 2rem;
     }
@@ -398,25 +524,42 @@
     .timeline-item {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 1.5rem;
+        gap: 1.5rem;
+        padding: 2rem;
         border-bottom: 1px solid #f1f5f9;
         position: relative;
+        transition: all 0.2s ease;
+    }
+    
+    .timeline-item:hover {
+        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05));
     }
     
     .timeline-item:last-child {
         border-bottom: none;
     }
     
+    .timeline-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        right: 35px;
+        bottom: -1px;
+        width: 2px;
+        height: 20px;
+        background: #e2e8f0;
+    }
+    
     .timeline-icon {
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1rem;
+        font-size: 1.2rem;
         flex-shrink: 0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 3px solid white;
     }
     
     .timeline-content {
@@ -424,92 +567,111 @@
     }
     
     .timeline-title {
-        font-weight: 600;
+        font-weight: 700;
         color: #0f172a;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
     }
     
     .timeline-time {
-        color: #475569;
-        font-size: 0.875rem;
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 500;
     }
     
     .icon-submitted {
-        background: #eff6ff;
-        color: #2563eb;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        color: #3b82f6;
     }
     
     .icon-approved {
-        background: #dcfce7;
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
         color: #059669;
     }
     
     .icon-rejected {
-        background: #fee2e2;
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
         color: #dc2626;
     }
     
     .related-products {
-        background: #f8fafc;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        margin-top: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-top: 2rem;
+        border: 1px solid #e2e8f0;
     }
     
     .products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
     }
     
     .product-card {
         background: white;
-        border-radius: 0.5rem;
-        padding: 1rem;
+        border-radius: 1rem;
+        padding: 1.5rem;
         border: 1px solid #e2e8f0;
-        transition: all 0.15s ease;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     
     .product-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
     
     .product-placeholder {
         width: 100%;
         height: 120px;
-        background: #f1f5f9;
-        border-radius: 0.5rem;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border-radius: 0.75rem;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #64748b;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 2rem;
     }
     
     .product-name {
-        font-weight: 600;
+        font-weight: 700;
         color: #0f172a;
-        font-size: 0.875rem;
-        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
     }
     
     .product-price {
-        color: #2563eb;
-        font-weight: 700;
-        font-size: 1rem;
+        color: #3b82f6;
+        font-weight: 800;
+        font-size: 1.1rem;
     }
     
     .fade-in {
         opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.6s ease-out;
+        transform: translateY(30px);
+        transition: all 0.8s ease-out;
     }
     
     .fade-in.visible {
         opacity: 1;
         transform: translateY(0);
+    }
+    
+    /* RTL Adjustments */
+    .breadcrumb-item i {
+        transform: scaleX(-1);
+    }
+    
+    .info-value {
+        text-align: left;
+        direction: ltr;
+    }
+    
+    .order-link:hover {
+        transform: translateX(5px);
     }
     
     @media (max-width: 1024px) {
@@ -530,27 +692,27 @@
     
     @media (max-width: 768px) {
         .customer-card {
-            padding: 1.5rem;
+            padding: 2rem;
         }
         
         .customer-avatar {
-            width: 60px;
-            height: 60px;
-            font-size: 1.5rem;
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
         }
         
         .testimonial-text {
-            font-size: 1rem;
-            padding: 1.5rem;
+            font-size: 1.1rem;
+            padding: 2rem;
         }
         
         .testimonial-text::before,
         .testimonial-text::after {
-            font-size: 3rem;
+            font-size: 4rem;
         }
         
         .star {
-            font-size: 1.5rem;
+            font-size: 2rem;
         }
         
         .action-buttons {
@@ -560,8 +722,20 @@
         .products-grid {
             grid-template-columns: 1fr;
         }
+        
+        .testimonial-header {
+            padding: 2rem;
+        }
+        
+        .content-body {
+            padding: 2rem;
+        }
     }
 </style>
+
+@push('styles')
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+@endpush
 @endpush
 
 @section('content')
@@ -571,30 +745,30 @@
         <div class="testimonial-info">
             <h1 class="testimonial-id">
                 <i class="fas fa-star"></i>
-                {{ __('Testimonial') }} #{{ $testimonial->id }}
+                الشهادة رقم #{{ $testimonial->id }}
             </h1>
             <div class="testimonial-date">
                 <i class="fas fa-calendar-alt"></i>
-                {{ __('Submitted on') }} {{ $testimonial->created_at->format('F d, Y \a\t g:i A') }}
+                تم إرسالها في {{ $testimonial->created_at->format('d F Y \ا\ل\س\ا\ع\ة g:i A') }}
             </div>
         </div>
         
         <div class="testimonial-actions">
             <a href="{{ route('admin.testimonials.index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i>
-                {{ __('Back to Testimonials') }}
+                <i class="fas fa-arrow-right"></i>
+                العودة للشهادات
             </a>
             
             <button class="btn btn-primary" onclick="window.print()">
                 <i class="fas fa-print"></i>
-                {{ __('Print') }}
+                طباعة
             </button>
         </div>
     </div>
     
     <span class="status-badge status-{{ $testimonial->status }}">
         <i class="fas fa-{{ $testimonial->status === 'pending' ? 'clock' : ($testimonial->status === 'approved' ? 'check' : 'times') }}"></i>
-        {{ ucfirst($testimonial->status) }}
+        {{ $testimonial->status === 'pending' ? 'في الانتظار' : ($testimonial->status === 'approved' ? 'مُوافق عليها' : 'مرفوضة') }}
     </span>
 </div>
 
@@ -605,7 +779,7 @@
         <div class="section-header">
             <h3 class="section-title">
                 <i class="fas fa-comment-alt"></i>
-                {{ __('Customer Testimonial') }}
+                شهادة العميل
             </h3>
         </div>
         
@@ -617,8 +791,8 @@
                         <i class="fas fa-star {{ $i <= $testimonial->rating ? 'star' : 'star empty' }}"></i>
                     @endfor
                 </div>
-                <div class="rating-text">{{ $testimonial->rating }} {{ __('out of 5 stars') }}</div>
-                <div class="rating-subtitle">{{ __('Customer Rating') }}</div>
+                <div class="rating-text">{{ $testimonial->rating }} من أصل 5 نجوم</div>
+                <div class="rating-subtitle">تقييم العميل</div>
             </div>
             
             <!-- Testimonial Text -->
@@ -629,22 +803,22 @@
             <!-- Related Products -->
             @if($testimonial->order && $testimonial->order->orderItems->count() > 0)
                 <div class="related-products">
-                    <h4 style="margin: 0 0 1rem 0; color: #0f172a; font-weight: 600;">
+                    <h4 style="margin: 0 0 1rem 0; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;">
                         <i class="fas fa-shopping-bag"></i>
-                        {{ __('Products from this order') }}
+                        المنتجات من هذا الطلب
                     </h4>
                     
                     <div class="products-grid">
                         @foreach($testimonial->order->orderItems->take(4) as $orderItem)
                             <div class="product-card">
                                 @if($orderItem->product && $orderItem->product->image)
-                                    <img src="{{ asset('storage/' . $orderItem->product->image) }}" alt="{{ $orderItem->product->name }}" class="product-image">
+                                    <img src="{{ asset('storage/' . $orderItem->product->image) }}" alt="{{ $orderItem->product->name }}" class="product-image" style="width: 100%; height: 120px; object-fit: cover; border-radius: 0.75rem; margin-bottom: 1rem;">
                                 @else
                                     <div class="product-placeholder">
                                         <i class="fas fa-image"></i>
                                     </div>
                                 @endif
-                                <div class="product-name">{{ $orderItem->product->name ?? 'Product' }}</div>
+                                <div class="product-name">{{ $orderItem->product->name ?? 'منتج' }}</div>
                                 <div class="product-price">${{ number_format($orderItem->price, 2) }}</div>
                             </div>
                         @endforeach
@@ -659,7 +833,7 @@
         <div class="section-header">
             <h3 class="section-title">
                 <i class="fas fa-user"></i>
-                {{ __('Customer Information') }}
+                معلومات العميل
             </h3>
         </div>
         
@@ -671,7 +845,7 @@
                 </div>
                 <div class="customer-name">{{ $testimonial->user->name }}</div>
                 <div class="customer-email">{{ $testimonial->user->email }}</div>
-                <div class="customer-role">{{ __('Customer') }}</div>
+                <div class="customer-role">عميل</div>
             </div>
             
             <!-- Information List -->
@@ -679,7 +853,7 @@
                 <li class="info-item">
                     <span class="info-label">
                         <i class="fas fa-envelope"></i>
-                        {{ __('Email') }}
+                        البريد الإلكتروني
                     </span>
                     <span class="info-value">{{ $testimonial->user->email }}</span>
                 </li>
@@ -687,7 +861,7 @@
                 <li class="info-item">
                     <span class="info-label">
                         <i class="fas fa-calendar-plus"></i>
-                        {{ __('Joined') }}
+                        تاريخ التسجيل
                     </span>
                     <span class="info-value">{{ $testimonial->user->created_at->format('M Y') }}</span>
                 </li>
@@ -696,7 +870,7 @@
                     <li class="info-item">
                         <span class="info-label">
                             <i class="fas fa-shopping-cart"></i>
-                            {{ __('Order') }}
+                            الطلب
                         </span>
                         <span class="info-value">
                             <a href="{{ route('admin.orders.show', $testimonial->order) }}" class="order-link">
@@ -709,7 +883,7 @@
                     <li class="info-item">
                         <span class="info-label">
                             <i class="fas fa-dollar-sign"></i>
-                            {{ __('Order Value') }}
+                            قيمة الطلب
                         </span>
                         <span class="info-value">${{ number_format($testimonial->order->total_amount, 2) }}</span>
                     </li>
@@ -717,16 +891,16 @@
                     <li class="info-item">
                         <span class="info-label">
                             <i class="fas fa-truck"></i>
-                            {{ __('Order Status') }}
+                            حالة الطلب
                         </span>
-                        <span class="info-value">{{ ucfirst($testimonial->order->status) }}</span>
+                        <span class="info-value">{{ $testimonial->order->status === 'pending' ? 'في الانتظار' : ($testimonial->order->status === 'completed' ? 'مكتمل' : ($testimonial->order->status === 'cancelled' ? 'ملغي' : ucfirst($testimonial->order->status))) }}</span>
                     </li>
                 @endif
                 
                 <li class="info-item">
                     <span class="info-label">
                         <i class="fas fa-clock"></i>
-                        {{ __('Submitted') }}
+                        تم الإرسال
                     </span>
                     <span class="info-value">{{ $testimonial->created_at->diffForHumans() }}</span>
                 </li>
@@ -737,12 +911,12 @@
                 <div class="action-buttons">
                     <button type="button" class="btn btn-success" id="approveBtn">
                         <i class="fas fa-check"></i>
-                        {{ __('Approve Testimonial') }}
+                        الموافقة على الشهادة
                     </button>
                     
                     <button type="button" class="btn btn-danger" id="rejectBtn">
                         <i class="fas fa-times"></i>
-                        {{ __('Reject Testimonial') }}
+                        رفض الشهادة
                     </button>
                 </div>
             @endif
@@ -751,7 +925,7 @@
             <div class="action-buttons" style="margin-top: 1rem;">
                 <button type="button" class="btn btn-danger" id="deleteBtn">
                     <i class="fas fa-trash"></i>
-                    {{ __('Delete Testimonial') }}
+                    حذف الشهادة
                 </button>
             </div>
         </div>
@@ -763,7 +937,7 @@
     <div class="section-header">
         <h3 class="section-title">
             <i class="fas fa-history"></i>
-            {{ __('Testimonial Timeline') }}
+            تاريخ الشهادة
         </h3>
     </div>
     
@@ -772,8 +946,8 @@
             <i class="fas fa-plus"></i>
         </div>
         <div class="timeline-content">
-            <div class="timeline-title">{{ __('Testimonial Submitted') }}</div>
-            <div class="timeline-time">{{ $testimonial->created_at->format('F d, Y \a\t g:i A') }}</div>
+            <div class="timeline-title">تم إرسال الشهادة</div>
+            <div class="timeline-time">{{ $testimonial->created_at->format('d F Y \ا\ل\س\ا\ع\ة g:i A') }}</div>
         </div>
     </div>
     
@@ -783,8 +957,8 @@
                 <i class="fas fa-{{ $testimonial->status === 'approved' ? 'check' : 'times' }}"></i>
             </div>
             <div class="timeline-content">
-                <div class="timeline-title">{{ __('Testimonial') }} {{ ucfirst($testimonial->status) }}</div>
-                <div class="timeline-time">{{ $testimonial->updated_at->format('F d, Y \a\t g:i A') }}</div>
+                <div class="timeline-title">تم {{ $testimonial->status === 'approved' ? 'الموافقة على' : 'رفض' }} الشهادة</div>
+                <div class="timeline-time">{{ $testimonial->updated_at->format('d F Y \ا\ل\س\ا\ع\ة g:i A') }}</div>
             </div>
         </div>
     @endif
@@ -823,11 +997,11 @@
     
     // Action functions
     function approveTestimonial() {
-        if (confirm('Are you sure you want to approve this testimonial?')) {
+        if (confirm('هل أنت متأكد من الموافقة على هذه الشهادة؟')) {
             var button = document.getElementById('approveBtn');
             if (!button) return;
             
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Approving...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الموافقة...';
             button.disabled = true;
             
             fetch('{{ route("admin.testimonials.approve", $testimonial) }}', {
@@ -839,26 +1013,26 @@
             })
             .then(response => {
                 if (response.ok) {
-                    showNotification('Testimonial approved successfully!', 'success');
+                    showNotification('تم الموافقة على الشهادة بنجاح!', 'success');
                     setTimeout(() => window.location.reload(), 1000);
                 } else {
                     throw new Error('Network response was not ok');
                 }
             })
             .catch(error => {
-                showNotification('Error approving testimonial', 'error');
-                button.innerHTML = '<i class="fas fa-check"></i> Approve';
+                showNotification('خطأ في الموافقة على الشهادة', 'error');
+                button.innerHTML = '<i class="fas fa-check"></i> الموافقة';
                 button.disabled = false;
             });
         }
     }
     
     function rejectTestimonial() {
-        if (confirm('Are you sure you want to reject this testimonial?')) {
+        if (confirm('هل أنت متأكد من رفض هذه الشهادة؟')) {
             var button = document.getElementById('rejectBtn');
             if (!button) return;
             
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rejecting...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الرفض...';
             button.disabled = true;
             
             fetch('{{ route("admin.testimonials.reject", $testimonial) }}', {
@@ -870,26 +1044,26 @@
             })
             .then(response => {
                 if (response.ok) {
-                    showNotification('Testimonial rejected successfully!', 'success');
+                    showNotification('تم رفض الشهادة بنجاح!', 'success');
                     setTimeout(() => window.location.reload(), 1000);
                 } else {
                     throw new Error('Network response was not ok');
                 }
             })
             .catch(error => {
-                showNotification('Error rejecting testimonial', 'error');
-                button.innerHTML = '<i class="fas fa-times"></i> Reject';
+                showNotification('خطأ في رفض الشهادة', 'error');
+                button.innerHTML = '<i class="fas fa-times"></i> رفض';
                 button.disabled = false;
             });
         }
     }
     
     function deleteTestimonial() {
-        if (confirm('Are you sure you want to delete this testimonial? This action cannot be undone.')) {
+        if (confirm('هل أنت متأكد من حذف هذه الشهادة؟ لا يمكن التراجع عن هذا الإجراء.')) {
             var button = document.getElementById('deleteBtn');
             if (!button) return;
             
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جارٍ الحذف...';
             button.disabled = true;
             
             var form = document.createElement('form');
@@ -910,15 +1084,19 @@
         notification.style.cssText = `
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
             z-index: 9999;
             max-width: 300px;
-            animation: slideInRight 0.3s ease-out;
-            padding: 12px 16px;
-            border-radius: 8px;
+            animation: slideInLeft 0.3s ease-out;
+            padding: 16px 20px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            text-align: right;
         `;
         
         var iconClass = type === 'success' ? 'check-circle' : 
@@ -930,7 +1108,7 @@
         
         setTimeout(function() {
             if (document.body.contains(notification)) {
-                notification.style.animation = 'slideOutRight 0.3s ease-out forwards';
+                notification.style.animation = 'slideOutLeft 0.3s ease-out forwards';
                 setTimeout(function() {
                     if (document.body.contains(notification)) {
                         document.body.removeChild(notification);
@@ -946,7 +1124,7 @@
                 if (entry.isIntersecting) {
                     setTimeout(function() {
                         entry.target.classList.add('visible');
-                    }, index * 100);
+                    }, index * 150);
                     observer.unobserve(entry.target);
                 }
             });
@@ -961,13 +1139,13 @@
     // Enhanced star interactions
     document.querySelectorAll('.star').forEach(function(star, index) {
         star.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.1)';
-            this.style.filter = 'brightness(1.2)';
+            this.style.transform = 'scale(1.2) rotate(15deg)';
+            this.style.filter = 'drop-shadow(0 4px 8px rgba(251, 191, 36, 0.7))';
         });
         
         star.addEventListener('mouseleave', function() {
             this.style.transform = '';
-            this.style.filter = '';
+            this.style.filter = this.classList.contains('empty') ? 'none' : 'drop-shadow(0 2px 4px rgba(251, 191, 36, 0.5))';
         });
     });
     
@@ -987,9 +1165,9 @@
 </script>
 
 <style>
-    @keyframes slideInRight {
+    @keyframes slideInLeft {
         from {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
         to {
@@ -998,13 +1176,13 @@
         }
     }
     
-    @keyframes slideOutRight {
+    @keyframes slideOutLeft {
         from {
             transform: translateX(0);
             opacity: 1;
         }
         to {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
     }
@@ -1028,30 +1206,32 @@
     }
     
     .alert {
-        padding: 12px 16px;
-        border-radius: 8px;
-        border: 1px solid;
+        padding: 16px 20px;
+        border-radius: 12px;
+        border: 2px solid;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
     
     .alert-success {
-        background: #dcfce7;
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
         color: #166534;
-        border-color: #bbf7d0;
+        border-color: #22c55e;
     }
     
     .alert-error {
-        background: #fef2f2;
+        background: linear-gradient(135deg, #fef2f2, #fecaca);
         color: #991b1b;
-        border-color: #fecaca;
+        border-color: #ef4444;
     }
     
     .alert-info {
-        background: #eff6ff;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
         color: #1e40af;
-        border-color: #bfdbfe;
+        border-color: #3b82f6;
     }
     
     @media print {
@@ -1067,7 +1247,55 @@
         
         body {
             font-size: 12px !important;
+            direction: rtl;
         }
+        
+        * {
+            box-shadow: none !important;
+            background: white !important;
+        }
+    }
+    
+    /* Additional RTL improvements */
+    .fas {
+        margin-left: 0.5rem;
+        margin-right: 0;
+    }
+    
+    .btn .fas {
+        margin-left: 0;
+        margin-right: 0.5rem;
+    }
+    
+    /* Enhanced hover effects */
+    .testimonial-card:hover,
+    .testimonial-content-section:hover,
+    .testimonial-sidebar:hover {
+        box-shadow: 0 35px 60px -12px rgba(59, 130, 246, 0.25);
+    }
+    
+    /* Smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Custom scrollbar for RTL */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
     }
 </style>
 @endpush

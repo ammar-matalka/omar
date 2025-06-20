@@ -255,10 +255,10 @@ a[style*="display: flex"]:hover {
     <!-- Back Link -->
     <a href="{{ route('user.conversations.index') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #0ea5e9; text-decoration: none; font-weight: 500; margin-bottom: 2rem; transition: color 0.2s ease;">
         <i class="fas fa-arrow-left"></i>
-        Back to Conversations
+        العودة إلى المحادثات
     </a>
 
-    <!-- New Message Indicator -->
+    <!-- رسالة جديدة Indicator -->
     <div id="newMessageIndicator" class="new-message-indicator" onclick="scrollToBottom(true, true)">
         <i class="fas fa-arrow-down"></i>
         رسائل جديدة
@@ -333,7 +333,7 @@ a[style*="display: flex"]:hover {
                         
                         <!-- Message Content -->
                         <div style="flex: 1; max-width: 75%;">
-                            <!-- Sender Info -->
+                            <!-- إرسالer Info -->
                             <div style="font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; {{ $message->is_from_admin ? '' : 'justify-content: flex-end;' }}">
                                 @if($message->is_from_admin)
                                     <span style="padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.5px; background: #dcfce7; color: #166534;">Support Team</span>
@@ -369,7 +369,7 @@ a[style*="display: flex"]:hover {
                             name="message" 
                             id="messageTextarea"
                             style="flex: 1; min-height: 60px; max-height: 120px; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; background: white; color: #333; font-size: 0.875rem; font-family: inherit; resize: none; transition: all 0.2s ease;"
-                            placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+                            placeholder="اكتب رسالتك here... (Press Enter to send, Shift+Enter for new line)"
                             required
                             onfocus="this.style.borderColor='#0ea5e9'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)';"
                             onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none';"
@@ -397,7 +397,7 @@ a[style*="display: flex"]:hover {
                         </span>
                         <span id="sendingStatus" style="display: none; color: #0ea5e9;">
                             <i class="fas fa-spinner fa-spin"></i>
-                            Sending...
+                            إرسالing...
                         </span>
                     </div>
                 </form>
@@ -903,7 +903,7 @@ if (!window.messageFormInitialized) {
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                 formData.append('message', message);
                 
-                console.log('Sending message:', message);
+                console.log('إرسالing message:', message);
 
                 const response = await fetch(form.action, {
                     method: 'POST',

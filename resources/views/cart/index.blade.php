@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
-@section('title', __('Shopping Cart') . ' - ' . config('app.name'))
+@section('title', __('عربة التسوق') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+    
     .cart-container {
         padding: var(--space-2xl) 0;
         min-height: 60vh;
@@ -58,6 +64,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .cart-list {
@@ -71,6 +78,7 @@
         padding: var(--space-lg);
         border-bottom: 1px solid var(--border-color);
         transition: background-color var(--transition-fast);
+        flex-direction: row-reverse;
     }
     
     .cart-item:last-child {
@@ -135,6 +143,7 @@
         align-items: center;
         gap: var(--space-md);
         flex-shrink: 0;
+        flex-direction: row-reverse;
     }
     
     .quantity-control {
@@ -144,6 +153,7 @@
         background: var(--surface-variant);
         border-radius: var(--radius-lg);
         padding: var(--space-xs);
+        flex-direction: row-reverse;
     }
     
     .quantity-btn {
@@ -187,7 +197,7 @@
         font-weight: 700;
         color: var(--on-surface);
         min-width: 80px;
-        text-align: right;
+        text-align: left;
     }
     
     .remove-btn {
@@ -228,6 +238,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .summary-row {
@@ -288,6 +299,7 @@
         gap: var(--space-sm);
         margin-bottom: var(--space-md);
         box-shadow: var(--shadow-md);
+        flex-direction: row-reverse;
     }
     
     .checkout-btn:hover {
@@ -312,6 +324,7 @@
         align-items: center;
         justify-content: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .continue-shopping:hover {
@@ -364,6 +377,7 @@
         padding: var(--space-lg);
         background: var(--surface-variant);
         border-top: 1px solid var(--border-color);
+        flex-direction: row-reverse;
     }
     
     .items-count {
@@ -384,6 +398,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-xs);
+        flex-direction: row-reverse;
     }
     
     .clear-cart-btn:hover {
@@ -462,8 +477,8 @@
 <div class="container cart-container">
     <!-- Page Header -->
     <div class="page-header">
-        <h1 class="page-title">{{ __('Shopping Cart') }}</h1>
-        <p class="page-subtitle">{{ __('Review your items before checkout') }}</p>
+        <h1 class="page-title">{{ __('عربة التسوق') }}</h1>
+        <p class="page-subtitle">{{ __('راجع العناصر قبل الدفع') }}</p>
     </div>
     
     @if($cart && $cart->cartItems->count() > 0)
@@ -473,7 +488,7 @@
                 <div class="cart-header">
                     <h2>
                         <i class="fas fa-shopping-cart"></i>
-                        {{ __('Cart Items') }} ({{ $cart->cartItems->count() }})
+                        {{ __('عناصر العربة') }} ({{ $cart->cartItems->count() }})
                     </h2>
                 </div>
                 
@@ -488,7 +503,7 @@
                             <!-- Item Details -->
                             <div class="item-details">
                                 <div class="item-type">
-                                    {{ $item->type === 'educational_card' ? __('Educational Card') : __('Product') }}
+                                    {{ $item->type === 'educational_card' ? __('بطاقة تعليمية') : __('منتج') }}
                                 </div>
                                 @if($item->type === 'educational_card')
                                     <a href="{{ route('educational-cards.show', $item->educationalCard) }}" class="item-title">
@@ -541,7 +556,7 @@
                                 <button 
                                     class="remove-btn" 
                                     onclick="removeItem('{{ $item->id }}')"
-                                    title="{{ __('Remove Item') }}"
+                                    title="{{ __('إزالة العنصر') }}"
                                 >
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -553,12 +568,12 @@
                 <!-- Cart Actions -->
                 <div class="cart-actions">
                     <div class="items-count">
-                        {{ $cart->cartItems->count() }} {{ __('items') }} • {{ $cart->cartItems->sum('quantity') }} {{ __('total quantity') }}
+                        {{ $cart->cartItems->count() }} {{ __('عناصر') }} • {{ $cart->cartItems->sum('quantity') }} {{ __('الكمية الإجمالية') }}
                     </div>
                     
                     <button class="clear-cart-btn" onclick="clearCart()">
                         <i class="fas fa-trash-alt"></i>
-                        {{ __('Clear Cart') }}
+                        {{ __('تفريغ العربة') }}
                     </button>
                 </div>
             </div>
@@ -567,39 +582,39 @@
             <div class="cart-summary fade-in">
                 <h3 class="summary-title">
                     <i class="fas fa-receipt"></i>
-                    {{ __('Order Summary') }}
+                    {{ __('ملخص الطلب') }}
                 </h3>
                 
                 <div class="summary-row">
-                    <span class="summary-label">{{ __('Subtotal') }}</span>
+                    <span class="summary-label">{{ __('المجموع الجزئي') }}</span>
                     <span class="summary-value" id="cartSubtotal">${{ number_format($cart->total(), 2) }}</span>
                 </div>
                 
                 <div class="summary-row">
-                    <span class="summary-label">{{ __('Shipping') }}</span>
-                    <span class="summary-value">{{ __('Free') }}</span>
+                    <span class="summary-label">{{ __('الشحن') }}</span>
+                    <span class="summary-value">{{ __('مجاني') }}</span>
                 </div>
                 
                 <div class="summary-row">
-                    <span class="summary-label">{{ __('Tax') }}</span>
-                    <span class="summary-value">{{ __('Calculated at checkout') }}</span>
+                    <span class="summary-label">{{ __('الضريبة') }}</span>
+                    <span class="summary-value">{{ __('تحسب عند الدفع') }}</span>
                 </div>
                 
                 <div class="summary-divider"></div>
                 
                 <div class="summary-total">
-                    <span class="total-label">{{ __('Total') }}</span>
+                    <span class="total-label">{{ __('الإجمالي') }}</span>
                     <span class="total-value" id="cartTotal">${{ number_format($cart->total(), 2) }}</span>
                 </div>
                 
                 <a href="{{ route('checkout.index') }}" class="checkout-btn">
                     <i class="fas fa-credit-card"></i>
-                    {{ __('Proceed to Checkout') }}
+                    {{ __('الانتقال إلى الدفع') }}
                 </a>
                 
                 <a href="{{ route('products.index') }}" class="continue-shopping">
                     <i class="fas fa-arrow-left"></i>
-                    {{ __('Continue Shopping') }}
+                    {{ __('مواصلة التسوق') }}
                 </a>
             </div>
         </div>
@@ -609,18 +624,18 @@
             <div class="empty-icon">
                 <i class="fas fa-shopping-cart"></i>
             </div>
-            <h2 class="empty-title">{{ __('Your cart is empty') }}</h2>
-            <p class="empty-text">{{ __('Add some products to your cart to get started') }}</p>
+            <h2 class="empty-title">{{ __('عربة التسوق فارغة') }}</h2>
+            <p class="empty-text">{{ __('أضف بعض المنتجات إلى عربة التسوق للبدء') }}</p>
             
             <div class="empty-actions">
                 <a href="{{ route('products.index') }}" class="btn btn-primary btn-lg">
                     <i class="fas fa-shopping-bag"></i>
-                    {{ __('Shop Products') }}
+                    {{ __('تصفح المنتجات') }}
                 </a>
                 
                 <a href="{{ route('educational-cards.index') }}" class="btn btn-secondary btn-lg">
                     <i class="fas fa-graduation-cap"></i>
-                    {{ __('Educational Cards') }}
+                    {{ __('البطاقات التعليمية') }}
                 </a>
             </div>
         </div>
@@ -650,16 +665,16 @@
                 location.reload(); // Reload to update totals
             } else {
                 const data = await response.json();
-                showNotification(data.message || '{{ __("Error updating quantity") }}', 'error');
+                showNotification(data.message || '{{ __("خطأ في تحديث الكمية") }}', 'error');
             }
         } catch (error) {
-            showNotification('{{ __("Error updating quantity") }}', 'error');
+            showNotification('{{ __("خطأ في تحديث الكمية") }}', 'error');
         }
     }
     
     // Remove item from cart
     async function removeItem(itemId) {
-        if (!confirm('{{ __("Are you sure you want to remove this item?") }}')) {
+        if (!confirm('{{ __("هل أنت متأكد من رغبتك في إزالة هذا العنصر؟") }}')) {
             return;
         }
         
@@ -680,16 +695,16 @@
                     location.reload();
                 }, 300);
             } else {
-                showNotification('{{ __("Error removing item") }}', 'error');
+                showNotification('{{ __("خطأ في إزالة العنصر") }}', 'error');
             }
         } catch (error) {
-            showNotification('{{ __("Error removing item") }}', 'error');
+            showNotification('{{ __("خطأ في إزالة العنصر") }}', 'error');
         }
     }
     
     // Clear entire cart
     async function clearCart() {
-        if (!confirm('{{ __("Are you sure you want to clear your entire cart?") }}')) {
+        if (!confirm('{{ __("هل أنت متأكد من رغبتك في تفريغ عربة التسوق بالكامل؟") }}')) {
             return;
         }
         
@@ -704,10 +719,10 @@
             if (response.ok) {
                 location.reload();
             } else {
-                showNotification('{{ __("Error clearing cart") }}', 'error');
+                showNotification('{{ __("خطأ في تفريغ العربة") }}', 'error');
             }
         } catch (error) {
-            showNotification('{{ __("Error clearing cart") }}', 'error');
+            showNotification('{{ __("خطأ في تفريغ العربة") }}', 'error');
         }
     }
     
@@ -717,7 +732,7 @@
         notification.className = `alert alert-${type} slide-in`;
         notification.style.position = 'fixed';
         notification.style.top = '20px';
-        notification.style.right = '20px';
+        notification.style.left = '20px'; /* Changed from right to left for RTL */
         notification.style.zIndex = '9999';
         notification.style.maxWidth = '300px';
         notification.innerHTML = `
@@ -759,7 +774,7 @@
 <style>
     @keyframes slideOut {
         to {
-            transform: translateX(-100%);
+            transform: translateX(100%);
             opacity: 0;
             height: 0;
             padding: 0;

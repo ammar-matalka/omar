@@ -1,475 +1,75 @@
 @extends('layouts.app')
 
-@section('title', __('My Orders') . ' - ' . config('app.name'))
+@section('title', 'طلباتي - ' . config('app.name'))
 
 @push('styles')
 <style>
-    .orders-hero {
-        background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
-        color: white;
-        padding: var(--space-2xl) 0;
-        position: relative;
-        overflow: hidden;
+    /* RTL CSS Adjustments */
+    :root {
+        --text-direction: rtl;
+    }
+    
+    body[dir="rtl"] {
+        direction: rtl;
+        text-align: right;
     }
     
     .orders-hero::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
         right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="0,0 1000,0 1000,80 0,100"/></svg>');
-        background-size: cover;
-        background-position: bottom;
-    }
-    
-    .hero-content {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-    }
-    
-    .hero-title {
-        font-size: 2.5rem;
-        font-weight: 900;
-        margin-bottom: var(--space-sm);
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .hero-subtitle {
-        font-size: 1.125rem;
-        opacity: 0.9;
-        margin-bottom: var(--space-lg);
+        left: auto;
     }
     
     .breadcrumb {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-sm);
-        font-size: 0.875rem;
-        opacity: 0.9;
-        flex-wrap: wrap;
-    }
-    
-    .breadcrumb-link {
-        color: white;
-        text-decoration: none;
-        transition: opacity var(--transition-fast);
-    }
-    
-    .breadcrumb-link:hover {
-        opacity: 0.8;
-        text-decoration: underline;
-    }
-    
-    .breadcrumb-separator {
-        opacity: 0.6;
-    }
-    
-    .orders-container {
-        padding: var(--space-3xl) 0;
-        background: var(--background);
-        min-height: 50vh;
+        flex-direction: row-reverse;
     }
     
     .orders-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--space-2xl);
-        flex-wrap: wrap;
-        gap: var(--space-lg);
-    }
-    
-    .orders-count {
-        font-size: 1.125rem;
-        color: var(--on-surface-variant);
-        font-weight: 500;
+        flex-direction: row-reverse;
     }
     
     .orders-filters {
-        display: flex;
-        gap: var(--space-md);
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    
-    .filter-select {
-        padding: var(--space-sm) var(--space-md);
-        border: 2px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        background: var(--surface);
-        color: var(--on-surface);
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-    }
-    
-    .filter-select:focus {
-        outline: none;
-        border-color: var(--primary-500);
-        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-    }
-    
-    .orders-grid {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-lg);
-    }
-    
-    .order-card {
-        background: var(--surface);
-        border: 2px solid var(--border-color);
-        border-radius: var(--radius-xl);
-        padding: var(--space-xl);
-        box-shadow: var(--shadow-sm);
-        transition: all var(--transition-normal);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .order-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
-        transform: scaleX(0);
-        transition: transform var(--transition-normal);
-    }
-    
-    .order-card:hover {
-        border-color: var(--primary-200);
-        box-shadow: var(--shadow-lg);
-        transform: translateY(-4px);
-    }
-    
-    .order-card:hover::before {
-        transform: scaleX(1);
+        flex-direction: row-reverse;
     }
     
     .order-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: var(--space-lg);
-        flex-wrap: wrap;
-        gap: var(--space-md);
-    }
-    
-    .order-info {
-        flex: 1;
-    }
-    
-    .order-number {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--on-surface);
-        margin-bottom: var(--space-xs);
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-    }
-    
-    .order-meta {
-        display: flex;
-        align-items: center;
-        gap: var(--space-lg);
-        color: var(--on-surface-variant);
-        font-size: 0.875rem;
-        flex-wrap: wrap;
-    }
-    
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: var(--space-xs);
+        flex-direction: row-reverse;
     }
     
     .order-status {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: var(--space-sm);
+        align-items: flex-start;
     }
     
-    .status-badge {
-        padding: var(--space-sm) var(--space-md);
-        border-radius: var(--radius-xl);
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border: 2px solid transparent;
-    }
-    
-    .status-pending {
-        background: var(--warning-100);
-        color: var(--warning-700);
-        border-color: var(--warning-200);
-    }
-    
-    .status-processing {
-        background: var(--info-100);
-        color: var(--info-700);
-        border-color: var(--info-200);
-    }
-    
-    .status-shipped {
-        background: var(--primary-100);
-        color: var(--primary-700);
-        border-color: var(--primary-200);
-    }
-    
-    .status-delivered {
-        background: var(--success-100);
-        color: var(--success-700);
-        border-color: var(--success-200);
-    }
-    
-    .status-cancelled {
-        background: var(--error-100);
-        color: var(--error-700);
-        border-color: var(--error-200);
-    }
-    
-    .order-total {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: var(--on-surface);
-    }
-    
-    .order-items {
-        margin-bottom: var(--space-lg);
-    }
-    
-    .items-summary {
-        display: flex;
-        align-items: center;
-        gap: var(--space-md);
-        color: var(--on-surface-variant);
-        font-size: 0.875rem;
-        margin-bottom: var(--space-md);
+    .order-meta {
+        flex-direction: row-reverse;
     }
     
     .item-previews {
-        display: flex;
-        gap: var(--space-sm);
-        flex-wrap: wrap;
-    }
-    
-    .item-preview {
-        width: 60px;
-        height: 60px;
-        border-radius: var(--radius-md);
-        background: var(--surface-variant);
-        border: 2px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        color: var(--on-surface-variant);
-        overflow: hidden;
-        position: relative;
-    }
-    
-    .item-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .item-preview .quantity-badge {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: var(--primary-500);
-        color: white;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        font-weight: 600;
-        border: 2px solid var(--surface);
-    }
-    
-    .more-items {
-        background: var(--primary-50);
-        border-color: var(--primary-200);
-        color: var(--primary-600);
-        font-weight: 600;
+        flex-direction: row-reverse;
     }
     
     .order-actions {
-        display: flex;
-        gap: var(--space-md);
-        justify-content: flex-end;
-        flex-wrap: wrap;
-    }
-    
-    .action-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-sm);
-        padding: var(--space-sm) var(--space-lg);
-        border: 2px solid transparent;
-        border-radius: var(--radius-lg);
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-    }
-    
-    .action-btn:focus {
-        outline: 2px solid var(--primary-500);
-        outline-offset: 2px;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-        color: white;
-        box-shadow: var(--shadow-sm);
-    }
-    
-    .btn-primary:hover {
-        background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
-    }
-    
-    .btn-secondary {
-        background: var(--surface);
-        color: var(--on-surface-variant);
-        border-color: var(--border-color);
-    }
-    
-    .btn-secondary:hover {
-        background: var(--surface-variant);
-        border-color: var(--border-hover);
-        color: var(--on-surface);
-    }
-    
-    .btn-outline {
-        background: transparent;
-        color: var(--primary-600);
-        border-color: var(--primary-200);
-    }
-    
-    .btn-outline:hover {
-        background: var(--primary-50);
-        border-color: var(--primary-300);
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: var(--space-3xl) var(--space-xl);
-        color: var(--on-surface-variant);
-    }
-    
-    .empty-icon {
-        font-size: 4rem;
-        margin-bottom: var(--space-lg);
-        opacity: 0.5;
-        color: var(--primary-300);
-    }
-    
-    .empty-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: var(--space-md);
-        color: var(--on-surface);
-    }
-    
-    .empty-text {
-        font-size: 1rem;
-        line-height: 1.6;
-        margin-bottom: var(--space-xl);
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
+        flex-direction: row-reverse;
     }
     
     .empty-cta {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-sm);
-        padding: var(--space-md) var(--space-xl);
-        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-        color: white;
-        border-radius: var(--radius-lg);
-        text-decoration: none;
-        font-weight: 600;
-        transition: all var(--transition-fast);
-        box-shadow: var(--shadow-md);
-    }
-    
-    .empty-cta:hover {
-        background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-    }
-    
-    .pagination-wrapper {
-        margin-top: var(--space-2xl);
-        display: flex;
-        justify-content: center;
+        flex-direction: row-reverse;
     }
     
     @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2rem;
-        }
-        
         .orders-header {
             flex-direction: column;
-            align-items: stretch;
-            gap: var(--space-md);
         }
         
         .orders-filters {
-            justify-content: center;
+            justify-content: flex-end;
         }
         
         .order-header {
             flex-direction: column;
-            gap: var(--space-sm);
-        }
-        
-        .order-status {
-            align-items: flex-start;
-            flex-direction: row;
-            justify-content: space-between;
-        }
-        
-        .order-meta {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: var(--space-sm);
         }
         
         .order-actions {
-            justify-content: stretch;
-        }
-        
-        .action-btn {
-            flex: 1;
-            justify-content: center;
-        }
-        
-        .item-previews {
-            justify-content: center;
-        }
-        
-        .breadcrumb {
-            justify-content: center;
+            flex-direction: row-reverse;
         }
     }
 </style>
@@ -477,53 +77,53 @@
 
 @section('content')
 <!-- Orders Hero -->
-<section class="orders-hero">
+<section class="orders-hero" dir="rtl">
     <div class="container">
         <div class="hero-content fade-in">
             <!-- Breadcrumb -->
             <nav class="breadcrumb">
                 <a href="{{ route('home') }}" class="breadcrumb-link">
                     <i class="fas fa-home"></i>
-                    {{ __('Home') }}
+                    الرئيسية
                 </a>
                 <span class="breadcrumb-separator">/</span>
                 <a href="{{ route('user.profile.show') }}" class="breadcrumb-link">
-                    {{ __('Profile') }}
+                    الملف الشخصي
                 </a>
                 <span class="breadcrumb-separator">/</span>
-                <span>{{ __('Orders') }}</span>
+                <span>طلباتي</span>
             </nav>
             
-            <h1 class="hero-title">{{ __('My Orders') }}</h1>
-            <p class="hero-subtitle">{{ __('Track and manage all your orders in one place') }}</p>
+            <h1 class="hero-title">طلباتي</h1>
+            <p class="hero-subtitle">تابع وادار جميع طلباتك في مكان واحد</p>
         </div>
     </div>
 </section>
 
 <!-- Orders Container -->
-<section class="orders-container">
+<section class="orders-container" dir="rtl">
     <div class="container">
         <!-- Orders Header -->
         <div class="orders-header fade-in">
             <div class="orders-count">
-                {{ __('Total Orders') }}: <strong>{{ $orders->total() }}</strong>
+                إجمالي الطلبات: <strong>{{ $orders->total() }}</strong>
             </div>
             
             <div class="orders-filters">
                 <select class="filter-select" onchange="filterOrders(this.value)">
-                    <option value="">{{ __('All Statuses') }}</option>
-                    <option value="pending">{{ __('Pending') }}</option>
-                    <option value="processing">{{ __('Processing') }}</option>
-                    <option value="shipped">{{ __('Shipped') }}</option>
-                    <option value="delivered">{{ __('Delivered') }}</option>
-                    <option value="cancelled">{{ __('Cancelled') }}</option>
+                    <option value="">جميع الحالات</option>
+                    <option value="pending">قيد الانتظار</option>
+                    <option value="processing">قيد التجهيز</option>
+                    <option value="shipped">تم الشحن</option>
+                    <option value="delivered">تم التسليم</option>
+                    <option value="cancelled">ملغية</option>
                 </select>
                 
                 <select class="filter-select" onchange="sortOrders(this.value)">
-                    <option value="newest">{{ __('Newest First') }}</option>
-                    <option value="oldest">{{ __('Oldest First') }}</option>
-                    <option value="amount_high">{{ __('Highest Amount') }}</option>
-                    <option value="amount_low">{{ __('Lowest Amount') }}</option>
+                    <option value="newest">الأحدث أولاً</option>
+                    <option value="oldest">الأقدم أولاً</option>
+                    <option value="amount_high">الأعلى سعراً</option>
+                    <option value="amount_low">الأقل سعراً</option>
                 </select>
             </div>
         </div>
@@ -538,7 +138,7 @@
                             <div class="order-info">
                                 <div class="order-number">
                                     <i class="fas fa-receipt"></i>
-                                    {{ __('Order') }} #{{ $order->id }}
+                                    طلب #{{ $order->id }}
                                 </div>
                                 <div class="order-meta">
                                     <div class="meta-item">
@@ -551,17 +151,28 @@
                                     </div>
                                     <div class="meta-item">
                                         <i class="fas fa-credit-card"></i>
-                                        {{ ucfirst($order->payment_method) }}
+                                        @switch($order->payment_method)
+                                            @case('credit_card') بطاقة ائتمان @break
+                                            @case('cash') نقداً عند الاستلام @break
+                                            @default {{ $order->payment_method }}
+                                        @endswitch
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="order-status">
                                 <span class="status-badge status-{{ $order->status }}">
-                                    {{ ucfirst($order->status) }}
+                                    @switch($order->status)
+                                        @case('pending') قيد الانتظار @break
+                                        @case('processing') قيد التجهيز @break
+                                        @case('shipped') تم الشحن @break
+                                        @case('delivered') تم التسليم @break
+                                        @case('cancelled') ملغي @break
+                                        @default {{ $order->status }}
+                                    @endswitch
                                 </span>
                                 <div class="order-total">
-                                    ${{ number_format($order->total_amount, 2) }}
+                                    {{ number_format($order->total_amount, 2) }} ر.س
                                 </div>
                             </div>
                         </div>
@@ -570,11 +181,11 @@
                         <div class="order-items">
                             <div class="items-summary">
                                 <i class="fas fa-box"></i>
-                                {{ $order->orderItems->sum('quantity') }} {{ __('items') }}
+                                {{ $order->orderItems->sum('quantity') }} عناصر
                                 @if($order->discount_amount > 0)
                                     <span style="color: var(--success-600);">
                                         <i class="fas fa-tag"></i>
-                                        {{ __('Discount Applied') }}: ${{ number_format($order->discount_amount, 2) }}
+                                        خصم مطبق: {{ number_format($order->discount_amount, 2) }} ر.س
                                     </span>
                                 @endif
                             </div>
@@ -613,26 +224,26 @@
                         <div class="order-actions">
                             <a href="{{ route('orders.show', $order) }}" class="action-btn btn-primary">
                                 <i class="fas fa-eye"></i>
-                                {{ __('View Details') }}
+                                عرض التفاصيل
                             </a>
                             
                             @if($order->status === 'delivered')
                                 <a href="{{ route('testimonials.create', $order) }}" class="action-btn btn-outline">
                                     <i class="fas fa-star"></i>
-                                    {{ __('Review') }}
+                                    تقييم
                                 </a>
                             @endif
                             
                             @if(in_array($order->status, ['pending', 'processing']))
                                 <button class="action-btn btn-secondary" onclick="cancelOrder('{{ $order->id }}')">
                                     <i class="fas fa-times"></i>
-                                    {{ __('Cancel') }}
+                                    إلغاء
                                 </button>
                             @endif
                             
                             <button class="action-btn btn-secondary" onclick="trackOrder('{{ $order->id }}')">
                                 <i class="fas fa-truck"></i>
-                                {{ __('Track') }}
+                                تتبع
                             </button>
                         </div>
                     </div>
@@ -651,13 +262,13 @@
                 <div class="empty-icon">
                     <i class="fas fa-shopping-bag"></i>
                 </div>
-                <h2 class="empty-title">{{ __('No Orders Yet') }}</h2>
+                <h2 class="empty-title">لا توجد طلبات</h2>
                 <p class="empty-text">
-                    {{ __('You haven\'t placed any orders yet. Start shopping to see your orders here.') }}
+                    لم تقم بتقديم أي طلبات حتى الآن. ابدأ بالتسوق لرؤية طلباتك هنا.
                 </p>
                 <a href="{{ route('products.index') }}" class="empty-cta">
                     <i class="fas fa-shopping-cart"></i>
-                    {{ __('Start Shopping') }}
+                    ابدأ التسوق
                 </a>
             </div>
         @endif
@@ -754,7 +365,7 @@
     
     // Cancel order function
     function cancelOrder(orderId) {
-        if (!confirm('{{ __("Are you sure you want to cancel this order?") }}')) {
+        if (!confirm('هل أنت متأكد أنك تريد إلغاء هذا الطلب؟')) {
             return;
         }
         
@@ -768,26 +379,24 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showNotification('{{ __("Order cancelled successfully") }}', 'success');
+                showNotification('تم إلغاء الطلب بنجاح', 'success');
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
             } else {
-                showNotification(data.message || '{{ __("Failed to cancel order") }}', 'error');
+                showNotification(data.message || 'فشل في إلغاء الطلب', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('{{ __("An error occurred") }}', 'error');
+            showNotification('حدث خطأ', 'error');
         });
     }
     
     // Track order function
     function trackOrder(orderId) {
-        // Implement order tracking functionality
-        showNotification('{{ __("Opening order tracking...") }}', 'info');
+        showNotification('جاري فتح صفحة تتبع الطلب...', 'info');
         
-        // For now, just redirect to order details
         setTimeout(() => {
             window.location.href = `/orders/${orderId}`;
         }, 500);
@@ -800,7 +409,8 @@
         notification.style.cssText = `
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
+            right: auto;
             z-index: 9999;
             max-width: 300px;
             box-shadow: var(--shadow-xl);
@@ -858,7 +468,7 @@
 <style>
     @keyframes slideIn {
         from {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
         to {
@@ -869,7 +479,7 @@
     
     @keyframes slideOut {
         to {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
     }

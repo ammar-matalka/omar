@@ -1,1239 +1,1254 @@
 @extends('layouts.admin')
 
-@section('title', __('Order Details') . ' #' . $order->id)
-@section('page-title', __('Order Details') . ' #' . $order->id)
+@section('title', 'Conversation Details')
+@section('page-title', 'Conversation with ' . $conversation->user->name)
 
 @section('breadcrumb')
-    <div class="breadcrumb-item">
-        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">{{ __('Dashboard') }}</a>
-    </div>
-    <div class="breadcrumb-item">
-        <i class="fas fa-chevron-right"></i>
-        <a href="{{ route('admin.orders.index') }}" class="breadcrumb-link">{{ __('Orders') }}</a>
-    </div>
-    <div class="breadcrumb-item">
-        <i class="fas fa-chevron-right"></i>
-        {{ __('Order') }} #{{ $order->id }}
-    </div>
+<div class="breadcrumb-item">
+    <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">Dashboard</a>
+</div>
+<div class="breadcrumb-item">
+    <i class="fas fa-chevron-right"></i>
+    <a href="{{ route('admin.conversations.index') }}" class="breadcrumb-link">Conversations</a>
+</div>
+<div class="breadcrumb-item">
+    <i class="fas fa-chevron-right"></i>
+    {{ Str::limit($conversation->title, 30) }}
+</div>
 @endsection
 
 @push('styles')
 <style>
-    .order-header {
-        background: white;
-        border-radius: var(--radius-xl);
-        padding: var(--space-xl);
-        margin-bottom: var(--space-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--admin-secondary-200);
-    }
-    
-    .order-title {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: var(--space-lg);
-        flex-wrap: wrap;
-        gap: var(--space-md);
-    }
-    
-    .order-info {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-sm);
-    }
-    
-    .order-id {
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: var(--admin-secondary-900);
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-    }
-    
-    .order-date {
-        color: var(--admin-secondary-600);
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-    }
-    
-    .order-actions {
-        display: flex;
-        gap: var(--space-sm);
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-    
-    .status-section {
-        background: var(--admin-secondary-50);
-        border-radius: var(--radius-lg);
-        padding: var(--space-lg);
-        margin-bottom: var(--space-xl);
-    }
-    
-    .status-form {
-        display: flex;
-        align-items: center;
-        gap: var(--space-md);
-        flex-wrap: wrap;
-    }
-    
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: var(--space-sm) var(--space-lg);
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        gap: var(--space-sm);
-        margin-right: var(--space-md);
-    }
-    
-    .status-pending {
-        background: var(--warning-100);
-        color: var(--warning-700);
-        border: 1px solid var(--warning-200);
-    }
-    
-    .status-processing {
-        background: var(--info-100);
-        color: var(--info-700);
-        border: 1px solid var(--info-200);
-    }
-    
-    .status-shipped {
-        background: var(--admin-primary-100);
-        color: var(--admin-primary-700);
-        border: 1px solid var(--admin-primary-200);
-    }
-    
-    .status-delivered {
-        background: var(--success-100);
-        color: var(--success-700);
-        border: 1px solid var(--success-200);
-    }
-    
-    .status-cancelled {
-        background: var(--error-100);
-        color: var(--error-700);
-        border: 1px solid var(--error-200);
-    }
-    
-    .order-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: var(--space-xl);
-        margin-bottom: var(--space-xl);
-    }
-    
-    .order-items-section {
-        background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--admin-secondary-200);
-        overflow: hidden;
-    }
-    
-    .section-header {
-        background: var(--admin-secondary-50);
-        padding: var(--space-lg);
-        border-bottom: 1px solid var(--admin-secondary-200);
-    }
-    
-    .section-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--admin-secondary-900);
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-        margin: 0;
-    }
-    
-    .items-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .items-table th {
-        background: var(--admin-secondary-50);
-        padding: var(--space-md) var(--space-lg);
-        text-align: left;
-        font-weight: 600;
-        color: var(--admin-secondary-700);
-        font-size: 0.875rem;
-        border-bottom: 1px solid var(--admin-secondary-200);
-    }
-    
-    .items-table td {
-        padding: var(--space-lg);
-        border-bottom: 1px solid var(--admin-secondary-100);
-        vertical-align: middle;
-    }
-    
-    .item-info {
-        display: flex;
-        align-items: center;
-        gap: var(--space-md);
-    }
-    
-    .item-image {
-        width: 60px;
-        height: 60px;
-        border-radius: var(--radius-md);
-        object-fit: cover;
-        border: 1px solid var(--admin-secondary-200);
-        flex-shrink: 0;
-    }
-    
-    .item-placeholder {
-        width: 60px;
-        height: 60px;
-        border-radius: var(--radius-md);
-        background: var(--admin-secondary-100);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--admin-secondary-500);
-        flex-shrink: 0;
-    }
-    
-    .item-details {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
-    }
-    
-    .item-name {
-        font-weight: 600;
-        color: var(--admin-secondary-900);
-        margin: 0;
-    }
-    
-    .item-category {
-        font-size: 0.75rem;
-        color: var(--admin-secondary-500);
-    }
-    
-    .price-cell {
-        text-align: right;
-        font-weight: 600;
-        color: var(--admin-secondary-900);
-    }
-    
-    .quantity-badge {
-        background: var(--admin-primary-100);
-        color: var(--admin-primary-700);
-        padding: var(--space-xs) var(--space-sm);
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: 0.875rem;
-        text-align: center;
-        min-width: 40px;
-    }
-    
-    .order-summary {
-        background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--admin-secondary-200);
-        height: fit-content;
-    }
-    
-    .summary-content {
-        padding: var(--space-lg);
-    }
-    
-    .customer-info {
-        display: flex;
-        align-items: center;
-        gap: var(--space-md);
-        margin-bottom: var(--space-lg);
-        padding: var(--space-lg);
-        background: var(--admin-secondary-50);
-        border-radius: var(--radius-lg);
-    }
-    
-    .customer-avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 700;
-        font-size: 1.125rem;
-        flex-shrink: 0;
-    }
-    
-    .customer-details {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
-    }
-    
-    .customer-name {
-        font-weight: 600;
-        color: var(--admin-secondary-900);
-        font-size: 1rem;
-    }
-    
-    .customer-email {
-        color: var(--admin-secondary-600);
-        font-size: 0.875rem;
-    }
-    
-    .customer-role {
-        font-size: 0.75rem;
-        color: var(--admin-secondary-500);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: var(--space-sm) 0;
-        border-bottom: 1px solid var(--admin-secondary-100);
-    }
-    
-    .summary-row:last-child {
-        border-bottom: none;
-        padding-top: var(--space-md);
-        border-top: 2px solid var(--admin-secondary-200);
-        margin-top: var(--space-md);
-    }
-    
-    .summary-label {
-        color: var(--admin-secondary-600);
-        font-size: 0.875rem;
-    }
-    
-    .summary-value {
-        font-weight: 600;
-        color: var(--admin-secondary-900);
-    }
-    
-    .total-row .summary-label,
-    .total-row .summary-value {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: var(--admin-primary-600);
-    }
-    
-    .shipping-info {
-        background: var(--admin-secondary-50);
-        border-radius: var(--radius-lg);
-        padding: var(--space-lg);
-        margin-top: var(--space-lg);
-    }
-    
-    .shipping-title {
-        font-weight: 600;
-        color: var(--admin-secondary-900);
-        margin-bottom: var(--space-md);
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-    }
-    
-    .shipping-address {
-        color: var(--admin-secondary-700);
-        line-height: 1.6;
-    }
-    
-    .payment-info {
-        background: var(--info-50);
-        border: 1px solid var(--info-200);
-        border-radius: var(--radius-lg);
-        padding: var(--space-lg);
-        margin-top: var(--space-lg);
-    }
-    
-    .payment-method {
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-        font-weight: 600;
-        color: var(--info-700);
-    }
-    
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-sm);
-        padding: var(--space-sm) var(--space-lg);
-        border: 1px solid transparent;
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-        font-weight: 500;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-        white-space: nowrap;
-    }
-    
-    .btn-primary {
-        background: var(--admin-primary-600);
-        color: white;
-        box-shadow: var(--shadow-sm);
-    }
-    
-    .btn-primary:hover {
-        background: var(--admin-primary-700);
-        box-shadow: var(--shadow-md);
-        transform: translateY(-1px);
-    }
-    
-    .btn-secondary {
-        background: white;
-        color: var(--admin-secondary-700);
-        border-color: var(--admin-secondary-300);
-    }
-    
-    .btn-secondary:hover {
-        background: var(--admin-secondary-50);
-        border-color: var(--admin-secondary-400);
-    }
-    
-    .btn-success {
-        background: var(--success-500);
-        color: white;
-    }
-    
-    .btn-success:hover {
-        background: #059669;
-        transform: translateY(-1px);
-    }
-    
-    .btn-warning {
-        background: var(--warning-500);
-        color: white;
-    }
-    
-    .btn-warning:hover {
-        background: #d97706;
-        transform: translateY(-1px);
-    }
-    
-    .btn-danger {
-        background: var(--error-500);
-        color: white;
-    }
-    
-    .btn-danger:hover {
-        background: #dc2626;
-        transform: translateY(-1px);
-    }
-    
-    .form-select {
-        padding: var(--space-sm) var(--space-md);
-        border: 1px solid var(--admin-secondary-300);
-        border-radius: var(--radius-md);
-        background: white;
-        color: var(--admin-secondary-900);
-        font-size: 0.875rem;
-        min-width: 150px;
-    }
-    
-    .form-select:focus {
-        outline: none;
-        border-color: var(--admin-primary-500);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    .timeline {
-        margin-top: var(--space-xl);
-        background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--admin-secondary-200);
-        overflow: hidden;
-    }
-    
-    .timeline-item {
-        display: flex;
-        align-items: center;
-        gap: var(--space-md);
-        padding: var(--space-lg);
-        border-bottom: 1px solid var(--admin-secondary-100);
-        position: relative;
-    }
-    
-    .timeline-item:last-child {
-        border-bottom: none;
-    }
-    
-    .timeline-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        flex-shrink: 0;
-    }
-    
-    .timeline-content {
-        flex: 1;
-    }
-    
-    .timeline-title {
-        font-weight: 600;
-        color: var(--admin-secondary-900);
-        margin-bottom: var(--space-xs);
-    }
-    
-    .timeline-time {
-        color: var(--admin-secondary-600);
-        font-size: 0.875rem;
-    }
-    
-    .icon-pending {
-        background: var(--warning-100);
-        color: var(--warning-600);
-    }
-    
-    .icon-processing {
-        background: var(--info-100);
-        color: var(--info-600);
-    }
-    
-    .icon-shipped {
-        background: var(--admin-primary-100);
-        color: var(--admin-primary-600);
-    }
-    
-    .icon-delivered {
-        background: var(--success-100);
-        color: var(--success-600);
-    }
-    
-    .icon-cancelled {
-        background: var(--error-100);
-        color: var(--error-600);
-    }
-    
-    @media (max-width: 1024px) {
-        .order-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .order-title {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .order-actions {
-            width: 100%;
-            justify-content: flex-start;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .status-form {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .customer-info {
-            flex-direction: column;
-            text-align: center;
-        }
-        
-        .items-table,
-        .items-table thead,
-        .items-table tbody,
-        .items-table th,
-        .items-table td,
-        .items-table tr {
-            display: block;
-        }
-        
-        .items-table thead tr {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-        }
-        
-        .items-table tr {
-            border: 1px solid var(--admin-secondary-200);
-            margin-bottom: var(--space-md);
-            border-radius: var(--radius-md);
-            padding: var(--space-md);
-        }
-        
-        .items-table td {
-            border: none;
-            position: relative;
-            padding: var(--space-sm) 0;
-        }
-        
-        .items-table td:before {
-            content: attr(data-label);
-            position: absolute;
-            left: 0;
-            width: 45%;
-            padding-right: var(--space-sm);
-            white-space: nowrap;
-            font-weight: 600;
-            color: var(--admin-secondary-700);
-        }
-        
-        .item-info {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: var(--space-sm);
-        }
-    }
-    
-    .alert {
-        padding: var(--space-md);
-        border-radius: var(--radius-md);
-        border: 1px solid;
-        margin-bottom: var(--space-lg);
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-    }
-    
-    .alert-success {
-        background: var(--success-100);
-        color: var(--success-700);
-        border-color: var(--success-200);
-    }
-    
-    .alert-error {
-        background: var(--error-100);
-        color: var(--error-700);
-        border-color: var(--error-200);
-    }
-    
-    .alert-warning {
-        background: var(--warning-100);
-        color: var(--warning-700);
-        border-color: var(--warning-200);
-    }
-    
-    .alert-info {
-        background: var(--info-100);
-        color: var(--info-700);
-        border-color: var(--info-200);
-    }
-    
-    /* Animation for smooth transitions */
-    .fade-in {
+/* متغيرات CSS للأدمن */
+:root {
+    --admin-primary-500: #3b82f6;
+    --admin-primary-600: #2563eb;
+    --admin-secondary-50: #f8fafc;
+    --admin-secondary-100: #f1f5f9;
+    --admin-secondary-200: #e2e8f0;
+    --admin-secondary-300: #cbd5e1;
+    --admin-secondary-600: #475569;
+    --admin-secondary-700: #334155;
+    --admin-secondary-900: #0f172a;
+    
+    --success-100: #dcfce7;
+    --success-500: #22c55e;
+    --success-600: #16a34a;
+    --success-700: #15803d;
+    
+    --error-50: #fef2f2;
+    --error-200: #fecaca;
+    --error-500: #ef4444;
+    --error-700: #b91c1c;
+    
+    --warning-100: #fef3c7;
+    --info-500: #3b82f6;
+    
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+    
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 1rem;
+    
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    --transition-fast: 150ms ease-in-out;
+    --transition-normal: 300ms ease-in-out;
+}
+
+/* تحسينات CSS للرسائل الفورية */
+.message-sending {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.new-message-indicator {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: var(--admin-primary-500);
+    color: white;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    z-index: 1000;
+    transform: translateY(100px);
+    transition: transform 0.3s ease;
+    display: none;
+}
+
+.new-message-indicator.show {
+    display: block;
+    transform: translateY(0);
+}
+
+.typing-indicator {
+    display: none;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--admin-secondary-100);
+    border-radius: var(--radius-lg);
+    margin: var(--space-sm) 0;
+    font-style: italic;
+    color: var(--admin-secondary-600);
+}
+
+.typing-indicator.show {
+    display: block;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.pulse {
+    animation: pulse 1s infinite;
+}
+
+.connection-status {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.connection-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.connection-dot.connected {
+    background: var(--success-500);
+}
+
+.connection-dot.disconnected {
+    background: var(--error-500);
+}
+
+.unread-count {
+    background: var(--error-500);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* تأثير التمرير السلس المحسن */
+.smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+.auto-scroll-indicator {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: var(--admin-primary-500);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.auto-scroll-indicator.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.auto-scroll-indicator:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* Base Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-primary {
+    background: var(--admin-primary-500);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--admin-primary-600);
+}
+
+.btn-secondary {
+    background: var(--admin-secondary-200);
+    color: var(--admin-secondary-700);
+}
+
+.btn-success {
+    background: var(--success-500);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background: var(--success-100);
+    color: var(--success-700);
+}
+
+.badge-danger {
+    background: var(--error-200);
+    color: var(--error-700);
+}
+
+.badge-warning {
+    background: var(--warning-100);
+    color: #92400e;
+}
+
+.badge-secondary {
+    background: var(--admin-secondary-100);
+    color: var(--admin-secondary-700);
+}
+
+.card {
+    background: white;
+    border: 1px solid var(--admin-secondary-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-normal);
+}
+
+.card-header {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--admin-secondary-200);
+    background: var(--admin-secondary-50);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-body {
+    padding: var(--space-lg);
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--admin-secondary-900);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--admin-secondary-300);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    transition: var(--transition-fast);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--admin-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Enhanced message animations */
+@keyframes messageSlideIn {
+    from {
         opacity: 0;
         transform: translateY(20px);
-        transition: all 0.6s ease-out;
     }
-    
-    .fade-in.visible {
+    to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+div[style*="margin-bottom: var(--space-xl)"] {
+    animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Hover effects */
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Message bubble hover effects */
+div[style*="border-radius: var(--radius-xl)"]:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    div[style*="grid-template-columns: 1fr 350px"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    div[style*="height: calc(100vh - 200px)"] {
+        height: calc(100vh - 300px) !important;
+        min-height: 400px !important;
+    }
+    
+    div[style*="max-width: 75%"] {
+        max-width: 85% !important;
+    }
+    
+    div[style*="display: flex"][style*="justify-content: space-between"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: var(--space-md) !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn, .card-header, nav, .sidebar {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
 </style>
 @endpush
 
 @section('content')
-<!-- Order Header -->
-<div class="order-header fade-in">
-    <div class="order-title">
-        <div class="order-info">
-            <h1 class="order-id">
-                <i class="fas fa-receipt"></i>
-                {{ __('Order') }} #{{ $order->id }}
+<div style="padding: var(--space-xl);">
+    <!-- CSRF Token for JavaScript -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Header Section -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2xl);">
+        <div>
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-sm);">
+                <i class="fas fa-comment-dots" style="color: var(--admin-primary-500); margin-right: var(--space-sm);"></i>
+                {{ $conversation->title }}
+                @if(!$conversation->is_read_by_admin)
+                    <span class="badge badge-danger">Unread</span>
+                @else
+                    <span class="badge badge-success">Read</span>
+                @endif
+                <span class="unread-count" id="unreadCount" style="display: none;">0</span>
             </h1>
-            <div class="order-date">
-                <i class="fas fa-calendar-alt"></i>
-                {{ __('Placed on') }} {{ $order->created_at->format('F j, Y \a\t g:i A') }}
-            </div>
+            <p style="color: var(--admin-secondary-600); font-size: 0.875rem;">
+                Conversation with {{ $conversation->user->name }} • <span id="messageCount">{{ $messages->count() }}</span> messages
+            </p>
         </div>
         
-        <div class="order-actions">
-            <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">
+        <div style="display: flex; gap: var(--space-md);">
+            <a href="{{ route('admin.conversations.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i>
-                {{ __('Back to Orders') }}
+                Back to Conversations
             </a>
-            
-            <button class="btn btn-primary" onclick="window.print()">
-                <i class="fas fa-print"></i>
-                {{ __('Print Order') }}
-            </button>
-            
-            <button class="btn btn-danger" onclick="deleteOrder('{{ $order->id }}')">
-                <i class="fas fa-trash"></i>
-                {{ __('Delete Order') }}
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Order Status Update -->
-<div class="status-section fade-in">
-    <h3 class="section-title" style="margin-bottom: var(--space-md);">
-        <i class="fas fa-sync-alt"></i>
-        {{ __('Order Status') }}
-    </h3>
-    
-    <form action="{{ route('admin.orders.update', $order) }}" method="POST" class="status-form">
-        @csrf
-        @method('PUT')
-        
-        <span class="status-badge status-{{ $order->status }}">
-            <i class="fas fa-{{ $order->status == 'pending' ? 'clock' : ($order->status == 'processing' ? 'cog' : ($order->status == 'shipped' ? 'shipping-fast' : ($order->status == 'delivered' ? 'check' : 'times'))) }}"></i>
-            {{ ucfirst($order->status) }}
-        </span>
-        
-        <select name="status" class="form-select" required>
-            <option value="">{{ __('Select Status') }}</option>
-            <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
-            <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>{{ __('Processing') }}</option>
-            <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>{{ __('Shipped') }}</option>
-            <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>{{ __('Delivered') }}</option>
-            <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>{{ __('Cancelled') }}</option>
-        </select>
-        
-        <button type="submit" class="btn btn-success">
-            <i class="fas fa-save"></i>
-            {{ __('Update Status') }}
-        </button>
-    </form>
-</div>
-
-<!-- Order Content Grid -->
-<div class="order-grid">
-    <!-- Order Items -->
-    <div class="order-items-section fade-in">
-        <div class="section-header">
-            <h3 class="section-title">
-                <i class="fas fa-shopping-bag"></i>
-                {{ __('Order Items') }} ({{ $order->orderItems->count() }})
-            </h3>
-        </div>
-        
-        @if($order->orderItems->count() > 0)
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th>{{ __('Product') }}</th>
-                        <th>{{ __('Price') }}</th>
-                        <th>{{ __('Quantity') }}</th>
-                        <th>{{ __('Total') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($order->orderItems as $item)
-                        <tr>
-                            <td data-label="{{ __('Product') }}">
-                                <div class="item-info">
-                                    @if($item->product && $item->product->image)
-                                        <img src="{{ asset('storage/' . $item->product->image) }}" 
-                                             alt="{{ $item->product_name }}" 
-                                             class="item-image">
-                                    @else
-                                        <div class="item-placeholder">
-                                            <i class="fas fa-image"></i>
-                                        </div>
-                                    @endif
-                                    
-                                    <div class="item-details">
-                                        <h4 class="item-name">{{ $item->product_name }}</h4>
-                                        @if($item->product && $item->product->category)
-                                            <div class="item-category">
-                                                <i class="fas fa-tag"></i>
-                                                {{ $item->product->category->name }}
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </td>
-                            <td data-label="{{ __('Price') }}" class="price-cell">
-                                ${{ number_format($item->price, 2) }}
-                            </td>
-                            <td data-label="{{ __('Quantity') }}">
-                                <span class="quantity-badge">{{ $item->quantity }}</span>
-                            </td>
-                            <td data-label="{{ __('Total') }}" class="price-cell">
-                                ${{ number_format($item->price * $item->quantity, 2) }}
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <div style="padding: var(--space-3xl); text-align: center; color: var(--admin-secondary-500);">
-                <i class="fas fa-shopping-bag" style="font-size: 3rem; margin-bottom: var(--space-lg); opacity: 0.5;"></i>
-                <h3 style="margin-bottom: var(--space-sm);">{{ __('No Items Found') }}</h3>
-                <p>{{ __('This order has no items.') }}</p>
-            </div>
-        @endif
-    </div>
-    
-    <!-- Order Summary -->
-    <div class="order-summary fade-in">
-        <div class="section-header">
-            <h3 class="section-title">
-                <i class="fas fa-receipt"></i>
-                {{ __('Order Summary') }}
-            </h3>
-        </div>
-        
-        <div class="summary-content">
-            <!-- Customer Information -->
-            <div class="customer-info">
-                <div class="customer-avatar">
-                    {{ strtoupper(substr($order->user->name, 0, 1)) }}
-                </div>
-                <div class="customer-details">
-                    <div class="customer-name">{{ $order->user->name }}</div>
-                    <div class="customer-email">{{ $order->user->email }}</div>
-                    <div class="customer-role">{{ __('Customer') }}</div>
-                </div>
-            </div>
-            
-            <!-- Order Totals -->
-            <div class="summary-row">
-                <span class="summary-label">{{ __('Subtotal') }}</span>
-                <span class="summary-value">${{ number_format($order->total_amount + $order->discount_amount, 2) }}</span>
-            </div>
-            
-            @if($order->discount_amount > 0)
-                <div class="summary-row">
-                    <span class="summary-label">{{ __('Discount') }}</span>
-                    <span class="summary-value" style="color: var(--success-600);">
-                        -${{ number_format($order->discount_amount, 2) }}
-                    </span>
-                </div>
+            @if(!$conversation->is_read_by_admin)
+            <form action="{{ route('admin.conversations.mark-read', $conversation) }}" method="POST" style="display: inline;">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i>
+                    Mark as Read
+                </button>
+            </form>
             @endif
-            
-            <div class="summary-row">
-                <span class="summary-label">{{ __('Shipping') }}</span>
-                <span class="summary-value">{{ __('Free') }}</span>
-            </div>
-            
-            <div class="summary-row total-row">
-                <span class="summary-label">{{ __('Total') }}</span>
-                <span class="summary-value">${{ number_format($order->total_amount, 2) }}</span>
-            </div>
-            
-            <!-- Shipping Information -->
-            <div class="shipping-info">
-                <h4 class="shipping-title">
-                    <i class="fas fa-truck"></i>
-                    {{ __('Shipping Address') }}
-                </h4>
-                <div class="shipping-address">
-                    {{ $order->shipping_address ?? __('No shipping address provided') }}
-                </div>
-            </div>
-            
-            <!-- Payment Information -->
-            <div class="payment-info">
-                <div class="payment-method">
-                    <i class="fas fa-credit-card"></i>
-                    {{ ucfirst($order->payment_method) }}
-                </div>
-            </div>
+            <span id="connectionStatus" class="connection-status">
+                <div class="connection-dot connected"></div>
+                <span>Connected</span>
+            </span>
         </div>
     </div>
-</div>
 
-<!-- Order Timeline -->
-<div class="timeline fade-in">
-    <div class="section-header">
-        <h3 class="section-title">
-            <i class="fas fa-history"></i>
-            {{ __('Order Timeline') }}
-        </h3>
+    <!-- New Message Indicator -->
+    <div id="newMessageIndicator" class="new-message-indicator" onclick="scrollToBottom()">
+        <i class="fas fa-arrow-down"></i>
+        رسائل جديدة
     </div>
-    
-    <div class="timeline-item">
-        <div class="timeline-icon icon-pending">
-            <i class="fas fa-plus"></i>
+
+    <div style="display: grid; grid-template-columns: 1fr 350px; gap: var(--space-xl);">
+        <!-- Main Conversation Area -->
+        <div style="display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 600px;">
+            
+            <!-- Messages Container -->
+            <div class="card" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-comments"></i>
+                        Conversation Messages
+                    </h3>
+                    <button onclick="scrollToBottom()" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-arrow-down"></i>
+                        Latest
+                    </button>
+                </div>
+                
+                <!-- Messages List -->
+                <div id="messagesList" class="smooth-scroll" style="flex: 1; padding: var(--space-lg); overflow-y: auto; background: linear-gradient(180deg, white 0%, var(--admin-secondary-50) 100%); position: relative;">
+                    @foreach($messages as $message)
+                    <div data-message-id="{{ $message->id }}" style="margin-bottom: var(--space-xl); display: flex; gap: var(--space-md); {{ $message->is_from_admin ? 'flex-direction: row-reverse;' : '' }}">
+                        <!-- Avatar -->
+                        <div style="width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem; flex-shrink: 0; box-shadow: var(--shadow-md); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, var(--success-500), var(--success-600));' : 'background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));' }}">
+                            @if($message->is_from_admin)
+                                <i class="fas fa-user-shield"></i>
+                            @else
+                                {{ strtoupper(substr($conversation->user->name, 0, 1)) }}
+                            @endif
+                        </div>
+                        
+                        <!-- Message Content -->
+                        <div style="flex: 1; max-width: 75%;">
+                            <!-- Sender Info -->
+                            <div style="font-size: 0.8rem; font-weight: 600; color: var(--admin-secondary-600); margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-sm); {{ $message->is_from_admin ? 'justify-content: flex-end;' : '' }}">
+                                @if($message->is_from_admin)
+                                    <span style="padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; background: var(--success-100); color: var(--success-700);">Admin</span>
+                                @else
+                                    <span style="padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; background: var(--admin-primary-100); color: var(--admin-primary-700);">{{ $conversation->user->name }}</span>
+                                @endif
+                                <span style="font-size: 0.75rem; color: var(--admin-secondary-500); display: flex; align-items: center; gap: var(--space-xs);">
+                                    <i class="fas fa-clock"></i>
+                                    {{ $message->created_at->format('M d, Y h:i A') }}
+                                </span>
+                            </div>
+                            
+                            <!-- Message Bubble -->
+                            <div style="padding: var(--space-md) var(--space-lg); border-radius: var(--radius-xl); margin-bottom: var(--space-xs); word-wrap: break-word; line-height: 1.6; position: relative; box-shadow: var(--shadow-sm); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, var(--success-500), var(--success-600)); color: white; border-bottom-right-radius: var(--radius-sm);' : 'background: white; color: var(--admin-secondary-900); border: 1px solid var(--admin-secondary-200); border-bottom-left-radius: var(--radius-sm);' }}">
+                                {{ $message->message }}
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                    
+                    <!-- Typing Indicator -->
+                    <div id="typingIndicator" class="typing-indicator">
+                        <i class="fas fa-pencil-alt"></i>
+                        Customer is typing...
+                    </div>
+                </div>
+                
+                <!-- Auto Scroll Indicator -->
+                <div id="autoScrollIndicator" class="auto-scroll-indicator" onclick="scrollToBottom()">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                
+                <!-- Reply Form - FIXED VERSION -->
+                <div style="border-top: 1px solid var(--admin-secondary-200); padding: var(--space-lg); background: var(--admin-secondary-50);">
+                    <form action="{{ route('admin.conversations.reply', $conversation) }}" method="POST" id="messageForm">
+                        @csrf
+                        <div style="margin-bottom: var(--space-md);">
+                            <label style="display: block; margin-bottom: var(--space-sm); font-weight: 500; color: var(--admin-secondary-700);">
+                                <i class="fas fa-reply"></i>
+                                Your Reply
+                            </label>
+                            <textarea 
+                                name="message" 
+                                id="messageTextarea"
+                                class="form-input"
+                                style="width: 100%; min-height: 100px; padding: var(--space-md); border: 2px solid var(--admin-secondary-300); border-radius: var(--radius-lg); font-family: inherit; resize: vertical; transition: all var(--transition-fast);"
+                                placeholder="Type your reply here..."
+                                required
+                                onkeydown="handleKeyDown(event)"
+                                oninput="autoResize(this)"
+                                onfocus="this.style.borderColor='var(--admin-primary-500)'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
+                                onblur="this.style.borderColor='var(--admin-secondary-300)'; this.style.boxShadow='none';"
+                            >{{ old('message') }}</textarea>
+                            
+                            <!-- Error Display -->
+                            @if ($errors->any())
+                            <div style="margin-top: var(--space-sm); padding: var(--space-sm); background: var(--error-50); border: 1px solid var(--error-200); border-radius: var(--radius-md); color: var(--error-700);">
+                                <ul style="margin: 0; padding-left: var(--space-md);">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            @endif
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-size: 0.875rem; color: var(--admin-secondary-600);">
+                                <i class="fas fa-info-circle"></i>
+                                This will be sent to {{ $conversation->user->name }}
+                                <span id="sendingStatus" style="display: none; margin-left: var(--space-sm); color: var(--admin-primary-500);">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    Sending...
+                                </span>
+                            </div>
+                            <div style="display: flex; gap: var(--space-sm); align-items: center;">
+                                <button type="button" onclick="toggleRealTimeMessaging()" id="realTimeToggle" class="btn btn-sm btn-secondary">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Disable Auto-refresh</span>
+                                </button>
+                                <button type="submit" id="sendButton" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Send Reply
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="timeline-content">
-            <div class="timeline-title">{{ __('Order Placed') }}</div>
-            <div class="timeline-time">{{ $order->created_at->format('F j, Y \a\t g:i A') }}</div>
+
+        <!-- Sidebar -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+            <!-- Customer Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user"></i>
+                        Customer Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="text-align: center; margin-bottom: var(--space-lg);">
+                        <div style="width: 80px; height: 80px; margin: 0 auto var(--space-md); border-radius: 50%; background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600)); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 700; box-shadow: var(--shadow-lg);">
+                            {{ strtoupper(substr($conversation->user->name, 0, 1)) }}
+                        </div>
+                        <h4 style="font-size: 1.125rem; font-weight: 600; color: var(--admin-secondary-900); margin-bottom: var(--space-xs);">
+                            {{ $conversation->user->name }}
+                        </h4>
+                        <p style="color: var(--admin-secondary-600); font-size: 0.875rem;">
+                            {{ $conversation->user->email }}
+                        </p>
+                    </div>
+                    
+                    <div style="border-top: 1px solid var(--admin-secondary-200); padding-top: var(--space-lg);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
+                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Member Since:</span>
+                            <span style="color: var(--admin-secondary-900); font-size: 0.875rem;">{{ $conversation->user->created_at->format('M d, Y') }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
+                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Role:</span>
+                            <span class="badge badge-secondary">{{ ucfirst($conversation->user->role ?? 'customer') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversation Status -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        Conversation Details
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
+                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Status:</span>
+                        <span>
+                            @if(!$conversation->is_read_by_admin)
+                                <span class="badge badge-warning">Needs Attention</span>
+                            @else
+                                <span class="badge badge-success">Handled</span>
+                            @endif
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
+                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Messages:</span>
+                        <span style="color: var(--admin-secondary-900); font-size: 0.875rem;" id="sidebarMessageCount">{{ $messages->count() }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
+                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Started:</span>
+                        <span style="color: var(--admin-secondary-900); font-size: 0.875rem;">{{ $conversation->created_at->format('M d, Y h:i A') }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
+                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Last Updated:</span>
+                        <span style="color: var(--admin-secondary-900); font-size: 0.875rem;" id="lastReplyTime">{{ $conversation->updated_at->diffForHumans() }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+                        @if(!$conversation->is_read_by_admin)
+                        <form action="{{ route('admin.conversations.mark-read', $conversation) }}" method="POST">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-success" style="width: 100%;">
+                                <i class="fas fa-check"></i>
+                                Mark as Read
+                            </button>
+                        </form>
+                        @endif
+                        
+                        <a href="{{ route('admin.users.show', $conversation->user) }}" class="btn btn-secondary" style="width: 100%; text-decoration: none;">
+                            <i class="fas fa-user"></i>
+                            View Customer Profile
+                        </a>
+                        
+                        <a href="{{ route('admin.conversations.index') }}" class="btn btn-secondary" style="width: 100%; text-decoration: none;">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Conversations
+                        </a>
+                        
+                        <button onclick="window.print()" class="btn btn-secondary" style="width: 100%;">
+                            <i class="fas fa-print"></i>
+                            Print Conversation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-question-circle"></i>
+                        Support Guidelines
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="font-size: 0.875rem; color: var(--admin-secondary-700); line-height: 1.6;">
+                        <div style="margin-bottom: var(--space-md);">
+                            <strong>Response Goals:</strong>
+                            <ul style="margin: var(--space-sm) 0 0 var(--space-lg); padding: 0;">
+                                <li>First response: < 2 hours</li>
+                                <li>Resolution: < 24 hours</li>
+                                <li>Follow-up: Within 48 hours</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong>Tips:</strong>
+                            <ul style="margin: var(--space-sm) 0 0 var(--space-lg); padding: 0;">
+                                <li>Be empathetic and professional</li>
+                                <li>Provide clear, actionable solutions</li>
+                                <li>Ask for clarification if needed</li>
+                                <li>Follow up to ensure satisfaction</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
-    @if(in_array($order->status, ['processing', 'shipped', 'delivered']))
-        <div class="timeline-item">
-            <div class="timeline-icon icon-processing">
-                <i class="fas fa-cog"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="timeline-title">{{ __('Order Processing') }}</div>
-                <div class="timeline-time">{{ $order->updated_at->format('F j, Y \a\t g:i A') }}</div>
-            </div>
-        </div>
-    @endif
-    
-    @if(in_array($order->status, ['shipped', 'delivered']))
-        <div class="timeline-item">
-            <div class="timeline-icon icon-shipped">
-                <i class="fas fa-shipping-fast"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="timeline-title">{{ __('Order Shipped') }}</div>
-                <div class="timeline-time">{{ $order->updated_at->format('F j, Y \a\t g:i A') }}</div>
-            </div>
-        </div>
-    @endif
-    
-    @if($order->status == 'delivered')
-        <div class="timeline-item">
-            <div class="timeline-icon icon-delivered">
-                <i class="fas fa-check"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="timeline-title">{{ __('Order Delivered') }}</div>
-                <div class="timeline-time">{{ $order->updated_at->format('F j, Y \a\t g:i A') }}</div>
-            </div>
-        </div>
-    @endif
-    
-    @if($order->status == 'cancelled')
-        <div class="timeline-item">
-            <div class="timeline-icon icon-cancelled">
-                <i class="fas fa-times"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="timeline-title">{{ __('Order Cancelled') }}</div>
-                <div class="timeline-time">{{ $order->updated_at->format('F j, Y \a\t g:i A') }}</div>
-            </div>
-        </div>
-    @endif
 </div>
 @endsection
 
 @push('scripts')
-<script>
-    // Delete order function
-    function deleteOrder(orderId) {
-        if (!confirm('{{ __("Are you sure you want to delete this order? This action cannot be undone.") }}')) {
-            return;
-        }
+<script type="text/javascript">
+// ========================================
+// Real-time Messaging System for Admin (مُحسن مع التمرير التلقائي)
+// ========================================
+
+class RealTimeMessaging {
+    constructor(conversationId, isAdmin = false) {
+        this.conversationId = conversationId;
+        this.isAdmin = isAdmin;
+        this.lastMessageId = 0;
+        this.checkInterval = null;
+        this.isActive = true;
+        this.checkFrequency = 3000; // 3 ثواني
+        this.isRealTimeEnabled = true;
+        this.autoScroll = true; // التمرير التلقائي
+        this.isUserScrolledUp = false; // تتبع إذا كان المستخدم مرر لأعلى
         
-        fetch('/admin/orders/' + orderId, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        this.init();
+    }
+
+    init() {
+        // الحصول على آخر معرف رسالة عند التحميل
+        this.getLatestMessageId();
+        
+        // بدء التحقق الدوري
+        this.startPolling();
+        
+        // إيقاف التحقق عند مغادرة الصفحة
+        this.setupVisibilityChange();
+        
+        // تحسين الـ form submission
+        this.setupFormSubmission();
+        
+        // إعداد مراقبة التمرير
+        this.setupScrollDetection();
+        
+        console.log('Real-time messaging initialized for admin');
+    }
+
+    getLatestMessageId() {
+        const messages = document.querySelectorAll('#messagesList > div[data-message-id]');
+        if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            const messageId = lastMessage.getAttribute('data-message-id');
+            if (messageId) {
+                this.lastMessageId = parseInt(messageId);
             }
-        }).then(function(response) {
-            if (response.ok) {
-                showNotification('{{ __("Order deleted successfully") }}', 'success');
-                setTimeout(function() {
-                    window.location.href = '{{ route("admin.orders.index") }}';
-                }, 1000);
-            } else {
-                showNotification('{{ __("Error deleting order") }}', 'error');
+        }
+    }
+
+    setupScrollDetection() {
+        const messagesList = document.getElementById('messagesList');
+        const autoScrollIndicator = document.getElementById('autoScrollIndicator');
+        
+        if (!messagesList) return;
+
+        messagesList.addEventListener('scroll', () => {
+            const scrollTop = messagesList.scrollTop;
+            const scrollHeight = messagesList.scrollHeight;
+            const clientHeight = messagesList.clientHeight;
+            
+            // تحقق إذا كان المستخدم قريب من الأسفل (ضمن 100px)
+            const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
+            
+            this.isUserScrolledUp = !isNearBottom;
+            this.autoScroll = isNearBottom;
+            
+            // إظهار/إخفاء مؤشر التمرير التلقائي
+            if (autoScrollIndicator) {
+                if (this.isUserScrolledUp) {
+                    autoScrollIndicator.classList.add('show');
+                } else {
+                    autoScrollIndicator.classList.remove('show');
+                }
             }
-        }).catch(function(error) {
-            showNotification('{{ __("Error deleting order") }}', 'error');
         });
     }
-    
-    // Show notification
-    function showNotification(message, type) {
-        if (type === undefined) {
-            type = 'info';
+
+    startPolling() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
         }
-        
-        var notification = document.createElement('div');
-        notification.className = 'alert alert-' + type;
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.zIndex = '9999';
-        notification.style.maxWidth = '300px';
-        notification.style.animation = 'slideInRight 0.3s ease-out';
-        
-        var iconClass = 'info-circle';
-        if (type === 'success') {
-            iconClass = 'check-circle';
-        } else if (type === 'error') {
-            iconClass = 'exclamation-circle';
-        } else if (type === 'warning') {
-            iconClass = 'exclamation-triangle';
-        }
-        
-        notification.innerHTML = '<i class="fas fa-' + iconClass + '"></i> ' + message;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(function() {
-            notification.style.animation = 'slideOutRight 0.3s ease-out forwards';
-            setTimeout(function() {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
+
+        if (!this.isRealTimeEnabled) return;
+
+        this.checkInterval = setInterval(() => {
+            if (this.isActive && document.hasFocus()) {
+                this.checkForNewMessages();
+            }
+        }, this.checkFrequency);
+
+        this.updateConnectionStatus(true);
     }
-    
-    // Initialize fade-in animations
-    document.addEventListener('DOMContentLoaded', function() {
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry, index) {
-                if (entry.isIntersecting) {
-                    setTimeout(function() {
-                        entry.target.classList.add('visible');
-                    }, index * 100);
-                    observer.unobserve(entry.target);
+
+    stopPolling() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+            this.checkInterval = null;
+        }
+        this.updateConnectionStatus(false);
+    }
+
+    async checkForNewMessages() {
+        try {
+            const url = `/admin/conversations/${this.conversationId}/check-new-messages?last_message_id=${this.lastMessageId}`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 }
             });
-        }, { threshold: 0.1 });
-        
-        var fadeElements = document.querySelectorAll('.fade-in');
-        fadeElements.forEach(function(el) {
-            observer.observe(el);
-        });
-    });
-    
-    // Print functionality enhancement
-    window.addEventListener('beforeprint', function() {
-        // Hide non-essential elements when printing
-        var hideElements = document.querySelectorAll('.order-actions, .btn');
-        hideElements.forEach(function(el) {
-            el.style.display = 'none';
-        });
-    });
-    
-    window.addEventListener('afterprint', function() {
-        // Show elements back after printing
-        var showElements = document.querySelectorAll('.order-actions, .btn');
-        showElements.forEach(function(el) {
-            el.style.display = '';
-        });
-    });
-    
-    // Auto-refresh order status (every 30 seconds)
-    setInterval(function() {
-        var currentStatus = '{{ $order->status }}';
-        
-        fetch('/admin/orders/{{ $order->id }}', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        }).then(function(response) {
-            return response.json();
-        }).then(function(data) {
-            if (data.status && data.status !== currentStatus) {
-                showNotification('{{ __("Order status has been updated") }}', 'info');
-                setTimeout(function() {
-                    location.reload();
-                }, 2000);
-            }
-        }).catch(function(error) {
-            // Silently fail - don't show error for auto-refresh
-        });
-    }, 30000);
-    
-    // Status form enhancement
-    document.querySelector('select[name="status"]').addEventListener('change', function() {
-        var form = this.closest('form');
-        var submitBtn = form.querySelector('button[type="submit"]');
-        
-        if (this.value && this.value !== '{{ $order->status }}') {
-            submitBtn.style.background = 'var(--warning-500)';
-            submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> {{ __("Update Status") }}';
-        } else {
-            submitBtn.style.background = 'var(--success-500)';
-            submitBtn.innerHTML = '<i class="fas fa-save"></i> {{ __("Update Status") }}';
-        }
-    });
-    
-    // Confirm status change for critical statuses
-    document.querySelector('form').addEventListener('submit', function(e) {
-        var newStatus = document.querySelector('select[name="status"]').value;
-        var currentStatus = '{{ $order->status }}';
-        
-        if (newStatus === 'cancelled' && currentStatus !== 'cancelled') {
-            e.preventDefault();
-            if (confirm('{{ __("Are you sure you want to cancel this order? This action may affect inventory and customer notifications.") }}')) {
-                this.submit();
-            }
-        } else if (newStatus === 'delivered' && currentStatus !== 'delivered') {
-            e.preventDefault();
-            if (confirm('{{ __("Are you sure you want to mark this order as delivered? This will finalize the order.") }}')) {
-                this.submit();
-            }
-        }
-    });
-</script>
 
-<style>
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.has_new_messages && data.messages.length > 0) {
+                    // عرض الرسائل الجديدة من العميل فقط (ليس من الأدمن)
+                    const customerMessages = data.messages.filter(msg => !msg.is_from_admin);
+                    if (customerMessages.length > 0) {
+                        this.displayNewMessages(customerMessages);
+                        this.showNewMessageIndicator();
+                    }
+                    
+                    // تحديث آخر معرف رسالة
+                    data.messages.forEach(msg => {
+                        if (msg.id > this.lastMessageId) {
+                            this.lastMessageId = msg.id;
+                        }
+                    });
+                }
+                this.updateConnectionStatus(true);
+            } else {
+                this.updateConnectionStatus(false);
+            }
+        } catch (error) {
+            console.error('Error checking for new messages:', error);
+            this.updateConnectionStatus(false);
         }
     }
+
+    displayNewMessages(messages) {
+        const messagesList = document.getElementById('messagesList');
+        if (!messagesList) return;
+
+        messages.forEach(message => {
+            // تحقق من عدم وجود الرسالة مسبقاً
+            const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
+            if (existingMessage) {
+                console.log('Message already exists, skipping:', message.id);
+                return;
+            }
+
+            const messageElement = this.createMessageElement(message);
+            
+            // إدراج قبل typing indicator إذا وجد
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                messagesList.insertBefore(messageElement, typingIndicator);
+            } else {
+                messagesList.appendChild(messageElement);
+            }
+            
+            // إضافة تأثير الظهور
+            setTimeout(() => {
+                messageElement.style.opacity = '1';
+                messageElement.style.transform = 'translateY(0)';
+            }, 50);
+
+            // تحديث العدادات
+            this.updateMessageCount();
+        });
+
+        // تشغيل صوت إشعار
+        this.playNotificationSound();
+        
+        // التمرير التلقائي إذا كان المستخدم لم يمرر لأعلى
+        if (this.autoScroll) {
+            setTimeout(() => {
+                this.scrollToBottom(true); // تمرير سلس
+            }, 100);
+        }
+    }
+
+    createMessageElement(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.setAttribute('data-message-id', message.id);
+        messageDiv.style.cssText = `
+            margin-bottom: var(--space-xl); display: flex; gap: var(--space-md);
+            opacity: 0; transform: translateY(20px); transition: all 0.3s ease;
+        `;
+        
+        if (message.is_from_admin) {
+            messageDiv.style.flexDirection = 'row-reverse';
+        }
+
+        // إنشاء الأفاتار
+        const avatar = document.createElement('div');
+        avatar.style.cssText = `
+            width: 45px; height: 45px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            color: white; font-weight: 600; font-size: 1rem; 
+            flex-shrink: 0; box-shadow: var(--shadow-md);
+        `;
+        
+        if (message.is_from_admin) {
+            avatar.style.background = 'linear-gradient(135deg, var(--success-500), var(--success-600))';
+            avatar.innerHTML = '<i class="fas fa-user-shield"></i>';
+        } else {
+            avatar.style.background = 'linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600))';
+            avatar.textContent = message.avatar;
+        }
+
+        // إنشاء محتوى الرسالة
+        const contentDiv = document.createElement('div');
+        contentDiv.style.cssText = 'flex: 1; max-width: 75%;';
+
+        // معلومات المرسل
+        const senderInfo = document.createElement('div');
+        senderInfo.style.cssText = `
+            font-size: 0.8rem; font-weight: 600; color: var(--admin-secondary-600); 
+            margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-sm);
+        `;
+        
+        if (message.is_from_admin) {
+            senderInfo.style.justifyContent = 'flex-end';
+        }
+
+        const senderBadge = document.createElement('span');
+        senderBadge.style.cssText = `
+            padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; 
+            text-transform: uppercase; letter-spacing: 0.5px;
+        `;
+        
+        if (message.is_from_admin) {
+            senderBadge.style.cssText += 'background: var(--success-100); color: var(--success-700);';
+            senderBadge.textContent = 'Admin';
+        } else {
+            senderBadge.style.cssText += 'background: var(--admin-primary-100); color: var(--admin-primary-700);';
+            senderBadge.textContent = message.user_name;
+        }
+
+        const timeSpan = document.createElement('span');
+        timeSpan.style.cssText = 'font-size: 0.75rem; color: var(--admin-secondary-500); display: flex; align-items: center; gap: var(--space-xs);';
+        timeSpan.innerHTML = `<i class="fas fa-clock"></i> ${message.created_at}`;
+
+        senderInfo.appendChild(senderBadge);
+        senderInfo.appendChild(timeSpan);
+
+        // فقاعة الرسالة
+        const messageBubble = document.createElement('div');
+        messageBubble.style.cssText = `
+            padding: var(--space-md) var(--space-lg); border-radius: var(--radius-xl); 
+            margin-bottom: var(--space-xs); word-wrap: break-word; line-height: 1.6; 
+            position: relative; box-shadow: var(--shadow-sm);
+        `;
+        
+        if (message.is_from_admin) {
+            messageBubble.style.cssText += `
+                background: linear-gradient(135deg, var(--success-500), var(--success-600)); 
+                color: white; border-bottom-right-radius: var(--radius-sm);
+            `;
+        } else {
+            messageBubble.style.cssText += `
+                background: white; color: var(--admin-secondary-900); 
+                border: 1px solid var(--admin-secondary-200); 
+                border-bottom-left-radius: var(--radius-sm);
+            `;
+        }
+        
+        messageBubble.textContent = message.message;
+
+        contentDiv.appendChild(senderInfo);
+        contentDiv.appendChild(messageBubble);
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(contentDiv);
+
+        return messageDiv;
+    }
+
+    async setupFormSubmission() {
+        const form = document.getElementById('messageForm');
+        const textarea = document.getElementById('messageTextarea');
+        const submitButton = document.getElementById('sendButton');
+        const sendingStatus = document.getElementById('sendingStatus');
+        
+        if (!form || !textarea || !submitButton) return;
+
+        let isSubmitting = false;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (isSubmitting) return;
+            
+            const message = textarea.value.trim();
+            if (!message) {
+                alert('Please enter a message before sending.');
+                return;
+            }
+
+            isSubmitting = true;
+            
+            // تعطيل الـ form
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            textarea.disabled = true;
+            if (sendingStatus) sendingStatus.style.display = 'inline';
+
+            try {
+                // إنشاء FormData بشكل صحيح
+                const formData = new FormData();
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                formData.append('message', message);
+                
+                console.log('Admin sending message:', message);
+                console.log('Form action:', form.action);
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    
+                    if (data.success && data.message) {
+                        // إضافة الرسالة فوراً
+                        this.displayNewMessages([data.message]);
+                        
+                        // تحديث آخر معرف رسالة
+                        this.lastMessageId = data.message.id;
+                        
+                        // مسح النص
+                        textarea.value = '';
+                        
+                        // تقليل حجم الـ textarea
+                        textarea.style.height = 'auto';
+                        
+                        // التمرير إلى أسفل (فوري للرسائل المرسلة)
+                        setTimeout(() => {
+                            this.scrollToBottom(true);
+                        }, 100);
+                    } else {
+                        throw new Error(data.error || 'Failed to send message');
+                    }
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error response:', errorData);
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('خطأ في إرسال الرسالة: ' + error.message + '. يرجى المحاولة مرة أخرى.');
+            } finally {
+                // إعادة تفعيل الـ form
+                isSubmitting = false;
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reply';
+                textarea.disabled = false;
+                textarea.focus();
+                if (sendingStatus) sendingStatus.style.display = 'none';
+            }
+        });
+    }
+
+    scrollToBottom(smooth = true) {
+        const messagesList = document.getElementById('messagesList');
+        const autoScrollIndicator = document.getElementById('autoScrollIndicator');
+        
+        if (messagesList) {
+            if (smooth) {
+                messagesList.scrollTo({
+                    top: messagesList.scrollHeight,
+                    behavior: 'smooth'
+                });
+            } else {
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+            
+            // إخفاء مؤشر التمرير
+            if (autoScrollIndicator) {
+                autoScrollIndicator.classList.remove('show');
+            }
+            
+            // تحديث حالة التمرير
+            this.isUserScrolledUp = false;
+            this.autoScroll = true;
+        }
+        this.hideNewMessageIndicator();
+    }
+
+    showNewMessageIndicator() {
+        const indicator = document.getElementById('newMessageIndicator');
+        if (indicator && this.isUserScrolledUp) {
+            indicator.classList.add('show');
+        }
+    }
+
+    hideNewMessageIndicator() {
+        const indicator = document.getElementById('newMessageIndicator');
+        if (indicator) {
+            indicator.classList.remove('show');
+        }
+    }
+
+    updateMessageCount() {
+        const messageCountElements = document.querySelectorAll('#messageCount, #sidebarMessageCount');
+        const currentCount = document.querySelectorAll('#messagesList > div[data-message-id]').length;
+        
+        messageCountElements.forEach(element => {
+            element.textContent = currentCount;
+        });
+    }
+
+    updateConnectionStatus(connected) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (statusElement) {
+            const dot = statusElement.querySelector('.connection-dot');
+            const text = statusElement.querySelector('span');
+            
+            if (connected) {
+                dot.className = 'connection-dot connected';
+                text.textContent = 'Connected';
+            } else {
+                dot.className = 'connection-dot disconnected';
+                text.textContent = 'Disconnected';
+            }
+        }
+    }
+
+    playNotificationSound() {
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCTGa2+m1bi8EJHzK7+ORSA0PUqfk7bFlHgg2jdXzzXkpBS12wuzZkT8LElyx6+2rWBULTKLh6WNHDTGLz/fbiTAKGGm/8+CK');
+            audio.volume = 0.3;
+            audio.play().catch(() => {}); // تجاهل الأخطاء
+        } catch (e) {
+            // تجاهل أخطاء الصوت
+        }
+    }
+
+    setupVisibilityChange() {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.isActive = false;
+            } else {
+                this.isActive = true;
+                // تحقق فوري عند العودة للصفحة
+                setTimeout(() => {
+                    if (this.isRealTimeEnabled) {
+                        this.checkForNewMessages();
+                    }
+                }, 500);
+            }
+        });
+
+        // إيقاف عند مغادرة الصفحة
+        window.addEventListener('beforeunload', () => {
+            this.stopPolling();
+        });
+    }
+
+    toggle() {
+        this.isRealTimeEnabled = !this.isRealTimeEnabled;
+        
+        const toggleButton = document.getElementById('realTimeToggle');
+        if (toggleButton) {
+            const span = toggleButton.querySelector('span');
+            if (this.isRealTimeEnabled) {
+                this.startPolling();
+                span.textContent = 'Disable Auto-refresh';
+                toggleButton.style.background = '';
+            } else {
+                this.stopPolling();
+                span.textContent = 'Enable Auto-refresh';
+                toggleButton.style.background = 'var(--warning-100)';
+            }
+        }
+    }
+
+    // تدمير المثيل
+    destroy() {
+        this.stopPolling();
+        this.isActive = false;
+    }
+}
+
+// ========================================
+// Helper Functions
+// ========================================
+
+function scrollToBottom(smooth = true) {
+    if (window.realTimeMessaging) {
+        window.realTimeMessaging.scrollToBottom(smooth);
+    }
+}
+
+function autoResize(textarea) {
+    if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+}
+
+function handleKeyDown(event) {
+    if (event.ctrlKey && event.key === 'Enter') {
+        event.preventDefault();
+        const form = event.target.closest('form');
+        if (form) {
+            form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+    }
+}
+
+function toggleRealTimeMessaging() {
+    if (window.realTimeMessaging) {
+        window.realTimeMessaging.toggle();
+    }
+}
+
+// ========================================
+// Auto-initialization
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin page DOM loaded, initializing...');
     
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
+    // استخراج معرف المحادثة من الـ URL
+    const pathParts = window.location.pathname.split('/');
+    const conversationId = pathParts[pathParts.length - 1];
     
-    /* Print styles */
-    @media print {
-        .order-actions,
-        .btn,
-        .sidebar,
-        .admin-header,
-        .status-section form {
-            display: none !important;
-        }
-        
-        .main-content {
-            margin-left: 0 !important;
-        }
-        
-        .order-header,
-        .order-items-section,
-        .order-summary,
-        .timeline {
-            box-shadow: none !important;
-            border: 1px solid #ddd !important;
-        }
-        
-        .order-grid {
-            grid-template-columns: 1fr !important;
-        }
-        
-        body {
-            font-size: 12px !important;
-        }
-        
-        .order-id {
-            font-size: 24px !important;
-        }
-        
-        .section-title {
-            font-size: 18px !important;
-        }
-    }
+    // التحقق من وجود صفحة المحادثة
+    const messagesList = document.getElementById('messagesList');
     
-    /* Enhanced responsive design */
-    @media (max-width: 480px) {
-        .order-header {
-            padding: var(--space-md);
-        }
-        
-        .order-id {
-            font-size: 1.5rem;
-        }
-        
-        .customer-info {
-            padding: var(--space-md);
-        }
-        
-        .summary-content {
-            padding: var(--space-md);
-        }
-        
-        .shipping-info,
-        .payment-info {
-            padding: var(--space-md);
-        }
-        
-        .btn {
-            padding: var(--space-xs) var(--space-md);
-            font-size: 0.75rem;
-        }
-        
-        .status-form {
-            gap: var(--space-sm);
-        }
-        
-        .form-select {
-            min-width: 120px;
-            font-size: 0.75rem;
-        }
-    }
+    console.log('Admin Conversation ID:', conversationId);
+    console.log('Messages list found:', !!messagesList);
     
-    /* Loading states */
-    .loading {
-        opacity: 0.6;
-        pointer-events: none;
-        position: relative;
-    }
-    
-    .loading::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 20px;
-        height: 20px;
-        margin: -10px 0 0 -10px;
-        border: 2px solid var(--admin-primary-600);
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: spin 1s ease-in-out infinite;
-    }
-    
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-    
-    /* Accessibility improvements */
-    .btn:focus,
-    .form-select:focus {
-        outline: 2px solid var(--admin-primary-500);
-        outline-offset: 2px;
-    }
-    
-    /* High contrast mode support */
-    @media (prefers-contrast: high) {
-        .status-badge {
-            border-width: 2px;
-        }
+    if (messagesList && conversationId && !isNaN(conversationId)) {
+        // إنشاء مثيل من نظام الرسائل الفورية للأدمن
+        window.realTimeMessaging = new RealTimeMessaging(conversationId, true);
         
-        .timeline-icon {
-            border: 2px solid currentColor;
-        }
-    }
-    
-    /* Reduced motion support */
-    @media (prefers-reduced-motion: reduce) {
-        .fade-in,
-        .btn,
-        .form-select,
-        .timeline-item {
-            transition: none;
-        }
+        console.log('Real-time messaging started for admin conversation:', conversationId);
         
-        .fade-in {
-            opacity: 1;
-            transform: none;
+        // التمرير إلى أسفل عند التحميل
+        setTimeout(() => {
+            scrollToBottom(false); // تمرير فوري عند التحميل
+        }, 500);
+        
+        // تركيز على حقل النص
+        const textarea = document.getElementById('messageTextarea');
+        if (textarea) {
+            textarea.focus();
         }
+    } else {
+        console.error('Failed to initialize admin real-time messaging:', {
+            messagesList: !!messagesList,
+            conversationId,
+            isValidId: !isNaN(conversationId)
+        });
     }
-</style>
+});
+</script>
 @endpush

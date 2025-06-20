@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
-@section('title', __('My Profile') . ' - ' . config('app.name'))
+@section('title', __('الملف الشخصي') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+
     .profile-hero {
         background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
         color: white;
@@ -79,6 +85,7 @@
         gap: var(--space-sm);
         font-size: 1rem;
         opacity: 0.9;
+        flex-direction: row-reverse;
     }
     
     .profile-stats {
@@ -155,6 +162,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .quick-actions {
@@ -174,6 +182,7 @@
         text-decoration: none;
         font-weight: 500;
         transition: all var(--transition-fast);
+        flex-direction: row-reverse;
     }
     
     .action-btn:hover {
@@ -225,12 +234,13 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .info-value {
         color: var(--on-surface);
         font-weight: 500;
-        text-align: right;
+        text-align: left;
         line-height: 1.4;
     }
     
@@ -331,6 +341,7 @@
         gap: var(--space-sm);
         font-size: 0.875rem;
         font-weight: 500;
+        flex-direction: row-reverse;
     }
     
     .status-indicator {
@@ -381,7 +392,8 @@
     }
     
     .preference-control {
-        margin-left: var(--space-md);
+        margin-right: var(--space-md);
+        margin-left: 0;
     }
     
     .toggle-switch {
@@ -402,7 +414,8 @@
         content: '';
         position: absolute;
         top: 2px;
-        left: 2px;
+        right: 2px;
+        left: auto;
         width: 20px;
         height: 20px;
         background: white;
@@ -412,7 +425,7 @@
     }
     
     .toggle-switch.active::before {
-        transform: translateX(26px);
+        transform: translateX(-26px);
     }
     
     .empty-state {
@@ -462,7 +475,7 @@
         }
         
         .info-value {
-            text-align: left;
+            text-align: right;
         }
         
         .security-item,
@@ -473,7 +486,7 @@
         }
         
         .preference-control {
-            margin-left: 0;
+            margin-right: 0;
         }
     }
 </style>
@@ -510,22 +523,22 @@
                     
                     <div class="meta-item">
                         <i class="fas fa-calendar"></i>
-                        {{ __('Member since') }} {{ $user->created_at->format('M Y') }}
+                        {{ __('عضو منذ') }} {{ $user->created_at->format('M Y') }}
                     </div>
                 </div>
                 
                 <div class="profile-stats">
                     <div class="stat-item">
                         <span class="stat-number">{{ $user->total_orders }}</span>
-                        <div class="stat-label">{{ __('Orders') }}</div>
+                        <div class="stat-label">{{ __('الطلبات') }}</div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-number">${{ number_format($user->total_spent, 0) }}</span>
-                        <div class="stat-label">{{ __('Total Spent') }}</div>
+                        <div class="stat-label">{{ __('إجمالي الإنفاق') }}</div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-number">{{ $user->wishlist_items_count }}</span>
-                        <div class="stat-label">{{ __('Wishlist') }}</div>
+                        <div class="stat-label">{{ __('قائمة الرغبات') }}</div>
                     </div>
                 </div>
             </div>
@@ -543,38 +556,38 @@
                 <div class="section-card fade-in">
                     <h2 class="section-title">
                         <i class="fas fa-bolt"></i>
-                        {{ __('Quick Actions') }}
+                        {{ __('إجراءات سريعة') }}
                     </h2>
                     
                     <div class="quick-actions">
                         <a href="{{ route('user.profile.edit') }}" class="action-btn primary">
                             <i class="fas fa-edit"></i>
-                            {{ __('Edit Profile') }}
+                            {{ __('تعديل الملف الشخصي') }}
                         </a>
                         
                         <a href="{{ route('user.profile.change-password') }}" class="action-btn">
                             <i class="fas fa-key"></i>
-                            {{ __('Change Password') }}
+                            {{ __('تغيير كلمة المرور') }}
                         </a>
                         
                         <a href="{{ route('orders.index') }}" class="action-btn">
                             <i class="fas fa-shopping-bag"></i>
-                            {{ __('View Orders') }}
+                            {{ __('عرض الطلبات') }}
                         </a>
                         
                         <a href="{{ route('wishlist.index') }}" class="action-btn">
                             <i class="fas fa-heart"></i>
-                            {{ __('My Wishlist') }}
+                            {{ __('قائمة رغباتي') }}
                         </a>
                         
                         <a href="{{ route('user.conversations.index') }}" class="action-btn">
                             <i class="fas fa-comments"></i>
-                            {{ __('Messages') }}
+                            {{ __('الرسائل') }}
                         </a>
                         
                         <a href="{{ route('coupons.index') }}" class="action-btn">
                             <i class="fas fa-ticket-alt"></i>
-                            {{ __('My Coupons') }}
+                            {{ __('كوبوناتي') }}
                         </a>
                     </div>
                 </div>
@@ -583,39 +596,39 @@
                 <div class="section-card account-security fade-in">
                     <h2 class="section-title">
                         <i class="fas fa-shield-alt"></i>
-                        {{ __('Account Security') }}
+                        {{ __('أمان الحساب') }}
                     </h2>
                     
                     <div class="security-item">
                         <div class="security-info">
-                            <div class="security-title">{{ __('Email Verification') }}</div>
-                            <div class="security-description">{{ __('Your email address is verified') }}</div>
+                            <div class="security-title">{{ __('تأكيد البريد الإلكتروني') }}</div>
+                            <div class="security-description">{{ __('تم التحقق من عنوان بريدك الإلكتروني') }}</div>
                         </div>
                         <div class="security-status status-secure">
                             <span class="status-indicator status-secure"></span>
-                            {{ __('Verified') }}
+                            {{ __('تم التحقق') }}
                         </div>
                     </div>
                     
                     <div class="security-item">
                         <div class="security-info">
-                            <div class="security-title">{{ __('Password Security') }}</div>
-                            <div class="security-description">{{ __('Last changed') }} {{ $user->updated_at->diffForHumans() }}</div>
+                            <div class="security-title">{{ __('أمان كلمة المرور') }}</div>
+                            <div class="security-description">{{ __('آخر تغيير') }} {{ $user->updated_at->diffForHumans() }}</div>
                         </div>
                         <div class="security-status status-secure">
                             <span class="status-indicator status-secure"></span>
-                            {{ __('Strong') }}
+                            {{ __('قوية') }}
                         </div>
                     </div>
                     
                     <div class="security-item">
                         <div class="security-info">
-                            <div class="security-title">{{ __('Two-Factor Authentication') }}</div>
-                            <div class="security-description">{{ __('Add an extra layer of security') }}</div>
+                            <div class="security-title">{{ __('المصادقة الثنائية') }}</div>
+                            <div class="security-description">{{ __('أضف طبقة أمان إضافية') }}</div>
                         </div>
                         <div class="security-status status-warning">
                             <span class="status-indicator status-warning"></span>
-                            {{ __('Not Enabled') }}
+                            {{ __('غير مفعلة') }}
                         </div>
                     </div>
                 </div>
@@ -627,14 +640,14 @@
                 <div class="section-card personal-info fade-in">
                     <h2 class="section-title">
                         <i class="fas fa-user"></i>
-                        {{ __('Personal Information') }}
+                        {{ __('المعلومات الشخصية') }}
                     </h2>
                     
                     <div class="info-grid">
                         <div class="info-row">
                             <span class="info-label">
                                 <i class="fas fa-user"></i>
-                                {{ __('Full Name') }}
+                                {{ __('الاسم الكامل') }}
                             </span>
                             <span class="info-value">{{ $user->name }}</span>
                         </div>
@@ -642,7 +655,7 @@
                         <div class="info-row">
                             <span class="info-label">
                                 <i class="fas fa-envelope"></i>
-                                {{ __('Email Address') }}
+                                {{ __('البريد الإلكتروني') }}
                             </span>
                             <span class="info-value">{{ $user->email }}</span>
                         </div>
@@ -650,27 +663,27 @@
                         <div class="info-row">
                             <span class="info-label">
                                 <i class="fas fa-phone"></i>
-                                {{ __('Phone Number') }}
+                                {{ __('رقم الهاتف') }}
                             </span>
                             <span class="info-value {{ !$user->phone ? 'empty' : '' }}">
-                                {{ $user->phone ?: __('Not provided') }}
+                                {{ $user->phone ?: __('غير متوفر') }}
                             </span>
                         </div>
                         
                         <div class="info-row">
                             <span class="info-label">
                                 <i class="fas fa-map-marker-alt"></i>
-                                {{ __('Address') }}
+                                {{ __('العنوان') }}
                             </span>
                             <span class="info-value {{ !$user->address ? 'empty' : '' }}">
-                                {{ $user->address ?: __('Not provided') }}
+                                {{ $user->address ?: __('غير متوفر') }}
                             </span>
                         </div>
                         
                         <div class="info-row">
                             <span class="info-label">
                                 <i class="fas fa-calendar-plus"></i>
-                                {{ __('Member Since') }}
+                                {{ __('عضو منذ') }}
                             </span>
                             <span class="info-value">{{ $user->created_at->format('M d, Y') }}</span>
                         </div>
@@ -678,7 +691,7 @@
                         <div class="info-row">
                             <span class="info-label">
                                 <i class="fas fa-clock"></i>
-                                {{ __('Last Updated') }}
+                                {{ __('آخر تحديث') }}
                             </span>
                             <span class="info-value">{{ $user->updated_at->diffForHumans() }}</span>
                         </div>
@@ -689,7 +702,7 @@
                 <div class="section-card recent-activity fade-in">
                     <h2 class="section-title">
                         <i class="fas fa-history"></i>
-                        {{ __('Recent Activity') }}
+                        {{ __('النشاط الحديث') }}
                     </h2>
                     
                     @if($user->orders->count() > 0)
@@ -702,10 +715,10 @@
                                     
                                     <div class="activity-content">
                                         <div class="activity-title">
-                                            {{ __('Order') }} #{{ $order->id }} - {{ ucfirst($order->status) }}
+                                            {{ __('طلب') }} #{{ $order->id }} - {{ ucfirst($order->status) }}
                                         </div>
                                         <div class="activity-meta">
-                                            {{ $order->orderItems->sum('quantity') }} {{ __('items') }} • ${{ number_format($order->total_amount, 2) }}
+                                            {{ $order->orderItems->sum('quantity') }} {{ __('عناصر') }} • ${{ number_format($order->total_amount, 2) }}
                                         </div>
                                     </div>
                                     
@@ -720,7 +733,7 @@
                             <div class="empty-icon">
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
-                            <div class="empty-text">{{ __('No recent activity found') }}</div>
+                            <div class="empty-text">{{ __('لا يوجد نشاط حديث') }}</div>
                         </div>
                     @endif
                 </div>
@@ -729,13 +742,13 @@
                 <div class="section-card preferences fade-in">
                     <h2 class="section-title">
                         <i class="fas fa-cog"></i>
-                        {{ __('Preferences') }}
+                        {{ __('التفضيلات') }}
                     </h2>
                     
                     <div class="preference-item">
                         <div class="preference-info">
-                            <div class="preference-title">{{ __('Email Notifications') }}</div>
-                            <div class="preference-description">{{ __('Receive email updates about your orders and promotions') }}</div>
+                            <div class="preference-title">{{ __('إشعارات البريد الإلكتروني') }}</div>
+                            <div class="preference-description">{{ __('تلقي تحديثات حول طلباتك والعروض الترويجية') }}</div>
                         </div>
                         <div class="preference-control">
                             <div class="toggle-switch active" onclick="togglePreference(this)"></div>
@@ -744,8 +757,8 @@
                     
                     <div class="preference-item">
                         <div class="preference-info">
-                            <div class="preference-title">{{ __('SMS Notifications') }}</div>
-                            <div class="preference-description">{{ __('Get SMS updates for order status and delivery') }}</div>
+                            <div class="preference-title">{{ __('إشعارات الرسائل النصية') }}</div>
+                            <div class="preference-description">{{ __('الحصول على تحديثات لحالة الطلب والتسليم') }}</div>
                         </div>
                         <div class="preference-control">
                             <div class="toggle-switch" onclick="togglePreference(this)"></div>
@@ -754,21 +767,14 @@
                     
                     <div class="preference-item">
                         <div class="preference-info">
-                            <div class="preference-title">{{ __('Marketing Communications') }}</div>
-                            <div class="preference-description">{{ __('Receive promotional offers and new product announcements') }}</div>
+                            <div class="preference-title">{{ __('الاتصالات التسويقية') }}</div>
+                            <div class="preference-description">{{ __('تلقي العروض الترويجية وإعلانات المنتجات الجديدة') }}</div>
                         </div>
                         <div class="preference-control">
                             <div class="toggle-switch" onclick="togglePreference(this)"></div>
                         </div>
                     </div>
                     
-                    <div class="preference-item">
-                        <div class="preference-info">
-                            <div class="preference-title">{{ __('Dark Mode') }}</div>
-                            <div class="preference-description">{{ __('Switch to dark theme for better viewing experience') }}</div>
-                        </div>
-                        <div class="preference-control">
-                            <div class="toggle-switch" onclick="togglePreference(this)"></div>
                         </div>
                     </div>
                 </div>
@@ -824,7 +830,7 @@
         });
         */
         
-        showNotification(`${preferenceTitle} ${isActive ? 'enabled' : 'disabled'}`, 'success');
+        showNotification(`${preferenceTitle} ${isActive ? 'مفعل' : 'غير مفعل'}`, 'success');
     }
     
     // Show notification
@@ -834,7 +840,8 @@
         notification.style.cssText = `
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
+            right: auto;
             z-index: 9999;
             max-width: 300px;
             box-shadow: var(--shadow-xl);
@@ -888,7 +895,7 @@
 <style>
     @keyframes slideIn {
         from {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
         to {
@@ -899,7 +906,7 @@
     
     @keyframes slideOut {
         to {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
     }

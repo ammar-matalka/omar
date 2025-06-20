@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ config('app.direction', 'ltr') }}">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>@yield('title', __('Admin Dashboard')) - {{ config('app.name') }}</title>
+    <title>@yield('title', 'لوحة التحكم') - {{ config('app.name') }}</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -47,7 +47,7 @@
             --info-500: #3b82f6;
             
             /* Typography */
-            --font-family-sans: 'Inter', 'Cairo', system-ui, -apple-system, sans-serif;
+            --font-family-sans: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             
             /* Spacing */
             --space-xs: 0.25rem;
@@ -80,157 +80,190 @@
             --z-modal: 1050;
             
             /* Admin Layout */
-            --sidebar-width: 280px;
-            --header-height: 70px;
+            --sidebar-width: 300px;
+            --header-height: 80px;
         }
         
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            direction: rtl;
+            text-align: right;
         }
         
         body {
             font-family: var(--font-family-sans);
-            background-color: var(--admin-secondary-50);
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             color: var(--admin-secondary-900);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            direction: rtl;
         }
         
         .admin-layout {
             display: flex;
             min-height: 100vh;
+            direction: rtl;
         }
         
-        /* Sidebar */
+        /* Sidebar - تحويل لليمين */
         .sidebar {
             width: var(--sidebar-width);
             background: linear-gradient(180deg, var(--admin-secondary-800), var(--admin-secondary-900));
             color: white;
             position: fixed;
             top: 0;
-            left: 0;
+            right: 0; /* تحويل من left إلى right */
             height: 100vh;
             z-index: var(--z-sidebar);
             overflow-y: auto;
             transition: transform var(--transition-normal);
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1); /* تحويل اتجاه الظل */
         }
         
         .sidebar.collapsed {
-            transform: translateX(-100%);
+            transform: translateX(100%); /* تحويل اتجاه الحركة */
         }
         
         .sidebar-header {
-            padding: var(--space-lg);
+            padding: var(--space-xl) var(--space-lg);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             gap: var(--space-md);
+            background: linear-gradient(135deg, var(--admin-secondary-800), var(--admin-secondary-700));
         }
         
         .sidebar-logo {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 900;
             background: linear-gradient(135deg, #60a5fa, #a78bfa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-align: center;
+            width: 100%;
         }
         
         .sidebar-nav {
-            padding: var(--space-lg) 0;
+            padding: var(--space-xl) 0;
         }
         
         .nav-section {
-            margin-bottom: var(--space-xl);
+            margin-bottom: var(--space-2xl);
         }
         
         .nav-section-title {
             padding: 0 var(--space-lg);
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--admin-secondary-400);
-            margin-bottom: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            position: relative;
+        }
+        
+        .nav-section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            right: var(--space-lg);
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--admin-primary-500), var(--admin-primary-600));
         }
         
         .nav-item {
-            margin-bottom: var(--space-xs);
+            margin-bottom: var(--space-sm);
         }
         
         .nav-link {
             display: flex;
             align-items: center;
-            gap: var(--space-md);
-            padding: var(--space-md) var(--space-lg);
+            gap: var(--space-lg);
+            padding: var(--space-lg) var(--space-xl);
             color: var(--admin-secondary-300);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 0.95rem;
             transition: all var(--transition-fast);
             position: relative;
+            border-radius: 0 50px 50px 0; /* شكل منحني من اليسار */
+            margin-left: var(--space-lg); /* مسافة من اليسار */
         }
         
         .nav-link:hover {
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            transform: translateX(4px);
+            transform: translateX(-8px); /* تحريك لليسار عند الhover */
+            padding-right: calc(var(--space-xl) + 8px);
         }
         
         .nav-link.active {
             background: linear-gradient(90deg, var(--admin-primary-600), var(--admin-primary-500));
             color: white;
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-lg);
+            transform: translateX(-8px);
+            padding-right: calc(var(--space-xl) + 8px);
         }
         
         .nav-link.active::before {
             content: '';
             position: absolute;
-            left: 0;
+            right: 0;
             top: 0;
             bottom: 0;
             width: 4px;
             background: white;
+            border-radius: 0 2px 2px 0;
         }
         
         .nav-icon {
-            width: 20px;
+            width: 24px;
+            height: 24px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .nav-badge {
-            background: var(--error-500);
+            background: linear-gradient(135deg, var(--error-500), #dc2626);
             color: white;
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-left: auto;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 50px;
+            margin-right: auto; /* تحويل من margin-left */
             min-width: 20px;
             text-align: center;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
         }
         
-        /* Main Content */
+        /* Main Content - تعديل المسافات */
         .main-content {
             flex: 1;
-            margin-left: var(--sidebar-width);
+            margin-right: var(--sidebar-width); /* تحويل من margin-left */
+            margin-left: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            transition: margin-left var(--transition-normal);
+            transition: margin-right var(--transition-normal); /* تحويل الانتقال */
         }
         
         .main-content.expanded {
-            margin-left: 0;
+            margin-right: 0; /* تحويل من margin-left */
         }
         
         /* Header */
         .admin-header {
             background: white;
             border-bottom: 1px solid var(--admin-secondary-200);
-            padding: 0 var(--space-xl);
+            padding: 0 var(--space-2xl);
             height: var(--header-height);
             display: flex;
             align-items: center;
@@ -238,36 +271,50 @@
             position: sticky;
             top: 0;
             z-index: var(--z-header);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(10px);
         }
         
         .header-left {
             display: flex;
             align-items: center;
-            gap: var(--space-lg);
+            gap: var(--space-xl);
+            order: 2; /* تحويل ترتيب العناصر */
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xl);
+            order: 1; /* تحويل ترتيب العناصر */
         }
         
         .sidebar-toggle {
             display: none;
-            background: none;
-            border: none;
+            background: linear-gradient(135deg, var(--admin-secondary-100), var(--admin-secondary-50));
+            border: 2px solid var(--admin-secondary-200);
             font-size: 1.25rem;
             color: var(--admin-secondary-600);
             cursor: pointer;
-            padding: var(--space-sm);
-            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-lg);
             transition: all var(--transition-fast);
         }
         
         .sidebar-toggle:hover {
-            background: var(--admin-secondary-100);
-            color: var(--admin-secondary-800);
+            background: linear-gradient(135deg, var(--admin-primary-50), var(--admin-primary-100));
+            border-color: var(--admin-primary-300);
+            color: var(--admin-primary-700);
+            transform: scale(1.05);
         }
         
         .page-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--admin-secondary-900);
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--admin-secondary-900), var(--admin-secondary-700));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .breadcrumb {
@@ -275,7 +322,9 @@
             align-items: center;
             gap: var(--space-sm);
             color: var(--admin-secondary-500);
-            font-size: 0.875rem;
+            font-size: 0.9rem;
+            margin-top: var(--space-xs);
+            font-weight: 500;
         }
         
         .breadcrumb-item {
@@ -287,17 +336,18 @@
         .breadcrumb-link {
             color: var(--admin-primary-600);
             text-decoration: none;
-            transition: color var(--transition-fast);
+            transition: all var(--transition-fast);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-sm);
         }
         
         .breadcrumb-link:hover {
             color: var(--admin-primary-700);
+            background: var(--admin-primary-50);
         }
         
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: var(--space-lg);
+        .breadcrumb-item i {
+            transform: scaleX(-1); /* عكس اتجاه الأسهم */
         }
         
         .header-notifications {
@@ -305,84 +355,108 @@
         }
         
         .notification-btn {
-            background: none;
-            border: none;
+            background: linear-gradient(135deg, var(--admin-secondary-100), var(--admin-secondary-50));
+            border: 2px solid var(--admin-secondary-200);
             font-size: 1.25rem;
             color: var(--admin-secondary-600);
             cursor: pointer;
-            padding: var(--space-sm);
-            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-lg);
             transition: all var(--transition-fast);
             position: relative;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .notification-btn:hover {
-            background: var(--admin-secondary-100);
-            color: var(--admin-secondary-800);
+            background: linear-gradient(135deg, var(--admin-primary-50), var(--admin-primary-100));
+            border-color: var(--admin-primary-300);
+            color: var(--admin-primary-700);
+            transform: scale(1.05);
         }
         
         .notification-badge {
             position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--error-500);
+            top: -8px;
+            left: -8px; /* تحويل من right */
+            background: linear-gradient(135deg, var(--error-500), #dc2626);
             color: white;
-            font-size: 0.625rem;
-            padding: 2px 4px;
-            border-radius: 8px;
-            min-width: 16px;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 50px;
+            min-width: 20px;
             text-align: center;
-            transform: translate(25%, -25%);
+            font-weight: 700;
+            transform: scale(1);
+            animation: pulse 2s infinite;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
         
         .user-menu {
             display: flex;
             align-items: center;
-            gap: var(--space-md);
-            padding: var(--space-sm) var(--space-md);
-            border-radius: var(--radius-lg);
+            gap: var(--space-lg);
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-xl);
             cursor: pointer;
             transition: all var(--transition-fast);
             position: relative;
+            border: 2px solid var(--admin-secondary-200);
+            background: linear-gradient(135deg, white, var(--admin-secondary-50));
         }
         
         .user-menu:hover {
-            background: var(--admin-secondary-100);
+            background: linear-gradient(135deg, var(--admin-primary-50), var(--admin-primary-100));
+            border-color: var(--admin-primary-300);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
         
         .user-avatar {
-            width: 36px;
-            height: 36px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 600;
-            font-size: 0.875rem;
+            font-weight: 800;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+            border: 3px solid white;
         }
         
         .user-info {
             display: flex;
             flex-direction: column;
+            gap: 2px;
         }
         
         .user-name {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--admin-secondary-900);
-            font-size: 0.875rem;
+            font-size: 0.95rem;
         }
         
         .user-role {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--admin-secondary-500);
+            font-weight: 500;
         }
         
         /* Content Area */
         .content-area {
             flex: 1;
-            padding: var(--space-xl);
+            padding: var(--space-2xl);
             overflow-x: hidden;
         }
         
@@ -390,29 +464,35 @@
         .card {
             background: white;
             border: 1px solid var(--admin-secondary-200);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
             overflow: hidden;
+            transition: all var(--transition-fast);
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
         }
         
         .card-header {
-            padding: var(--space-lg);
+            padding: var(--space-xl);
             border-bottom: 1px solid var(--admin-secondary-200);
-            background: var(--admin-secondary-50);
+            background: linear-gradient(135deg, var(--admin-secondary-50), var(--admin-secondary-100));
         }
         
         .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            font-weight: 700;
             color: var(--admin-secondary-900);
             margin: 0;
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
+            gap: var(--space-md);
         }
         
         .card-body {
-            padding: var(--space-lg);
+            padding: var(--space-xl);
         }
         
         .btn {
@@ -420,164 +500,174 @@
             align-items: center;
             justify-content: center;
             gap: var(--space-sm);
-            padding: var(--space-sm) var(--space-lg);
-            border: 1px solid transparent;
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            font-weight: 500;
+            padding: var(--space-md) var(--space-xl);
+            border: 2px solid transparent;
+            border-radius: var(--radius-lg);
+            font-size: 0.9rem;
+            font-weight: 600;
             text-decoration: none;
             cursor: pointer;
             transition: all var(--transition-fast);
             white-space: nowrap;
+            font-family: var(--font-family-sans);
         }
         
         .btn:focus {
-            outline: 2px solid var(--admin-primary-500);
+            outline: 3px solid rgba(59, 130, 246, 0.3);
             outline-offset: 2px;
         }
         
         .btn-primary {
-            background: var(--admin-primary-600);
+            background: linear-gradient(135deg, var(--admin-primary-600), var(--admin-primary-700));
             color: white;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
         }
         
         .btn-primary:hover {
-            background: var(--admin-primary-700);
-            box-shadow: var(--shadow-md);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, var(--admin-primary-700), var(--admin-primary-800));
+            box-shadow: 0 8px 25px 0 rgba(59, 130, 246, 0.6);
+            transform: translateY(-2px);
         }
         
         .btn-secondary {
             background: white;
             color: var(--admin-secondary-700);
             border-color: var(--admin-secondary-300);
+            box-shadow: var(--shadow-sm);
         }
         
         .btn-secondary:hover {
             background: var(--admin-secondary-50);
             border-color: var(--admin-secondary-400);
+            transform: translateY(-1px);
         }
         
         .btn-success {
-            background: var(--success-500);
+            background: linear-gradient(135deg, var(--success-500), #059669);
             color: white;
+            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
         }
         
         .btn-success:hover {
-            background: #059669;
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
         }
         
         .btn-warning {
-            background: var(--warning-500);
+            background: linear-gradient(135deg, var(--warning-500), #d97706);
             color: white;
+            box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.39);
         }
         
         .btn-warning:hover {
-            background: #d97706;
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-2px);
         }
         
         .btn-danger {
-            background: var(--error-500);
+            background: linear-gradient(135deg, var(--error-500), #dc2626);
             color: white;
+            box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
         }
         
         .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
         }
         
         .btn-sm {
-            padding: var(--space-xs) var(--space-md);
-            font-size: 0.75rem;
+            padding: var(--space-sm) var(--space-lg);
+            font-size: 0.8rem;
         }
         
         .btn-lg {
-            padding: var(--space-md) var(--space-xl);
-            font-size: 1rem;
+            padding: var(--space-lg) var(--space-2xl);
+            font-size: 1.1rem;
         }
         
         .form-group {
-            margin-bottom: var(--space-lg);
+            margin-bottom: var(--space-xl);
         }
         
         .form-label {
             display: block;
-            margin-bottom: var(--space-sm);
-            font-weight: 500;
+            margin-bottom: var(--space-md);
+            font-weight: 600;
             color: var(--admin-secondary-700);
-            font-size: 0.875rem;
+            font-size: 0.95rem;
         }
         
         .form-input {
             width: 100%;
-            padding: var(--space-sm) var(--space-md);
-            border: 1px solid var(--admin-secondary-300);
-            border-radius: var(--radius-md);
+            padding: var(--space-md) var(--space-lg);
+            border: 2px solid var(--admin-secondary-300);
+            border-radius: var(--radius-lg);
             background: white;
             color: var(--admin-secondary-900);
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             transition: all var(--transition-fast);
+            font-family: var(--font-family-sans);
         }
         
         .form-input:focus {
             outline: none;
             border-color: var(--admin-primary-500);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
         }
         
         .alert {
-            padding: var(--space-md);
-            border-radius: var(--radius-md);
-            border: 1px solid;
-            margin-bottom: var(--space-lg);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            border: 2px solid;
+            margin-bottom: var(--space-xl);
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
+            gap: var(--space-md);
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
         }
         
         .alert-success {
-            background: #dcfce7;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
             color: #166534;
-            border-color: #bbf7d0;
+            border-color: #22c55e;
         }
         
         .alert-error {
-            background: #fef2f2;
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
             color: #991b1b;
-            border-color: #fecaca;
+            border-color: #ef4444;
         }
         
         .alert-warning {
-            background: #fffbeb;
+            background: linear-gradient(135deg, #fffbeb, #fde68a);
             color: #92400e;
-            border-color: #fde68a;
+            border-color: #f59e0b;
         }
         
         .alert-info {
-            background: #eff6ff;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
             color: #1e40af;
-            border-color: #bfdbfe;
+            border-color: #3b82f6;
         }
         
         .table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
         }
         
         .table th,
         .table td {
-            padding: var(--space-md);
-            text-align: left;
+            padding: var(--space-lg);
+            text-align: right; /* تحويل محاذاة النص */
             border-bottom: 1px solid var(--admin-secondary-200);
         }
         
         .table th {
-            background: var(--admin-secondary-50);
-            font-weight: 600;
+            background: linear-gradient(135deg, var(--admin-secondary-50), var(--admin-secondary-100));
+            font-weight: 700;
             color: var(--admin-secondary-700);
         }
         
@@ -588,31 +678,31 @@
         .badge {
             display: inline-flex;
             align-items: center;
-            padding: var(--space-xs) var(--space-sm);
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 500;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
         .badge-success {
-            background: #dcfce7;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
             color: #166534;
         }
         
         .badge-warning {
-            background: #fffbeb;
+            background: linear-gradient(135deg, #fffbeb, #fde68a);
             color: #92400e;
         }
         
         .badge-danger {
-            background: #fef2f2;
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
             color: #991b1b;
         }
         
         .badge-info {
-            background: #eff6ff;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
             color: #1e40af;
         }
         
@@ -624,7 +714,7 @@
         /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
-                transform: translateX(-100%);
+                transform: translateX(100%); /* تحويل الاتجاه */
             }
             
             .sidebar.open {
@@ -632,7 +722,7 @@
             }
             
             .main-content {
-                margin-left: 0;
+                margin-right: 0; /* تحويل من margin-left */
             }
             
             .sidebar-toggle {
@@ -640,7 +730,7 @@
             }
             
             .content-area {
-                padding: var(--space-md);
+                padding: var(--space-lg);
             }
             
             .user-info {
@@ -648,15 +738,19 @@
             }
             
             .page-title {
-                font-size: 1.25rem;
+                font-size: 1.5rem;
+            }
+            
+            .admin-header {
+                padding: 0 var(--space-lg);
             }
         }
         
         /* Animation for fade-in elements */
         .fade-in {
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s ease-out;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
         }
         
         .fade-in.visible {
@@ -672,17 +766,18 @@
         .dropdown-menu {
             position: absolute;
             top: 100%;
-            right: 0;
+            left: 0; /* تحويل من right */
             background: white;
-            border: 1px solid var(--admin-secondary-200);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            min-width: 200px;
+            border: 2px solid var(--admin-secondary-200);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            min-width: 220px;
             z-index: var(--z-dropdown);
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
-            transition: all var(--transition-fast);
+            transition: all var(--transition-normal);
+            backdrop-filter: blur(10px);
         }
         
         .dropdown.open .dropdown-menu {
@@ -694,22 +789,71 @@
         .dropdown-item {
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
-            padding: var(--space-md);
+            gap: var(--space-md);
+            padding: var(--space-lg);
             color: var(--admin-secondary-700);
             text-decoration: none;
-            font-size: 0.875rem;
-            transition: background-color var(--transition-fast);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: right;
+            cursor: pointer;
         }
         
         .dropdown-item:hover {
-            background: var(--admin-secondary-50);
+            background: linear-gradient(135deg, var(--admin-primary-50), var(--admin-primary-100));
+            color: var(--admin-primary-700);
+            transform: translateX(-4px);
+            padding-right: calc(var(--space-lg) + 4px);
         }
         
         .dropdown-divider {
-            height: 1px;
-            background: var(--admin-secondary-200);
-            margin: var(--space-sm) 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--admin-secondary-200), transparent);
+            margin: var(--space-sm) var(--space-md);
+        }
+        
+        /* Icons RTL adjustments */
+        .fas {
+            margin-left: var(--space-sm);
+            margin-right: 0;
+        }
+        
+        .nav-link .fas {
+            margin-left: 0;
+            margin-right: var(--space-lg);
+        }
+        
+        .card-title .fas {
+            margin-left: 0;
+            margin-right: var(--space-md);
+        }
+        
+        .btn .fas {
+            margin-left: 0;
+            margin-right: var(--space-sm);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--admin-secondary-100);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--admin-primary-600), var(--admin-primary-700));
         }
     </style>
     
@@ -720,7 +864,7 @@
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo">{{ config('app.name') }}</div>
+                <div class="sidebar-logo">{{ config('app.name', 'لوحة التحكم') }}</div>
             </div>
             
             <div class="sidebar-nav">
@@ -729,57 +873,57 @@
                     <div class="nav-item">
                         <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chart-line"></i>
-                            {{ __('Dashboard') }}
+                            لوحة التحكم
                         </a>
                     </div>
                 </div>
                 
                 <!-- Catalog Management -->
                 <div class="nav-section">
-                    <div class="nav-section-title">{{ __('Catalog') }}</div>
+                    <div class="nav-section-title">إدارة المنتجات</div>
                     
                     <div class="nav-item">
                         <a href="{{ route('admin.categories.index') }}" class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-tags"></i>
-                            {{ __('Categories') }}
+                            التصنيفات
                         </a>
                     </div>
                     
                     <div class="nav-item">
                         <a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-box"></i>
-                            {{ __('Products') }}
+                            المنتجات
                         </a>
                     </div>
                 </div>
                 
                 <!-- Order Management -->
                 <div class="nav-section">
-                    <div class="nav-section-title">{{ __('Orders') }}</div>
+                    <div class="nav-section-title">إدارة الطلبات</div>
                     
                     <div class="nav-item">
                         <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-shopping-cart"></i>
-                            {{ __('Orders') }}
+                            الطلبات
                         </a>
                     </div>
                 </div>
                 
                 <!-- Customer Management -->
                 <div class="nav-section">
-                    <div class="nav-section-title">{{ __('Customers') }}</div>
+                    <div class="nav-section-title">إدارة العملاء</div>
                     
                     <div class="nav-item">
                         <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-users"></i>
-                            {{ __('Users') }}
+                            المستخدمين
                         </a>
                     </div>
                     
                     <div class="nav-item">
                         <a href="{{ route('admin.conversations.index') }}" class="nav-link {{ request()->routeIs('admin.conversations.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-comments"></i>
-                            {{ __('Conversations') }}
+                            المحادثات
                             @if(isset($unreadConversationsCount) && $unreadConversationsCount > 0)
                                 <span class="nav-badge">{{ $unreadConversationsCount }}</span>
                             @endif
@@ -789,7 +933,7 @@
                     <div class="nav-item">
                         <a href="{{ route('admin.testimonials.index') }}" class="nav-link {{ request()->routeIs('admin.testimonials.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-star"></i>
-                            {{ __('Testimonials') }}
+                            الشهادات
                             @if(isset($pendingTestimonialsCount) && $pendingTestimonialsCount > 0)
                                 <span class="nav-badge">{{ $pendingTestimonialsCount }}</span>
                             @endif
@@ -799,12 +943,12 @@
                 
                 <!-- Marketing -->
                 <div class="nav-section">
-                    <div class="nav-section-title">{{ __('Marketing') }}</div>
+                    <div class="nav-section-title">التسويق</div>
                     
                     <div class="nav-item">
                         <a href="{{ route('admin.coupons.index') }}" class="nav-link {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-ticket-alt"></i>
-                            {{ __('Coupons') }}
+                            كوبونات الخصم
                         </a>
                     </div>
                 </div>
@@ -815,21 +959,6 @@
         <div class="main-content" id="mainContent">
             <!-- Header -->
             <header class="admin-header">
-                <div class="header-left">
-                    <button class="sidebar-toggle" id="sidebarToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    
-                    <div>
-                        <h1 class="page-title">@yield('page-title', __('Dashboard'))</h1>
-                        @hasSection('breadcrumb')
-                            <nav class="breadcrumb">
-                                @yield('breadcrumb')
-                            </nav>
-                        @endif
-                    </div>
-                </div>
-                
                 <div class="header-right">
                     <!-- Notifications -->
                     <div class="header-notifications">
@@ -851,34 +980,49 @@
                             </div>
                             <div class="user-info">
                                 <div class="user-name">{{ Auth::user()->name }}</div>
-                                <div class="user-role">{{ __('Administrator') }}</div>
+                                <div class="user-role">مدير النظام</div>
                             </div>
-                            <i class="fas fa-chevron-down" style="margin-left: var(--space-sm); color: var(--admin-secondary-500);"></i>
+                            <i class="fas fa-chevron-down" style="margin-right: var(--space-sm); color: var(--admin-secondary-500);"></i>
                         </div>
                         
                         <div class="dropdown-menu">
                             <a href="{{ route('admin.profile.show') }}" class="dropdown-item">
                                 <i class="fas fa-user"></i>
-                                {{ __('Profile') }}
+                                الملف الشخصي
                             </a>
                             <a href="{{ route('admin.profile.change-password') }}" class="dropdown-item">
                                 <i class="fas fa-key"></i>
-                                {{ __('Change Password') }}
+                                تغيير كلمة المرور
                             </a>
                             <div class="dropdown-divider"></div>
                             <a href="{{ route('home') }}" class="dropdown-item">
                                 <i class="fas fa-globe"></i>
-                                {{ __('View Site') }}
+                                عرض الموقع
                             </a>
                             <div class="dropdown-divider"></div>
                             <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
                                 @csrf
-                                <button type="submit" class="dropdown-item" style="width: 100%; border: none; background: none; text-align: left; cursor: pointer;">
+                                <button type="submit" class="dropdown-item">
                                     <i class="fas fa-sign-out-alt"></i>
-                                    {{ __('Logout') }}
+                                    تسجيل الخروج
                                 </button>
                             </form>
                         </div>
+                    </div>
+                </div>
+                
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <div>
+                        <h1 class="page-title">@yield('page-title', 'لوحة التحكم')</h1>
+                        @hasSection('breadcrumb')
+                            <nav class="breadcrumb">
+                                @yield('breadcrumb')
+                            </nav>
+                        @endif
                     </div>
                 </div>
             </header>
@@ -906,7 +1050,7 @@
                 <div class="content-area" style="padding-bottom: 0;">
                     <div class="alert alert-error fade-in">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <ul style="margin: 0; padding-left: var(--space-lg);">
+                        <ul style="margin: 0; padding-right: var(--space-lg); margin-right: var(--space-lg);">
                             @foreach($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -962,7 +1106,10 @@
                     entry.target.classList.add('visible');
                 }
             });
-        }, { threshold: 0.1 });
+        }, { 
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
         
         document.querySelectorAll('.fade-in').forEach(el => {
             observer.observe(el);
@@ -972,7 +1119,7 @@
         setTimeout(() => {
             document.querySelectorAll('.alert').forEach(alert => {
                 alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-20px)';
+                alert.style.transform = 'translateY(-30px)';
                 setTimeout(() => {
                     if (alert.parentNode) {
                         alert.parentNode.removeChild(alert);
@@ -980,6 +1127,80 @@
                 }, 300);
             });
         }, 5000);
+        
+        // Add enhanced hover effects
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.background = 'rgba(255, 255, 255, 0.1)';
+                    this.style.transform = 'translateX(-8px)';
+                    this.style.paddingRight = 'calc(var(--space-xl) + 8px)';
+                }
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.background = '';
+                    this.style.transform = '';
+                    this.style.paddingRight = '';
+                }
+            });
+        });
+        
+        // Enhanced button interactions
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mousedown', function() {
+                this.style.transform = 'translateY(0px) scale(0.98)';
+            });
+            
+            btn.addEventListener('mouseup', function() {
+                this.style.transform = '';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+            });
+        });
+        
+        // Navigation active state management
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                const linkPath = link.getAttribute('href');
+                if (currentPath.includes(linkPath) && linkPath !== '/admin') {
+                    link.classList.add('active');
+                } else if (linkPath === '/admin/dashboard' && currentPath === '/admin') {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setActiveNavigation();
+            
+            // Add smooth scrolling to sidebar
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.style.scrollBehavior = 'smooth';
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt + M to toggle sidebar
+            if (e.altKey && e.key === 'm') {
+                e.preventDefault();
+                document.getElementById('sidebarToggle').click();
+            }
+            
+            // Esc to close dropdowns
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+            }
+        });
     </script>
 </body>
 </html>

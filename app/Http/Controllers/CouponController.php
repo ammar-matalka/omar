@@ -1,5 +1,9 @@
 <?php
 
+// ===================================
+// CouponController - وحدة تحكم القسائم (للمستخدمين)
+// ===================================
+
 namespace App\Http\Controllers;
 
 use App\Models\Coupon;
@@ -9,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 class CouponController extends Controller
 {
     /**
-     * Display a listing of the user's coupons.
+     * عرض قائمة قسائم المستخدم.
      */
     public function index()
     {
@@ -22,7 +26,7 @@ class CouponController extends Controller
     }
 
     /**
-     * Display the specified coupon.
+     * عرض القسيمة المحددة.
      */
     public function show(Coupon $coupon)
     {

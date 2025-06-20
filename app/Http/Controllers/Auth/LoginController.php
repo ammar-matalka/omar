@@ -11,26 +11,26 @@ class LoginController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | Login Controller
+    | وحدة تحكم تسجيل الدخول
     |--------------------------------------------------------------------------
     |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
+    | تتعامل هذه الوحدة مع مصادقة المستخدمين للتطبيق وإعادة توجيههم
+    | إلى الشاشة الرئيسية. تستخدم الوحدة خاصية لتوفير هذه الوظائف
+    | بشكل مريح لتطبيقاتك.
     |
     */
 
     use AuthenticatesUsers;
 
     /**
-     * Where to redirect users after login.
+     * مكان إعادة توجيه المستخدمين بعد تسجيل الدخول.
      *
      * @var string
      */
     protected $redirectTo = '/home';
 
     /**
-     * Create a new controller instance.
+     * إنشاء مثيل جديد من الوحدة.
      *
      * @return void
      */
@@ -41,7 +41,7 @@ class LoginController extends Controller
     }
 
     /**
-     * Get the post-login redirect path based on user role.
+     * الحصول على مسار إعادة التوجيه بعد تسجيل الدخول بناءً على دور المستخدم.
      */
     protected function redirectTo()
     {
@@ -56,24 +56,17 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle a login request to the application.
+     * التعامل مع طلب تسجيل الدخول للتطبيق.
      */
     public function login(Request $request)
     {
         $this->validateLogin($request);
 
-        // Check if user exists and is verified
-        $user = \App\Models\User::where('email', $request->email)->first();
+        // تم إزالة التحقق من البريد الإلكتروني كما طلبت
         
-        if ($user && !$user->hasVerifiedEmail()) {
-            return back()->withErrors([
-                'email' => __('Please verify your email address before logging in.'),
-            ]);
-        }
-
-        // If the class is using the ThrottlesLogins trait, we can automatically throttle
-        // the login attempts for this application. We'll key this by the username and
-        // the IP address of the client making these requests into this application.
+        // إذا كانت الفئة تستخدم خاصية ThrottlesLogins، يمكننا تلقائياً تقييد
+        // محاولات تسجيل الدخول لهذا التطبيق. سنربط هذا بـ username و
+        // عنوان IP للعميل الذي يقوم بهذه الطلبات في هذا التطبيق.
         if (method_exists($this, 'hasTooManyLoginAttempts') &&
             $this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
@@ -89,33 +82,33 @@ class LoginController extends Controller
             return $this->sendLoginResponse($request);
         }
 
-        // If the login attempt was unsuccessful we will increment the number of attempts
-        // to login and redirect the user back to the login form. Of course, when this
-        // user surpasses their maximum number of attempts they will get locked out.
+        // إذا كانت محاولة تسجيل الدخول غير ناجحة، سنزيد عدد المحاولات
+        // لتسجيل الدخول وإعادة توجيه المستخدم إلى نموذج تسجيل الدخول. بطبيعة الحال، عندما
+        // يتجاوز هذا المستخدم العدد الأقصى للمحاولات سيتم قفله.
         $this->incrementLoginAttempts($request);
 
         return $this->sendFailedLoginResponse($request);
     }
 
     /**
-     * The user has been authenticated.
+     * تم مصادقة المستخدم.
      */
     protected function authenticated(Request $request, $user)
     {
         /** @var \App\Models\User $user */
         
-        // Add any post-login logic here
+        // إضافة أي منطق بعد تسجيل الدخول هنا
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard')
-                ->with('success', __('Welcome back, Admin!'));
+                ->with('success', 'أهلاً بعودتك، أيها المدير!');
         }
 
         return redirect()->route('home')
-            ->with('success', __('Welcome back!'));
+            ->with('success', 'أهلاً بعودتك!');
     }
 
     /**
-     * Log the user out of the application.
+     * تسجيل خروج المستخدم من التطبيق.
      */
     public function logout(Request $request)
     {
@@ -125,6 +118,6 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home')
-            ->with('success', __('You have been logged out successfully.'));
+            ->with('success', 'تم تسجيل خروجك بنجاح.');
     }
 }

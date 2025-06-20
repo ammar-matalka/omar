@@ -1,5 +1,9 @@
 <?php
 
+// ===================================
+// CartController - وحدة تحكم سلة التسوق
+// ===================================
+
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
@@ -12,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 class CartController extends Controller
 {
     /**
-     * Display the shopping cart
+     * عرض سلة التسوق
      */
     public function index()
     {
@@ -23,24 +27,30 @@ class CartController extends Controller
     }
 
     /**
-     * Add item to cart
+     * إضافة عنصر إلى السلة
      */
     public function addItem(Request $request)
     {
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+        ], [
+            'product_id.required' => 'معرف المنتج مطلوب.',
+            'product_id.exists' => 'المنتج المحدد غير موجود.',
+            'quantity.required' => 'الكمية مطلوبة.',
+            'quantity.integer' => 'الكمية يجب أن تكون رقم صحيح.',
+            'quantity.min' => 'الكمية يجب أن تكون على الأقل 1.',
         ]);
 
         $cart = $this->getCart();
         $product = Product::findOrFail($validated['product_id']);
 
-        // Check if product is active
+        // التحقق من تفعيل المنتج
         if (!$product->is_active) {
-            return back()->with('error', __('This product is currently unavailable.'));
+            return back()->with('error', 'هذا المنتج غير متوفر حالياً.');
         }
 
-        // Check for existing cart item
+        // البحث عن عنصر سلة موجود
         $existingCartItem = $cart->cartItems()
             ->where('product_id', $validated['product_id'])
             ->first();
@@ -48,88 +58,92 @@ class CartController extends Controller
         $existingQuantity = $existingCartItem ? $existingCartItem->quantity : 0;
         $totalQuantity = $validated['quantity'] + $existingQuantity;
 
-        // Check stock availability
+        // التحقق من توفر المخزون
         if ($totalQuantity > $product->stock) {
-            return back()->with('error', __('The quantity requested exceeds available stock. Available: :stock', ['stock' => $product->stock]));
+            return back()->with('error', 'الكمية المطلوبة تتجاوز المخزون المتاح. المتاح: ' . $product->stock);
         }
 
         if ($existingCartItem) {
-            // Update existing item quantity
+            // تحديث كمية العنصر الموجود
             $existingCartItem->update(['quantity' => $totalQuantity]);
         } else {
-            // Create new cart item
+            // إنشاء عنصر سلة جديد
             $cart->cartItems()->create([
                 'product_id' => $validated['product_id'],
                 'quantity' => $validated['quantity']
             ]);
         }
 
-        return back()->with('success', __('Product added to cart successfully.'));
+        return back()->with('success', 'تم إضافة المنتج إلى السلة بنجاح.');
     }
 
     /**
-     * Update cart item quantity
+     * تحديث كمية عنصر السلة
      */
     public function update(Request $request, CartItem $cartItem)
     {
         $validated = $request->validate([
             'quantity' => 'required|integer|min:1',
+        ], [
+            'quantity.required' => 'الكمية مطلوبة.',
+            'quantity.integer' => 'الكمية يجب أن تكون رقم صحيح.',
+            'quantity.min' => 'الكمية يجب أن تكون على الأقل 1.',
         ]);
 
-        // Ensure the cart item belongs to the authenticated user
+        // التأكد من أن عنصر السلة ينتمي للمستخدم المصادق عليه
         if ($cartItem->cart->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'إجراء غير مخول.');
         }
 
         $product = $cartItem->product;
         
         if (!$product) {
-            return back()->with('error', __('Product not found.'));
+            return back()->with('error', 'المنتج غير موجود.');
         }
 
-        // Check if product is still active
+        // التحقق من أن المنتج لا يزال نشطاً
         if (!$product->is_active) {
-            return back()->with('error', __('This product is no longer available.'));
+            return back()->with('error', 'هذا المنتج لم يعد متوفراً.');
         }
 
-        // Check stock availability
+        // التحقق من توفر المخزون
         if ($product->stock < $validated['quantity']) {
-            return back()->with('error', __('Requested quantity not available. Available stock: :stock', ['stock' => $product->stock]));
+            return back()->with('error', 'الكمية المطلوبة غير متوفرة. المخزون المتاح: ' . $product->stock);
         }
 
         $cartItem->update(['quantity' => $validated['quantity']]);
 
-        return back()->with('success', __('Cart updated successfully.'));
+        return back()->with('success', 'تم تحديث السلة بنجاح.');
     }
 
     /**
-     * Remove item from cart
+     * إزالة عنصر من السلة
      */
     public function remove(CartItem $cartItem)
     {
-        // Ensure the cart item belongs to the authenticated user
+        // التأكد من أن عنصر السلة ينتمي للمستخدم المصادق عليه
         if ($cartItem->cart->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'إجراء غير مخول.');
         }
 
         $cartItem->delete();
 
-        return back()->with('success', __('Item removed from cart.'));
+        return back()->with('success', 'تم إزالة العنصر من السلة.');
     }
 
     /**
-     * Clear entire cart
+     * مسح السلة بالكامل
      */
     public function clear()
     {
         $cart = $this->getCart();
         $cart->cartItems()->delete();
         
-        return back()->with('success', __('Cart cleared successfully.'));
+        return back()->with('success', 'تم مسح السلة بنجاح.');
     }
 
     /**
-     * Get cart count for header badge (AJAX)
+     * الحصول على عدد عناصر السلة للشارة في الرأس (AJAX)
      */
     public function getCartCount()
     {
@@ -140,11 +154,11 @@ class CartController extends Controller
     }
 
     // ====================================
-    // PRIVATE HELPER METHODS
+    // طرق مساعدة خاصة
     // ====================================
 
     /**
-     * Get or create user's cart
+     * الحصول على سلة المستخدم أو إنشاؤها
      */
     private function getCart()
     {

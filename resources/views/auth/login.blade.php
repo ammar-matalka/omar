@@ -1,9 +1,19 @@
 @extends('layouts.app')
 
-@section('title', __('Login') . ' - ' . config('app.name'))
+@section('title', __('تسجيل الدخول') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* إضافة دعم RTL */
+    :root {
+        --direction: rtl;
+    }
+    
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+    
     .auth-container {
         min-height: calc(100vh - 200px);
         display: flex;
@@ -36,7 +46,7 @@
         content: '';
         position: absolute;
         top: -50%;
-        left: -50%;
+        right: -50%; /* تغيير من left إلى right */
         width: 200%;
         height: 200%;
         background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="white" opacity="0.1"><circle cx="20" cy="20" r="15"/><circle cx="80" cy="80" r="20"/><circle cx="60" cy="30" r="10"/></svg>');
@@ -80,7 +90,7 @@
         color: var(--on-surface);
         font-size: 1rem;
         transition: all var(--transition-fast);
-        padding-left: 3rem;
+        padding-right: 3rem; /* تغيير من left إلى right */
     }
     
     .form-input:focus {
@@ -92,7 +102,7 @@
     
     .form-icon {
         position: absolute;
-        left: var(--space-md);
+        right: var(--space-md); /* تغيير من left إلى right */
         top: 50%;
         transform: translateY(-50%);
         color: var(--on-surface-variant);
@@ -106,7 +116,7 @@
     
     .password-toggle {
         position: absolute;
-        right: var(--space-md);
+        left: var(--space-md); /* تغيير من right إلى left */
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -297,8 +307,8 @@
     <div class="auth-card fade-in">
         <!-- Header -->
         <div class="auth-header">
-            <h1 class="auth-title">{{ __('Welcome Back') }}</h1>
-            <p class="auth-subtitle">{{ __('Sign in to your account') }}</p>
+            <h1 class="auth-title">{{ __('مرحباً بعودتك') }}</h1>
+            <p class="auth-subtitle">{{ __('سجل الدخول إلى حسابك') }}</p>
         </div>
         
         <!-- Body -->
@@ -317,7 +327,7 @@
                         required 
                         autocomplete="email" 
                         autofocus
-                        placeholder="{{ __('Email Address') }}"
+                        placeholder="{{ __('البريد الإلكتروني') }}"
                     >
                     <i class="form-icon fas fa-envelope"></i>
                     @error('email')
@@ -334,7 +344,7 @@
                         name="password" 
                         required 
                         autocomplete="current-password"
-                        placeholder="{{ __('Password') }}"
+                        placeholder="{{ __('كلمة المرور') }}"
                     >
                     <i class="form-icon fas fa-lock"></i>
                     <button type="button" class="password-toggle" onclick="togglePassword('password')">
@@ -355,13 +365,13 @@
                         {{ old('remember') ? 'checked' : '' }}
                     >
                     <label class="checkbox-label" for="remember">
-                        {{ __('Remember Me') }}
+                        {{ __('تذكرني') }}
                     </label>
                 </div>
                 
                 <!-- Submit Button -->
                 <button type="submit" class="auth-btn" id="submitBtn">
-                    <span class="btn-text">{{ __('Sign In') }}</span>
+                    <span class="btn-text">{{ __('تسجيل الدخول') }}</span>
                     <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
                 </button>
                 
@@ -370,7 +380,7 @@
                     @if (Route::has('password.request'))
                         <a class="auth-link" href="{{ route('password.request') }}">
                             <i class="fas fa-key"></i>
-                            {{ __('Forgot Your Password?') }}
+                            {{ __('نسيت كلمة المرور؟') }}
                         </a>
                     @endif
                 </div>
@@ -379,10 +389,10 @@
         
         <!-- Register Prompt -->
         <div class="register-prompt">
-            <p class="register-text">{{ __("Don't have an account?") }}</p>
+            <p class="register-text">{{ __('ليس لديك حساب؟') }}</p>
             <a href="{{ route('register') }}" class="register-btn">
                 <i class="fas fa-user-plus"></i>
-                {{ __('Create Account') }}
+                {{ __('إنشاء حساب') }}
             </a>
         </div>
     </div>

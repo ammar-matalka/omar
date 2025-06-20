@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class TestimonialController extends Controller
 {
     /**
-     * Display a listing of the testimonials.
+     * عرض قائمة الشهادات.
      *
      * @return \Illuminate\View\View
      */
@@ -38,14 +38,21 @@ class TestimonialController extends Controller
     }
 
     /**
-     * Display the specified testimonial.
+     * عرض الشهادة المحددة.
      *
      * @param  \App\Models\Testimonial  $testimonial
      * @return \Illuminate\View\View
      */
+    public function show(Testimonial $testimonial)
+    {
+        // تحميل بيانات المستخدم والطلب المرتبطة
+        $testimonial->load(['user', 'order']);
+        
+        return view('admin.testimonials.show', compact('testimonial'));
+    }
    
     /**
-     * Approve the specified testimonial.
+     * الموافقة على الشهادة المحددة.
      *
      * @param  \App\Models\Testimonial  $testimonial
      * @return \Illuminate\Http\RedirectResponse
@@ -54,11 +61,11 @@ class TestimonialController extends Controller
     {
         $testimonial->update(['status' => 'approved']);
         
-        return redirect()->back()->with('success', 'Testimonial has been approved successfully.');
+        return redirect()->back()->with('success', 'تم الموافقة على الشهادة بنجاح.');
     }
 
     /**
-     * Reject the specified testimonial.
+     * رفض الشهادة المحددة.
      *
      * @param  \App\Models\Testimonial  $testimonial
      * @return \Illuminate\Http\RedirectResponse
@@ -67,11 +74,11 @@ class TestimonialController extends Controller
     {
         $testimonial->update(['status' => 'rejected']);
         
-        return redirect()->back()->with('success', 'Testimonial has been rejected successfully.');
+        return redirect()->back()->with('success', 'تم رفض الشهادة بنجاح.');
     }
 
     /**
-     * Remove the specified testimonial from storage.
+     * حذف الشهادة المحددة من قاعدة البيانات.
      *
      * @param  \App\Models\Testimonial  $testimonial
      * @return \Illuminate\Http\RedirectResponse
@@ -80,13 +87,6 @@ class TestimonialController extends Controller
     {
         $testimonial->delete();
         
-        return redirect()->route('admin.testimonials.index')->with('success', 'Testimonial has been deleted successfully.');
+        return redirect()->route('admin.testimonials.index')->with('success', 'تم حذف الشهادة بنجاح.');
     }
-    public function show(Testimonial $testimonial)
-{
-    // Load the related user and order data
-    $testimonial->load(['user', 'order']);
-    
-    return view('admin.testimonials.show', compact('testimonial'));
-}
 }

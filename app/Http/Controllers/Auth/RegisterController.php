@@ -14,26 +14,26 @@ class RegisterController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | Register Controller
+    | وحدة تحكم التسجيل
     |--------------------------------------------------------------------------
     |
-    | This controller handles the registration of new users as well as their
-    | validation and creation. By default this controller uses a trait to
-    | provide this functionality without requiring any additional code.
+    | تتعامل هذه الوحدة مع تسجيل المستخدمين الجدد بالإضافة إلى
+    | التحقق من صحتهم وإنشاءهم. افتراضياً تستخدم هذه الوحدة خاصية
+    | لتوفير هذه الوظائف دون الحاجة لأي كود إضافي.
     |
     */
 
     use RegistersUsers;
 
     /**
-     * Where to redirect users after registration.
+     * مكان إعادة توجيه المستخدمين بعد التسجيل.
      *
      * @var string
      */
     protected $redirectTo = '/home';
 
     /**
-     * Create a new controller instance.
+     * إنشاء مثيل جديد من الوحدة.
      *
      * @return void
      */
@@ -43,7 +43,7 @@ class RegisterController extends Controller
     }
 
     /**
-     * Show the application registration form.
+     * عرض نموذج تسجيل التطبيق.
      */
     public function showRegistrationForm()
     {
@@ -51,7 +51,7 @@ class RegisterController extends Controller
     }
 
     /**
-     * Handle a registration request for the application.
+     * التعامل مع طلب تسجيل للتطبيق.
      */
     public function register(Request $request)
     {
@@ -62,11 +62,11 @@ class RegisterController extends Controller
         Auth::login($user);
 
         return redirect($this->redirectPath())
-            ->with('success', __('Registration completed successfully! Welcome to our platform.'));
+            ->with('success', 'تم إكمال التسجيل بنجاح! أهلاً بك في منصتنا.');
     }
 
     /**
-     * Get a validator for an incoming registration request.
+     * الحصول على مُدقق لطلب تسجيل وارد.
      *
      * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
@@ -81,31 +81,31 @@ class RegisterController extends Controller
                 'string',
                 'min:8',
                 'confirmed',
-                'regex:/[A-Z]/',      // Must contain uppercase
-                'regex:/[a-z]/',      // Must contain lowercase  
-                'regex:/[0-9]/',      // Must contain number
-                'regex:/[@$!%*#?&]/', // Must contain special character
-                'not_regex:/(123|abc|password|qwerty|admin|welcome)/i', // Weak passwords
+                'regex:/[A-Z]/',      // يجب أن تحتوي على حرف كبير
+                'regex:/[a-z]/',      // يجب أن تحتوي على حرف صغير
+                'regex:/[0-9]/',      // يجب أن تحتوي على رقم
+                'regex:/[@$!%*#?&]/', // يجب أن تحتوي على رمز خاص
+                'not_regex:/(123|abc|password|qwerty|admin|welcome)/i', // كلمات مرور ضعيفة
             ],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
         ], [
-            'name.required' => __('Full name is required.'),
-            'name.max' => __('Full name cannot exceed 255 characters.'),
-            'email.required' => __('Email address is required.'),
-            'email.email' => __('Please enter a valid email address.'),
-            'email.unique' => __('This email is already registered. Please use a different email or try logging in.'),
-            'password.min' => __('Password must be at least 8 characters long.'),
-            'password.regex' => __('Password must contain uppercase and lowercase letters, numbers, and special characters.'),
-            'password.not_regex' => __('Password is too weak and cannot be used.'),
-            'password.confirmed' => __('Password confirmation does not match.'),
-            'phone.max' => __('Phone number cannot exceed 20 characters.'),
-            'address.max' => __('Address cannot exceed 500 characters.'),
+            'name.required' => 'الاسم الكامل مطلوب.',
+            'name.max' => 'الاسم الكامل لا يمكن أن يتجاوز 255 حرف.',
+            'email.required' => 'عنوان البريد الإلكتروني مطلوب.',
+            'email.email' => 'يرجى إدخال عنوان بريد إلكتروني صحيح.',
+            'email.unique' => 'هذا البريد الإلكتروني مسجل بالفعل. يرجى استخدام بريد إلكتروني مختلف أو محاولة تسجيل الدخول.',
+            'password.min' => 'كلمة المرور يجب أن تكون على الأقل 8 أحرف.',
+            'password.regex' => 'كلمة المرور يجب أن تحتوي على أحرف كبيرة وصغيرة وأرقام ورموز خاصة.',
+            'password.not_regex' => 'كلمة المرور ضعيفة جداً ولا يمكن استخدامها.',
+            'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
+            'phone.max' => 'رقم الهاتف لا يمكن أن يتجاوز 20 حرف.',
+            'address.max' => 'العنوان لا يمكن أن يتجاوز 500 حرف.',
         ]);
     }
 
     /**
-     * Create a new user instance after a valid registration.
+     * إنشاء مثيل مستخدم جديد بعد تسجيل صحيح.
      *
      * @param  array  $data
      * @return \App\Models\User
@@ -119,7 +119,7 @@ class RegisterController extends Controller
             'phone' => $data['phone'] ?? null,
             'address' => $data['address'] ?? null,
             'role' => 'customer',
-            'email_verified_at' => now(), // Auto verify email
+            'email_verified_at' => now(), // تأكيد البريد الإلكتروني تلقائياً (تم إلغاء نظام التحقق)
         ]);
     }
 }

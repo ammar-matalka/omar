@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ConversationController extends Controller
 {
@@ -22,12 +23,12 @@ class ConversationController extends Controller
                 
             return view('user.conversations.index', compact('conversations'));
         } catch (\Exception $e) {
-            Log::error('Error in conversations index', [
+            Log::error('خطأ في فهرس المحادثات', [
                 'error' => $e->getMessage(),
                 'user_id' => Auth::id()
             ]);
             
-            return redirect()->back()->with('error', 'Error loading conversations: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'خطأ في تحميل المحادثات: ' . $e->getMessage());
         }
     }
     
@@ -42,6 +43,12 @@ class ConversationController extends Controller
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
                 'message' => 'required|string',
+            ], [
+                'title.required' => 'عنوان المحادثة مطلوب.',
+                'title.string' => 'عنوان المحادثة يجب أن يكون نص.',
+                'title.max' => 'عنوان المحادثة لا يجب أن يتجاوز 255 حرف.',
+                'message.required' => 'الرسالة مطلوبة.',
+                'message.string' => 'الرسالة يجب أن تكون نص.',
             ]);
             
             DB::beginTransaction();
@@ -63,11 +70,11 @@ class ConversationController extends Controller
             DB::commit();
             
             return redirect()->route('user.conversations.show', $conversation)
-                ->with('success', 'Conversation started successfully.');
+                ->with('success', 'تم بدء المحادثة بنجاح.');
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Error creating conversation', [
+            Log::error('خطأ في إنشاء المحادثة', [
                 'error' => $e->getMessage(),
                 'user_id' => Auth::id(),
                 'data' => $request->all()
@@ -75,7 +82,7 @@ class ConversationController extends Controller
             
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Error creating conversation: ' . $e->getMessage());
+                ->with('error', 'خطأ في إنشاء المحادثة: ' . $e->getMessage());
         }
     }
     
@@ -83,31 +90,31 @@ class ConversationController extends Controller
     {
         try {
             if ($conversation->user_id !== Auth::id()) {
-                abort(403, 'Unauthorized access to conversation');
+                abort(403, 'وصول غير مخول للمحادثة');
             }
             
-            // Mark as read
+            // تحديد كمقروءة
             $conversation->update(['is_read_by_user' => true]);
             
             $messages = $conversation->messages()->orderBy('created_at', 'asc')->get();
             
             return view('user.conversations.show', compact('conversation', 'messages'));
         } catch (\Exception $e) {
-            Log::error('Error showing conversation', [
+            Log::error('خطأ في عرض المحادثة', [
                 'error' => $e->getMessage(),
                 'conversation_id' => $conversation->id ?? 'unknown',
                 'user_id' => Auth::id()
             ]);
             
             return redirect()->route('user.conversations.index')
-                ->with('error', 'Error loading conversation: ' . $e->getMessage());
+                ->with('error', 'خطأ في تحميل المحادثة: ' . $e->getMessage());
         }
     }
     
     public function reply(Request $request, Conversation $conversation)
     {
         // تسجيل تفصيلي للطلب
-        Log::info('=== USER REPLY ATTEMPT START ===', [
+        Log::info('=== بداية محاولة رد المستخدم ===', [
             'timestamp' => now(),
             'user_id' => Auth::id(),
             'conversation_id' => $conversation->id,
@@ -124,7 +131,7 @@ class ConversationController extends Controller
 
         // تحقق من الصلاحية
         if ($conversation->user_id !== Auth::id()) {
-            Log::warning('Unauthorized reply attempt', [
+            Log::warning('محاولة رد غير مخولة', [
                 'user_id' => Auth::id(),
                 'conversation_user_id' => $conversation->user_id,
             ]);
@@ -132,7 +139,7 @@ class ConversationController extends Controller
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Unauthorized access'
+                    'error' => 'وصول غير مخول'
                 ], 403);
             }
             abort(403);
@@ -140,16 +147,20 @@ class ConversationController extends Controller
         
         try {
             // التحقق من صحة البيانات
-            Log::info('Starting validation');
+            Log::info('بدء التحقق من الصحة');
             
             $rules = [
                 'message' => 'required|string|max:2000',
             ];
             
-            $validator = \Validator::make($request->all(), $rules);
+            $validator = Validator::make($request->all(), $rules, [
+                'message.required' => 'الرسالة مطلوبة.',
+                'message.string' => 'الرسالة يجب أن تكون نص.',
+                'message.max' => 'الرسالة لا يجب أن تتجاوز 2000 حرف.',
+            ]);
             
             if ($validator->fails()) {
-                Log::error('Validation failed', [
+                Log::error('فشل التحقق من الصحة', [
                     'errors' => $validator->errors()->toArray(),
                     'input' => $request->all(),
                 ]);
@@ -157,7 +168,7 @@ class ConversationController extends Controller
                 if ($request->expectsJson() || $request->ajax()) {
                     return response()->json([
                         'success' => false,
-                        'error' => 'Validation failed',
+                        'error' => 'فشل التحقق من الصحة',
                         'errors' => $validator->errors()->toArray(),
                         'debug' => [
                             'received_data' => $request->all(),
@@ -170,7 +181,7 @@ class ConversationController extends Controller
             }
             
             $validated = $validator->validated();
-            Log::info('Validation passed', ['validated_data' => $validated]);
+            Log::info('نجح التحقق من الصحة', ['validated_data' => $validated]);
             
             // بدء المعاملة
             DB::beginTransaction();
@@ -183,7 +194,7 @@ class ConversationController extends Controller
                 'is_from_admin' => false,
             ]);
             
-            Log::info('Message created successfully', [
+            Log::info('تم إنشاء الرسالة بنجاح', [
                 'message_id' => $message->id,
                 'message_content' => $message->message,
             ]);
@@ -195,7 +206,7 @@ class ConversationController extends Controller
                 'updated_at' => now(),
             ]);
             
-            Log::info('Conversation updated successfully');
+            Log::info('تم تحديث المحادثة بنجاح');
             
             // تأكيد المعاملة
             DB::commit();
@@ -218,25 +229,25 @@ class ConversationController extends Controller
                 ]
             ];
             
-            Log::info('Response prepared successfully', $response_data);
+            Log::info('تم إعداد الاستجابة بنجاح', $response_data);
 
             // إرجاع الاستجابة
             if ($request->expectsJson() || $request->ajax()) {
-                Log::info('=== USER REPLY SUCCESS (JSON) ===');
+                Log::info('=== نجح رد المستخدم (JSON) ===');
                 
                 return response()->json($response_data, 200, [
                     'Content-Type' => 'application/json',
                 ]);
             }
             
-            Log::info('=== USER REPLY SUCCESS (REDIRECT) ===');
+            Log::info('=== نجح رد المستخدم (إعادة توجيه) ===');
             return redirect()->route('user.conversations.show', $conversation)
-                ->with('success', 'Reply sent successfully.');
+                ->with('success', 'تم إرسال الرد بنجاح.');
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             
-            Log::error('Validation exception', [
+            Log::error('استثناء التحقق من الصحة', [
                 'errors' => $e->errors(),
                 'input' => $request->all(),
             ]);
@@ -244,7 +255,7 @@ class ConversationController extends Controller
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Validation failed',
+                    'error' => 'فشل التحقق من الصحة',
                     'errors' => $e->errors(),
                 ], 422);
             }
@@ -254,7 +265,7 @@ class ConversationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Unexpected error in reply method', [
+            Log::error('خطأ غير متوقع في طريقة الرد', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
@@ -264,7 +275,7 @@ class ConversationController extends Controller
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Internal server error: ' . $e->getMessage(),
+                    'error' => 'خطأ في الخادر الداخلي: ' . $e->getMessage(),
                     'debug' => config('app.debug') ? [
                         'file' => $e->getFile(),
                         'line' => $e->getLine(),
@@ -283,7 +294,7 @@ class ConversationController extends Controller
             if ($conversation->user_id !== Auth::id()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Unauthorized'
+                    'error' => 'غير مخول'
                 ], 403);
             }
 
@@ -318,14 +329,14 @@ class ConversationController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            Log::error('Error in checkNewMessages', [
+            Log::error('خطأ في فحص الرسائل الجديدة', [
                 'error' => $e->getMessage(),
                 'conversation_id' => $conversation->id
             ]);
             
             return response()->json([
                 'success' => false,
-                'error' => 'Error checking messages'
+                'error' => 'خطأ في فحص الرسائل'
             ], 500);
         }
     }
@@ -343,7 +354,7 @@ class ConversationController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            Log::error('Error getting unread conversations count', [
+            Log::error('خطأ في الحصول على عدد المحادثات غير المقروءة', [
                 'error' => $e->getMessage(),
                 'user_id' => Auth::id()
             ]);
@@ -351,7 +362,7 @@ class ConversationController extends Controller
             return response()->json([
                 'unread_count' => 0,
                 'success' => false,
-                'error' => 'Error getting unread count'
+                'error' => 'خطأ في الحصول على العدد غير المقروء'
             ], 500);
         }
     }
@@ -362,7 +373,7 @@ class ConversationController extends Controller
             if ($conversation->user_id !== Auth::id()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Unauthorized'
+                    'error' => 'غير مخول'
                 ], 403);
             }
 
@@ -372,10 +383,10 @@ class ConversationController extends Controller
                 return response()->json(['success' => true]);
             }
 
-            return redirect()->back()->with('success', 'Conversation marked as read.');
+            return redirect()->back()->with('success', 'تم تحديد المحادثة كمقروءة.');
             
         } catch (\Exception $e) {
-            Log::error('Error in markAsRead', [
+            Log::error('خطأ في تحديد كمقروءة', [
                 'error' => $e->getMessage(),
                 'conversation_id' => $conversation->id
             ]);
@@ -383,11 +394,11 @@ class ConversationController extends Controller
             if (request()->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Error marking as read'
+                    'error' => 'خطأ في تحديد كمقروءة'
                 ], 500);
             }
             
-            return redirect()->back()->with('error', 'Error marking conversation as read.');
+            return redirect()->back()->with('error', 'خطأ في تحديد المحادثة كمقروءة.');
         }
     }
 }

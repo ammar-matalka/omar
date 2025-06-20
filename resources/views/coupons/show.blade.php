@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', __('Coupon Details'))
+@section('title', 'تفاصيل الكوبون')
 
 @section('content')
-<div class="container" style="padding: var(--space-2xl) var(--space-md);">
+<div class="container" style="padding: var(--space-2xl) var(--space-md);" dir="rtl">
     <!-- Breadcrumb -->
     <nav style="margin-bottom: var(--space-xl);">
-        <div style="display: flex; align-items: center; gap: var(--space-sm); font-size: 0.875rem; color: var(--on-surface-variant);">
-            <a href="{{ route('home') }}" style="color: var(--primary-600); text-decoration: none;">{{ __('Home') }}</a>
-            <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
-            <a href="{{ route('coupons.index') }}" style="color: var(--primary-600); text-decoration: none;">{{ __('My Coupons') }}</a>
-            <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
+        <div style="display: flex; flex-direction: row-reverse; align-items: center; gap: var(--space-sm); font-size: 0.875rem; color: var(--on-surface-variant);">
+            <a href="{{ route('home') }}" style="color: var(--primary-600); text-decoration: none;">الرئيسية</a>
+            <i class="fas fa-chevron-left" style="font-size: 0.75rem;"></i>
+            <a href="{{ route('coupons.index') }}" style="color: var(--primary-600); text-decoration: none;">كوبوناتي</a>
+            <i class="fas fa-chevron-left" style="font-size: 0.75rem;"></i>
             <span>{{ $coupon->code }}</span>
         </div>
     </nav>
@@ -18,10 +18,10 @@
     <!-- Header -->
     <div style="text-align: center; margin-bottom: var(--space-2xl);">
         <h1 style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary-500), var(--secondary-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md);">
-            {{ __('Coupon Details') }}
+            تفاصيل الكوبون
         </h1>
         
-        <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+        <div style="display: flex; flex-direction: row-reverse; align-items: center; justify-content: center; gap: var(--space-md); margin-bottom: var(--space-md);">
             <code style="background: var(--primary-50); color: var(--primary-700); padding: var(--space-sm) var(--space-lg); border-radius: var(--radius-lg); font-weight: 700; font-size: 1.5rem; font-family: monospace;">
                 {{ $coupon->code }}
             </code>
@@ -29,17 +29,17 @@
             @if($coupon->is_used)
                 <span class="badge" style="background: var(--info-100); color: var(--info-700); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-lg); font-weight: 600;">
                     <i class="fas fa-check-circle"></i>
-                    {{ __('Used') }}
+                    مستخدم
                 </span>
             @elseif($coupon->valid_until < now())
                 <span class="badge" style="background: var(--warning-100); color: var(--warning-700); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-lg); font-weight: 600;">
                     <i class="fas fa-clock"></i>
-                    {{ __('Expired') }}
+                    منتهي
                 </span>
             @else
                 <span class="badge" style="background: var(--success-100); color: var(--success-700); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-lg); font-weight: 600;">
                     <i class="fas fa-star"></i>
-                    {{ __('Active') }}
+                    نشط
                 </span>
             @endif
         </div>
@@ -69,20 +69,20 @@
                         </div>
                         <button onclick="copyToClipboard('{{ $coupon->code }}')" class="btn btn-primary">
                             <i class="fas fa-copy"></i>
-                            {{ __('Copy Code') }}
+                            نسخ الكود
                         </button>
                     </div>
 
                     <!-- Discount Amount -->
                     <div style="text-align: center; margin-bottom: var(--space-2xl);">
                         <div style="font-size: 1rem; color: var(--gray-500); margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
-                            {{ __('Discount Amount') }}
+                            مبلغ الخصم
                         </div>
                         <div style="font-size: 4rem; font-weight: 900; color: var(--success-600); line-height: 1;">
-                            ${{ number_format($coupon->amount, 2) }}
+                            {{ number_format($coupon->amount, 2) }} ر.س
                         </div>
                         <div style="font-size: 1.125rem; color: var(--success-600); font-weight: 600; margin-top: var(--space-sm);">
-                            {{ __('OFF YOUR PURCHASE') }}
+                            خصم من مشترياتك
                         </div>
                     </div>
 
@@ -91,20 +91,20 @@
                         <div class="grid grid-cols-2" style="gap: var(--space-xl);">
                             <div style="text-align: center;">
                                 <div style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
-                                    {{ __('Minimum Purchase') }}
+                                    الحد الأدنى للشراء
                                 </div>
                                 <div style="font-size: 1.5rem; font-weight: 700; color: var(--on-surface);">
                                     @if($coupon->min_purchase_amount > 0)
-                                        ${{ number_format($coupon->min_purchase_amount, 2) }}
+                                        {{ number_format($coupon->min_purchase_amount, 2) }} ر.س
                                     @else
-                                        {{ __('No Minimum') }}
+                                        لا يوجد حد أدنى
                                     @endif
                                 </div>
                             </div>
 
                             <div style="text-align: center;">
                                 <div style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
-                                    {{ __('Valid Until') }}
+                                    ساري حتى
                                 </div>
                                 <div style="font-size: 1.5rem; font-weight: 700; color: {{ $coupon->valid_until < now() ? 'var(--error-600)' : 'var(--on-surface)' }};">
                                     {{ $coupon->valid_until->format('M d, Y') }}
@@ -118,7 +118,7 @@
                 @if($coupon->is_used || $coupon->valid_until < now())
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-20deg); z-index: 10; pointer-events: none;">
                     <div style="background: {{ $coupon->is_used ? 'var(--info-500)' : 'var(--warning-500)' }}; color: white; padding: var(--space-lg) var(--space-2xl); border-radius: var(--radius-xl); font-weight: 900; text-transform: uppercase; letter-spacing: 3px; font-size: 2rem; box-shadow: var(--shadow-2xl); opacity: 0.9; border: 4px solid white;">
-                        {{ $coupon->is_used ? __('USED') : __('EXPIRED') }}
+                        {{ $coupon->is_used ? 'مستخدم' : 'منتهي' }}
                     </div>
                 </div>
                 @endif
@@ -128,28 +128,28 @@
             @if($coupon->is_used && $coupon->order)
             <div class="card" style="margin-bottom: var(--space-xl);">
                 <div class="card-header">
-                    <h3 style="display: flex; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; font-weight: 600;">
+                    <h3 style="display: flex; flex-direction: row-reverse; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; font-weight: 600;">
                         <i class="fas fa-shopping-cart" style="color: var(--info-500);"></i>
-                        {{ __('Usage Information') }}
+                        معلومات الاستخدام
                     </h3>
                 </div>
                 <div class="card-body">
                     <div style="background: var(--info-50); padding: var(--space-lg); border-radius: var(--radius-lg); border: 1px solid var(--info-200);">
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between;">
                             <div>
                                 <div style="font-weight: 600; font-size: 1.125rem; color: var(--info-700); margin-bottom: var(--space-sm);">
-                                    {{ __('Used in Order #:id', ['id' => $coupon->order->id]) }}
+                                    تم الاستخدام في الطلب رقم {{ $coupon->order->id }}
                                 </div>
                                 <div style="color: var(--gray-600); margin-bottom: var(--space-sm);">
-                                    {{ __('Order Total: $:amount', ['amount' => number_format($coupon->order->total_amount, 2)]) }}
+                                    إجمالي الطلب: {{ number_format($coupon->order->total_amount, 2) }} ر.س
                                 </div>
                                 <div style="color: var(--gray-500); font-size: 0.875rem;">
-                                    {{ __('Used on :date', ['date' => $coupon->updated_at->format('M d, Y h:i A')]) }}
+                                    تم الاستخدام في: {{ $coupon->updated_at->format('M d, Y h:i A') }}
                                 </div>
                             </div>
                             <a href="{{ route('orders.show', $coupon->order) }}" class="btn btn-info">
                                 <i class="fas fa-eye"></i>
-                                {{ __('View Order') }}
+                                عرض الطلب
                             </a>
                         </div>
                     </div>
@@ -158,17 +158,17 @@
             @endif
 
             <!-- Action Buttons -->
-            <div style="display: flex; gap: var(--space-md); justify-content: center;">
+            <div style="display: flex; flex-direction: row-reverse; gap: var(--space-md); justify-content: center;">
                 @if(!$coupon->is_used && $coupon->valid_until >= now())
                 <a href="{{ route('products.index') }}" class="btn btn-primary btn-lg">
                     <i class="fas fa-shopping-bag"></i>
-                    {{ __('Start Shopping') }}
+                    ابدأ التسوق
                 </a>
                 @endif
                 
                 <a href="{{ route('coupons.index') }}" class="btn btn-secondary btn-lg">
-                    <i class="fas fa-arrow-left"></i>
-                    {{ __('Back to Coupons') }}
+                    <i class="fas fa-arrow-right"></i>
+                    العودة إلى الكوبونات
                 </a>
             </div>
         </div>
@@ -178,54 +178,54 @@
             <!-- Quick Stats -->
             <div class="card" style="margin-bottom: var(--space-lg);">
                 <div class="card-header">
-                    <h3 style="display: flex; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; font-weight: 600;">
+                    <h3 style="display: flex; flex-direction: row-reverse; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; font-weight: 600;">
                         <i class="fas fa-chart-bar" style="color: var(--primary-500);"></i>
-                        {{ __('Coupon Details') }}
+                        تفاصيل الكوبون
                     </h3>
                 </div>
                 <div class="card-body">
                     <div style="space-y: var(--space-md);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
-                            <span style="color: var(--on-surface-variant);">{{ __('Code') }}</span>
+                        <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
+                            <span style="color: var(--on-surface-variant);">الكود</span>
                             <code style="background: var(--surface-variant); padding: 2px 6px; border-radius: 4px; font-weight: 600;">{{ $coupon->code }}</code>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
-                            <span style="color: var(--on-surface-variant);">{{ __('Discount') }}</span>
-                            <span style="font-weight: 600; color: var(--success-600);">${{ number_format($coupon->amount, 2) }}</span>
+                        <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
+                            <span style="color: var(--on-surface-variant);">الخصم</span>
+                            <span style="font-weight: 600; color: var(--success-600);">{{ number_format($coupon->amount, 2) }} ر.س</span>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
-                            <span style="color: var(--on-surface-variant);">{{ __('Min. Purchase') }}</span>
+                        <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
+                            <span style="color: var(--on-surface-variant);">الحد الأدنى للشراء</span>
                             <span style="font-weight: 600;">
                                 @if($coupon->min_purchase_amount > 0)
-                                    ${{ number_format($coupon->min_purchase_amount, 2) }}
+                                    {{ number_format($coupon->min_purchase_amount, 2) }} ر.س
                                 @else
-                                    {{ __('None') }}
+                                    لا يوجد
                                 @endif
                             </span>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
-                            <span style="color: var(--on-surface-variant);">{{ __('Created') }}</span>
+                        <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
+                            <span style="color: var(--on-surface-variant);">تاريخ الإنشاء</span>
                             <span style="font-weight: 600;">{{ $coupon->created_at->format('M d, Y') }}</span>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
-                            <span style="color: var(--on-surface-variant);">{{ __('Expires') }}</span>
+                        <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-md);">
+                            <span style="color: var(--on-surface-variant);">تاريخ الانتهاء</span>
                             <span style="font-weight: 600; color: {{ $coupon->valid_until < now() ? 'var(--error-600)' : 'var(--on-surface)' }};">
                                 {{ $coupon->valid_until->format('M d, Y') }}
                             </span>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
-                            <span style="color: var(--on-surface-variant);">{{ __('Status') }}</span>
+                        <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
+                            <span style="color: var(--on-surface-variant);">الحالة</span>
                             @if($coupon->is_used)
-                                <span class="badge badge-info">{{ __('Used') }}</span>
+                                <span class="badge badge-info">مستخدم</span>
                             @elseif($coupon->valid_until < now())
-                                <span class="badge badge-warning">{{ __('Expired') }}</span>
+                                <span class="badge badge-warning">منتهي</span>
                             @else
-                                <span class="badge badge-success">{{ __('Active') }}</span>
+                                <span class="badge badge-success">نشط</span>
                             @endif
                         </div>
                     </div>
@@ -236,9 +236,9 @@
             @if(!$coupon->is_used && $coupon->valid_until >= now())
             <div class="card" style="margin-bottom: var(--space-lg);">
                 <div class="card-header">
-                    <h3 style="display: flex; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; font-weight: 600;">
+                    <h3 style="display: flex; flex-direction: row-reverse; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; font-weight: 600;">
                         <i class="fas fa-clock" style="color: var(--warning-500);"></i>
-                        {{ __('Time Remaining') }}
+                        الوقت المتبقي
                     </h3>
                 </div>
                 <div class="card-body">
@@ -247,7 +247,7 @@
                             {{ $coupon->valid_until->diffForHumans() }}
                         </div>
                         <div style="font-size: 0.875rem; color: var(--on-surface-variant);">
-                            {{ __('Until expiration') }}
+                            حتى انتهاء الصلاحية
                         </div>
                     </div>
                 </div>
@@ -257,40 +257,40 @@
             <!-- How to Use -->
             <div class="card">
                 <div class="card-header">
-                    <h3 style="display: flex; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; font-weight: 600;">
+                    <h3 style="display: flex; flex-direction: row-reverse; align-items: center; gap: var(--space-sm); margin: 0; font-size: 1.125rem; font-weight: 600;">
                         <i class="fas fa-question-circle" style="color: var(--primary-500);"></i>
-                        {{ __('How to Use') }}
+                        كيفية الاستخدام
                     </h3>
                 </div>
                 <div class="card-body">
                     <ol style="list-style: none; padding: 0; margin: 0; counter-reset: step-counter;">
-                        <li style="counter-increment: step-counter; display: flex; align-items: flex-start; gap: var(--space-md); margin-bottom: var(--space-lg); position: relative;">
+                        <li style="counter-increment: step-counter; display: flex; flex-direction: row-reverse; align-items: flex-start; gap: var(--space-md); margin-bottom: var(--space-lg); position: relative;">
                             <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-500); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem; flex-shrink: 0;">
                                 1
                             </div>
                             <div>
-                                <div style="font-weight: 600; margin-bottom: var(--space-xs);">{{ __('Copy the Code') }}</div>
-                                <div style="color: var(--on-surface-variant); font-size: 0.875rem;">{{ __('Click the "Copy Code" button above') }}</div>
+                                <div style="font-weight: 600; margin-bottom: var(--space-xs);">نسخ الكود</div>
+                                <div style="color: var(--on-surface-variant); font-size: 0.875rem;">اضغط على زر "نسخ الكود" بالأعلى</div>
                             </div>
                         </li>
                         
-                        <li style="counter-increment: step-counter; display: flex; align-items: flex-start; gap: var(--space-md); margin-bottom: var(--space-lg); position: relative;">
+                        <li style="counter-increment: step-counter; display: flex; flex-direction: row-reverse; align-items: flex-start; gap: var(--space-md); margin-bottom: var(--space-lg); position: relative;">
                             <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--secondary-500); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem; flex-shrink: 0;">
                                 2
                             </div>
                             <div>
-                                <div style="font-weight: 600; margin-bottom: var(--space-xs);">{{ __('Shop Products') }}</div>
-                                <div style="color: var(--on-surface-variant); font-size: 0.875rem;">{{ __('Add items to your cart') }}</div>
+                                <div style="font-weight: 600; margin-bottom: var(--space-xs);">تسوق المنتجات</div>
+                                <div style="color: var(--on-surface-variant); font-size: 0.875rem;">أضف العناصر إلى سلة التسوق</div>
                             </div>
                         </li>
                         
-                        <li style="counter-increment: step-counter; display: flex; align-items: flex-start; gap: var(--space-md); position: relative;">
+                        <li style="counter-increment: step-counter; display: flex; flex-direction: row-reverse; align-items: flex-start; gap: var(--space-md); position: relative;">
                             <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent-500); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem; flex-shrink: 0;">
                                 3
                             </div>
                             <div>
-                                <div style="font-weight: 600; margin-bottom: var(--space-xs);">{{ __('Apply at Checkout') }}</div>
-                                <div style="color: var(--on-surface-variant); font-size: 0.875rem;">{{ __('Paste the code during checkout') }}</div>
+                                <div style="font-weight: 600; margin-bottom: var(--space-xs);">تطبيق عند الدفع</div>
+                                <div style="color: var(--on-surface-variant); font-size: 0.875rem;">الصق الكود أثناء عملية الدفع</div>
                             </div>
                         </li>
                     </ol>
@@ -303,10 +303,10 @@
 <script>
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
-        showSuccessNotification('{{ __('Coupon code copied to clipboard!') }}');
+        showSuccessNotification('تم نسخ كود الكوبون إلى الحافظة!');
     }).catch(function(err) {
         console.error('Could not copy text: ', err);
-        showErrorNotification('{{ __('Failed to copy coupon code') }}');
+        showErrorNotification('فشل في نسخ كود الكوبون');
     });
 }
 
@@ -320,7 +320,7 @@ setInterval(function() {
         const diff = expiryDate - now;
         
         if (diff <= 0) {
-            countdownElement.textContent = '{{ __('Expired') }}';
+            countdownElement.textContent = 'منتهي';
             countdownElement.style.color = 'var(--error-600)';
             location.reload(); // Reload to update the page state
         } else {
@@ -329,11 +329,11 @@ setInterval(function() {
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             
             if (days > 0) {
-                countdownElement.textContent = `${days} {{ __('days') }}, ${hours} {{ __('hours') }}`;
+                countdownElement.textContent = `${days} يوم, ${hours} ساعة`;
             } else if (hours > 0) {
-                countdownElement.textContent = `${hours} {{ __('hours') }}, ${minutes} {{ __('minutes') }}`;
+                countdownElement.textContent = `${hours} ساعة, ${minutes} دقيقة`;
             } else {
-                countdownElement.textContent = `${minutes} {{ __('minutes') }}`;
+                countdownElement.textContent = `${minutes} دقيقة`;
                 countdownElement.style.color = 'var(--error-600)';
             }
         }

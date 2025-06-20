@@ -10,22 +10,27 @@ use Illuminate\Support\Facades\Auth;
 class WishlistController extends Controller
 {
     /**
-     * Display the user's wishlist.
+     * عرض قائمة أمنيات المستخدم.
      */
     public function index()
     {
-        $wishlistItems = Auth::user()->wishlist()->with('product')->get();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $wishlistItems = $user->wishlist()->with('product')->get();
         
         return view('wishlist.index', compact('wishlistItems'));
     }
 
     /**
-     * Add a product to the wishlist.
+     * إضافة منتج إلى قائمة الأمنيات.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
+        ], [
+            'product_id.required' => 'معرف المنتج مطلوب.',
+            'product_id.exists' => 'المنتج المحدد غير موجود.',
         ]);
 
         $wishlistItem = Wishlist::updateOrCreate(
@@ -35,11 +40,11 @@ class WishlistController extends Controller
             ]
         );
 
-        return redirect()->back()->with('success', 'Product added to wishlist!');
+        return redirect()->back()->with('success', 'تم إضافة المنتج إلى قائمة الأمنيات!');
     }
 
     /**
-     * Remove a product from the wishlist.
+     * إزالة منتج من قائمة الأمنيات.
      */
     public function destroy($productId)
     {
@@ -47,16 +52,19 @@ class WishlistController extends Controller
             ->where('product_id', $productId)
             ->delete();
 
-        return redirect()->back()->with('success', 'Product removed from wishlist!');
+        return redirect()->back()->with('success', 'تم إزالة المنتج من قائمة الأمنيات!');
     }
 
     /**
-     * Toggle a product in the wishlist (add if not exists, remove if exists).
+     * تبديل منتج في قائمة الأمنيات (إضافة إذا لم يكن موجود، إزالة إذا كان موجود).
      */
     public function toggle(Request $request)
     {
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
+        ], [
+            'product_id.required' => 'معرف المنتج مطلوب.',
+            'product_id.exists' => 'المنتج المحدد غير موجود.',
         ]);
 
         $exists = Wishlist::where('user_id', Auth::id())
@@ -64,24 +72,26 @@ class WishlistController extends Controller
             ->exists();
 
         if ($exists) {
-            // Remove from wishlist
+            // إزالة من قائمة الأمنيات
             Wishlist::where('user_id', Auth::id())
                 ->where('product_id', $validated['product_id'])
                 ->delete();
-            $message = 'Product removed from wishlist!';
+            $message = 'تم إزالة المنتج من قائمة الأمنيات!';
             $inWishlist = false;
         } else {
-            // Add to wishlist
+            // إضافة إلى قائمة الأمنيات
             Wishlist::create([
                 'user_id' => Auth::id(),
                 'product_id' => $validated['product_id'],
             ]);
-            $message = 'Product added to wishlist!';
+            $message = 'تم إضافة المنتج إلى قائمة الأمنيات!';
             $inWishlist = true;
         }
         
-        // Get updated count for the badge
-        $count = Auth::user()->wishlist()->count();
+        // الحصول على العدد المحدث للشارة
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $count = $user->wishlist()->count();
 
         if ($request->ajax()) {
             return response()->json([

@@ -1,5 +1,9 @@
 <?php
 
+// ===================================
+// CheckoutController - وحدة تحكم عملية الشراء
+// ===================================
+
 namespace App\Http\Controllers;
 
 use App\Models\Order;
@@ -24,7 +28,7 @@ class CheckoutController extends Controller
     }
     
     /**
-     * Display checkout page
+     * عرض صفحة الدفع
      */
     public function index()
     {
@@ -32,31 +36,31 @@ class CheckoutController extends Controller
         
         if (!$cart || $cart->cartItems->isEmpty()) {
             return redirect()->route('cart.index')
-                ->with('error', __('Your cart is empty.'));
+                ->with('error', 'سلة التسوق فارغة.');
         }
         
-        // Fetch categories for the layout
+        // جلب الفئات للتخطيط
         $categories = Category::all();
         
-        // Featured products for recommendations
+        // المنتجات المميزة للتوصيات
         $featuredProducts = Product::where('is_active', true)
             ->where('featured', true)
             ->latest()
             ->take(4)
             ->get();
         
-        // Get available coupons for the user
+        // الحصول على القسائم المتاحة للمستخدم
         $availableCoupons = Coupon::where('user_id', Auth::id())
             ->where('is_used', false)
             ->where('valid_until', '>=', now())
             ->get();
             
-        // Calculate cart total
+        // حساب إجمالي السلة
         $cartTotal = $cart->cartItems->sum(function ($item) {
             return $item->quantity * $item->item_price;
         });
         
-        // Check for applied coupon in session
+        // التحقق من القسيمة المطبقة في الجلسة
         $appliedCoupon = null;
         $discountAmount = 0;
         
@@ -82,19 +86,22 @@ class CheckoutController extends Controller
     }
     
     /**
-     * Apply coupon to cart
+     * تطبيق قسيمة على السلة
      */
     public function applyCoupon(Request $request)
     {
         $request->validate([
             'coupon_code' => 'required|string'
+        ], [
+            'coupon_code.required' => 'رمز القسيمة مطلوب.',
+            'coupon_code.string' => 'رمز القسيمة يجب أن يكون نص.',
         ]);
         
         $cart = Auth::user()->cart;
         
         if (!$cart || $cart->cartItems->isEmpty()) {
             return redirect()->route('cart.index')
-                ->with('error', __('Your cart is empty.'));
+                ->with('error', 'سلة التسوق فارغة.');
         }
         
         $cartTotal = $cart->cartItems->sum(function ($item) {
@@ -111,23 +118,23 @@ class CheckoutController extends Controller
             return back()->withErrors(['coupon' => $validation['message']]);
         }
         
-        // Store the coupon code in the session
+        // حفظ رمز القسيمة في الجلسة
         Session::put('coupon_code', $request->coupon_code);
         
-        return back()->with('success', __('Coupon applied successfully!'));
+        return back()->with('success', 'تم تطبيق القسيمة بنجاح!');
     }
     
     /**
-     * Remove applied coupon
+     * إزالة القسيمة المطبقة
      */
     public function removeCoupon()
     {
         Session::forget('coupon_code');
-        return back()->with('success', __('Coupon removed successfully!'));
+        return back()->with('success', 'تم إزالة القسيمة بنجاح!');
     }
     
     /**
-     * Process checkout and create order
+     * معالجة الدفع وإنشاء الطلب
      */
     public function store(Request $request)
     {
@@ -137,38 +144,47 @@ class CheckoutController extends Controller
                 'shipping_address' => 'required|string|max:500',
                 'billing_address' => 'required|string|max:500',
                 'phone_number' => 'required|string|max:20',
+            ], [
+                'payment_method.required' => 'طريقة الدفع مطلوبة.',
+                'payment_method.in' => 'طريقة الدفع يجب أن تكون الدفع عند الاستلام.',
+                'shipping_address.required' => 'عنوان الشحن مطلوب.',
+                'shipping_address.string' => 'عنوان الشحن يجب أن يكون نص.',
+                'shipping_address.max' => 'عنوان الشحن لا يجب أن يتجاوز 500 حرف.',
+                'billing_address.required' => 'عنوان الفوترة مطلوب.',
+                'billing_address.string' => 'عنوان الفوترة يجب أن يكون نص.',
+                'billing_address.max' => 'عنوان الفوترة لا يجب أن يتجاوز 500 حرف.',
+                'phone_number.required' => 'رقم الهاتف مطلوب.',
+                'phone_number.string' => 'رقم الهاتف يجب أن يكون نص.',
+                'phone_number.max' => 'رقم الهاتف لا يجب أن يتجاوز 20 حرف.',
             ]);
             
             $cart = Auth::user()->cart;
             
             if (!$cart || $cart->cartItems->isEmpty()) {
                 return redirect()->route('cart.index')
-                    ->with('error', __('Your cart is empty.'));
+                    ->with('error', 'سلة التسوق فارغة.');
             }
             
             $totalAmount = 0;
             
-            // Validate stock and calculate total for all items
+            // التحقق من المخزون وحساب الإجمالي لجميع العناصر
             foreach ($cart->cartItems as $item) {
                 if (!$item->product) {
-                    return back()->with('error', __('One or more products in your cart are no longer available.'));
+                    return back()->with('error', 'واحد أو أكثر من المنتجات في سلتك لم تعد متوفرة.');
                 }
                 
                 if (!$item->product->is_active) {
-                    return back()->with('error', __('Product ":name" is no longer available.', ['name' => $item->product->name]));
+                    return back()->with('error', 'المنتج "' . $item->product->name . '" لم يعد متوفراً.');
                 }
                 
                 if ($item->product->stock < $item->quantity) {
-                    return back()->with('error', __('Not enough stock for ":name". Available: :stock', [
-                        'name' => $item->product->name,
-                        'stock' => $item->product->stock
-                    ]));
+                    return back()->with('error', 'مخزون غير كافٍ للمنتج "' . $item->product->name . '". المتاح: ' . $item->product->stock);
                 }
                 
                 $totalAmount += $item->quantity * $item->product->price;
             }
             
-            // Handle coupon discount
+            // التعامل مع خصم القسيمة
             $discountAmount = 0;
             $appliedCoupon = null;
             $couponDetails = null;
@@ -182,7 +198,7 @@ class CheckoutController extends Controller
                     $discountAmount = min($appliedCoupon->amount, $totalAmount);
                     $totalAmount -= $discountAmount;
                     
-                    // Store coupon details for order
+                    // حفظ تفاصيل القسيمة للطلب
                     $couponDetails = [
                         'code' => $appliedCoupon->code,
                         'amount' => $appliedCoupon->amount,
@@ -193,7 +209,7 @@ class CheckoutController extends Controller
             
             DB::beginTransaction();
             
-            // Create order
+            // إنشاء الطلب
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'total_amount' => $totalAmount,
@@ -206,57 +222,57 @@ class CheckoutController extends Controller
                 'coupon_details' => $couponDetails ? json_encode($couponDetails) : null,
             ]);
             
-            // Create order items and update stock
+            // إنشاء عناصر الطلب وتحديث المخزون
             foreach ($cart->cartItems as $item) {
-                // Create order item
+                // إنشاء عنصر الطلب
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
                     'price' => $item->product->price,
-                    'item_name' => $item->product->name, // Store name at purchase time
+                    'item_name' => $item->product->name, // حفظ الاسم وقت الشراء
                 ]);
                 
-                // Update product stock
+                // تحديث مخزون المنتج
                 $item->product->update([
                     'stock' => $item->product->stock - $item->quantity,
                 ]);
             }
             
-            // Apply coupon if one was used
+            // تطبيق القسيمة إذا تم استخدامها
             if ($appliedCoupon) {
                 $this->couponService->applyCoupon($order, $appliedCoupon);
                 Session::forget('coupon_code');
             }
             
-            // Generate a reward coupon for the order if eligible
+            // توليد قسيمة مكافأة للطلب إذا كان مؤهلاً
             $rewardCoupon = $this->couponService->generateCouponForOrder($order);
             
-            // Store reward coupon in session to display on thank you page
+            // حفظ قسيمة المكافأة في الجلسة لعرضها في صفحة الشكر
             if ($rewardCoupon) {
                 Session::put('reward_coupon', $rewardCoupon->id);
             }
             
-            // Clear cart
+            // مسح السلة
             $cart->cartItems()->delete();
             
             DB::commit();
             
-            // Redirect to testimonial form
+            // إعادة التوجيه إلى نموذج الشهادة
             return redirect()->route('testimonials.create', ['order' => $order->id])
-                ->with('success', __('Order placed successfully! Please share your experience with us.'));
+                ->with('success', 'تم تقديم الطلب بنجاح! يرجى مشاركة تجربتك معنا.');
                 
         } catch (\Exception $e) {
             DB::rollBack();
             
-            // Log the error for debugging
-            Log::error('Checkout error', [
+            // تسجيل الخطأ للتشخيص
+            Log::error('خطأ في الدفع', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
             ]);
             
-            return back()->with('error', __('An error occurred while processing your order. Please try again.'));
+            return back()->with('error', 'حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.');
         }
     }
 }

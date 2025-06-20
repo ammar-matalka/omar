@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Start New Conversation')
+@section('title', 'بدء محادثة جديدة')
 
 @push('styles')
 <style>
+/* RTL Direction */
+body {
+    direction: rtl;
+    text-align: right;
+}
+
 .create-conversation-container {
     max-width: 800px;
     margin: 0 auto;
@@ -56,6 +62,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-sm);
+    flex-direction: row-reverse;
 }
 
 .form-description {
@@ -80,6 +87,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
+    flex-direction: row-reverse;
 }
 
 .required-indicator {
@@ -98,6 +106,7 @@
     font-family: inherit;
     transition: all var(--transition-normal);
     box-shadow: var(--shadow-sm);
+    text-align: right;
 }
 
 .form-input:focus {
@@ -112,6 +121,7 @@
     resize: vertical;
     font-family: inherit;
     line-height: 1.6;
+    text-align: right;
 }
 
 .form-help {
@@ -121,11 +131,12 @@
     display: flex;
     align-items: center;
     gap: var(--space-xs);
+    flex-direction: row-reverse;
 }
 
 .character-counter {
     margin-top: var(--space-sm);
-    text-align: right;
+    text-align: left;
     font-size: 0.75rem;
     color: var(--on-surface-variant);
 }
@@ -151,6 +162,7 @@
     gap: var(--space-sm);
     color: var(--on-surface-variant);
     font-size: 0.875rem;
+    flex-direction: row-reverse;
 }
 
 .quick-topics {
@@ -165,6 +177,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
+    flex-direction: row-reverse;
 }
 
 .topics-grid {
@@ -179,7 +192,7 @@
     border-radius: var(--radius-lg);
     background: var(--surface);
     color: var(--on-surface);
-    text-align: left;
+    text-align: right;
     cursor: pointer;
     transition: all var(--transition-fast);
     display: flex;
@@ -187,6 +200,7 @@
     gap: var(--space-sm);
     font-size: 0.875rem;
     font-weight: 500;
+    flex-direction: row-reverse;
 }
 
 .topic-button:hover {
@@ -221,6 +235,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 0.875rem;
+    flex-direction: row-reverse;
 }
 
 .btn-primary {
@@ -285,9 +300,9 @@
 <div class="create-conversation-container">
     <!-- Page Header -->
     <div class="page-header">
-        <h1 class="page-title">Start New Conversation</h1>
+        <h1 class="page-title">بدء محادثة جديدة</h1>
         <p class="page-subtitle">
-            Get in touch with our support team. We're here to help you with any questions or concerns.
+            تواصل مع فريق الدعم لدينا. نحن هنا لمساعدتك في أي استفسارات أو مخاوف.
         </p>
     </div>
 
@@ -296,10 +311,10 @@
         <div class="form-header">
             <h2 class="form-title">
                 <i class="fas fa-comment-dots"></i>
-                Contact Support
+                التواصل مع الدعم
             </h2>
             <p class="form-description">
-                Please provide details about your inquiry so we can assist you better
+                يرجى تقديم تفاصيل عن استفسارك حتى نتمكن من مساعدتك بشكل أفضل
             </p>
         </div>
 
@@ -311,32 +326,32 @@
                 <div class="quick-topics">
                     <div class="topics-title">
                         <i class="fas fa-tags"></i>
-                        Choose a topic (optional)
+                        اختر موضوعًا (اختياري)
                     </div>
                     <div class="topics-grid">
-                        <button type="button" class="topic-button" onclick="selectTopic(this, 'Order Issue')">
+                        <button type="button" class="topic-button" onclick="selectTopic(this, 'مشكلة في الطلب')">
                             <i class="topic-icon fas fa-shopping-cart"></i>
-                            <span>Order Issue</span>
+                            <span>مشكلة في الطلب</span>
                         </button>
-                        <button type="button" class="topic-button" onclick="selectTopic(this, 'Product Question')">
+                        <button type="button" class="topic-button" onclick="selectTopic(this, 'استفسار عن منتج')">
                             <i class="topic-icon fas fa-box"></i>
-                            <span>Product Question</span>
+                            <span>استفسار عن منتج</span>
                         </button>
-                        <button type="button" class="topic-button" onclick="selectTopic(this, 'Technical Support')">
+                        <button type="button" class="topic-button" onclick="selectTopic(this, 'دعم فني')">
                             <i class="topic-icon fas fa-cog"></i>
-                            <span>Technical Support</span>
+                            <span>دعم فني</span>
                         </button>
-                        <button type="button" class="topic-button" onclick="selectTopic(this, 'Account Help')">
+                        <button type="button" class="topic-button" onclick="selectTopic(this, 'مساعدة في الحساب')">
                             <i class="topic-icon fas fa-user"></i>
-                            <span>Account Help</span>
+                            <span>مساعدة في الحساب</span>
                         </button>
-                        <button type="button" class="topic-button" onclick="selectTopic(this, 'Billing Question')">
+                        <button type="button" class="topic-button" onclick="selectTopic(this, 'استفسار عن الفواتير')">
                             <i class="topic-icon fas fa-credit-card"></i>
-                            <span>Billing Question</span>
+                            <span>استفسار عن الفواتير</span>
                         </button>
-                        <button type="button" class="topic-button" onclick="selectTopic(this, 'General Inquiry')">
+                        <button type="button" class="topic-button" onclick="selectTopic(this, 'استفسار عام')">
                             <i class="topic-icon fas fa-question-circle"></i>
-                            <span>General Inquiry</span>
+                            <span>استفسار عام</span>
                         </button>
                     </div>
                 </div>
@@ -345,7 +360,7 @@
                 <div class="form-group">
                     <label for="title" class="form-label">
                         <i class="fas fa-heading"></i>
-                        Subject
+                        الموضوع
                         <span class="required-indicator">*</span>
                     </label>
                     <input 
@@ -353,7 +368,7 @@
                         id="title" 
                         name="title" 
                         class="form-input" 
-                        placeholder="Brief description of your inquiry"
+                        placeholder="وصف مختصر لاستفسارك"
                         value="{{ old('title') }}"
                         required
                         maxlength="255"
@@ -361,10 +376,10 @@
                     >
                     <div class="form-help">
                         <i class="fas fa-info-circle"></i>
-                        <span>Please provide a clear and concise subject line</span>
+                        <span>يرجى تقديم سطر موضوع واضح وموجز</span>
                     </div>
                     <div class="character-counter">
-                        <span id="titleCounter">0</span>/255 characters
+                        <span id="titleCounter">0</span>/255 حرفًا
                     </div>
                     @error('title')
                         <div class="form-help" style="color: var(--error-500); margin-top: var(--space-sm);">
@@ -378,23 +393,23 @@
                 <div class="form-group">
                     <label for="message" class="form-label">
                         <i class="fas fa-comment"></i>
-                        Message
+                        الرسالة
                         <span class="required-indicator">*</span>
                     </label>
                     <textarea 
                         id="message" 
                         name="message" 
                         class="form-input form-textarea" 
-                        placeholder="Please describe your inquiry in detail. The more information you provide, the better we can assist you."
+                        placeholder="يرجى وصف استفسارك بالتفصيل. كلما زادت المعلومات التي تقدمها، كان بإمكاننا مساعدتك بشكل أفضل."
                         required
                         onkeyup="updateMessageCounter(this)"
                     >{{ old('message') }}</textarea>
                     <div class="form-help">
                         <i class="fas fa-lightbulb"></i>
-                        <span>Include any relevant details such as order numbers, error messages, or steps you've already tried</span>
+                        <span>قم بتضمين أي تفاصيل ذات صلة مثل أرقام الطلبات أو رسائل الخطأ أو الخطوات التي جربتها بالفعل</span>
                     </div>
                     <div class="character-counter">
-                        <span id="messageCounter">0</span> characters
+                        <span id="messageCounter">0</span> حرفًا
                     </div>
                     @error('message')
                         <div class="form-help" style="color: var(--error-500); margin-top: var(--space-sm);">
@@ -408,17 +423,17 @@
             <div class="form-actions">
                 <div class="form-note">
                     <i class="fas fa-clock"></i>
-                    <span>We typically respond within 24 hours</span>
+                    <span>نحن نرد عادةً خلال 24 ساعة</span>
                 </div>
                 
                 <div class="action-buttons">
                     <a href="{{ route('user.conversations.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i>
-                        Back to Conversations
+                        العودة إلى المحادثات
                     </a>
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="fas fa-paper-plane"></i>
-                        Start Conversation
+                        بدء المحادثة
                     </button>
                 </div>
             </div>

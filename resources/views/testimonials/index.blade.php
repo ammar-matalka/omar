@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
-@section('title', __('Customer Reviews') . ' - ' . config('app.name'))
+@section('title', __('تقييمات العملاء') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    html[dir="rtl"] {
+        direction: rtl;
+        text-align: right;
+    }
+
     .testimonials-hero {
         background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
         color: white;
@@ -303,7 +309,8 @@
         content: '"';
         position: absolute;
         top: -10px;
-        left: -15px;
+        right: -15px;
+        left: auto;
         font-size: 3rem;
         color: var(--primary-200);
         font-family: serif;
@@ -314,7 +321,8 @@
         content: '"';
         position: absolute;
         bottom: -20px;
-        right: -5px;
+        left: -5px;
+        right: auto;
         font-size: 3rem;
         color: var(--primary-200);
         font-family: serif;
@@ -460,7 +468,8 @@
     .testimonial-badge {
         position: absolute;
         top: var(--space-md);
-        right: var(--space-md);
+        left: var(--space-md);
+        right: auto;
         background: var(--warning-500);
         color: white;
         padding: var(--space-xs) var(--space-sm);
@@ -482,7 +491,8 @@
     .floating-action {
         position: fixed;
         bottom: var(--space-xl);
-        right: var(--space-xl);
+        left: var(--space-xl);
+        right: auto;
         width: 60px;
         height: 60px;
         background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
@@ -560,7 +570,7 @@
         
         .floating-action {
             bottom: var(--space-lg);
-            right: var(--space-lg);
+            left: var(--space-lg);
             width: 50px;
             height: 50px;
             font-size: 1.25rem;
@@ -574,23 +584,23 @@
 <section class="testimonials-hero">
     <div class="container">
         <div class="hero-content fade-in">
-            <h1 class="hero-title">{{ __('Customer Reviews') }}</h1>
+            <h1 class="hero-title">{{ __('تقييمات العملاء') }}</h1>
             <p class="hero-subtitle">
-                {{ __('Discover what our customers say about their shopping experience with us. Real reviews from real customers.') }}
+                {{ __('اكتشف ما يقوله عملاؤنا عن تجربة التسوق معنا. تقييمات حقيقية من عملاء حقيقيين.') }}
             </p>
             
             <div class="hero-stats">
                 <div class="stat-item">
                     <span class="stat-number">{{ $totalReviews ?? 0 }}</span>
-                    <div class="stat-label">{{ __('Total Reviews') }}</div>
+                    <div class="stat-label">{{ __('إجمالي التقييمات') }}</div>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">{{ number_format($averageRating ?? 0, 1) }}</span>
-                    <div class="stat-label">{{ __('Average Rating') }}</div>
+                    <div class="stat-label">{{ __('متوسط التقييم') }}</div>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">{{ $satisfiedCustomers ?? 0 }}%</span>
-                    <div class="stat-label">{{ __('Satisfied') }}</div>
+                    <div class="stat-label">{{ __('عملاء راضون') }}</div>
                 </div>
             </div>
         </div>
@@ -602,9 +612,9 @@
     <div class="container">
         <!-- Section Header -->
         <div class="testimonials-header fade-in">
-            <h2 class="section-title">{{ __('What Our Customers Say') }}</h2>
+            <h2 class="section-title">{{ __('ما يقوله عملاؤنا') }}</h2>
             <p class="section-subtitle">
-                {{ __('Browse through authentic reviews and experiences shared by our valued customers') }}
+                {{ __('تصفح التقييمات والتجارب الحقيقية التي شاركها عملاؤنا الكرام') }}
             </p>
         </div>
         
@@ -612,23 +622,23 @@
         <div class="filter-tabs fade-in">
             <a href="?rating=all" class="filter-tab {{ request('rating', 'all') === 'all' ? 'active' : '' }}">
                 <i class="fas fa-star"></i>
-                {{ __('All Reviews') }}
+                {{ __('كل التقييمات') }}
             </a>
             <a href="?rating=5" class="filter-tab {{ request('rating') === '5' ? 'active' : '' }}">
                 <i class="fas fa-star"></i>
-                {{ __('5 Stars') }}
+                {{ __('5 نجوم') }}
             </a>
             <a href="?rating=4" class="filter-tab {{ request('rating') === '4' ? 'active' : '' }}">
                 <i class="fas fa-star"></i>
-                {{ __('4 Stars') }}
+                {{ __('4 نجوم') }}
             </a>
             <a href="?rating=3" class="filter-tab {{ request('rating') === '3' ? 'active' : '' }}">
                 <i class="fas fa-star"></i>
-                {{ __('3 Stars') }}
+                {{ __('3 نجوم') }}
             </a>
             <a href="?rating=recent" class="filter-tab {{ request('rating') === 'recent' ? 'active' : '' }}">
                 <i class="fas fa-clock"></i>
-                {{ __('Recent') }}
+                {{ __('الأحدث') }}
             </a>
         </div>
         
@@ -636,19 +646,19 @@
         <div class="sort-controls fade-in">
             <select class="sort-select" onchange="window.location.href = updateUrlParameter('sort', this.value)">
                 <option value="newest" {{ request('sort', 'newest') === 'newest' ? 'selected' : '' }}>
-                    {{ __('Newest First') }}
+                    {{ __('الأحدث أولاً') }}
                 </option>
                 <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>
-                    {{ __('Oldest First') }}
+                    {{ __('الأقدم أولاً') }}
                 </option>
                 <option value="highest_rating" {{ request('sort') === 'highest_rating' ? 'selected' : '' }}>
-                    {{ __('Highest Rating') }}
+                    {{ __('أعلى تقييم') }}
                 </option>
                 <option value="lowest_rating" {{ request('sort') === 'lowest_rating' ? 'selected' : '' }}>
-                    {{ __('Lowest Rating') }}
+                    {{ __('أقل تقييم') }}
                 </option>
                 <option value="most_helpful" {{ request('sort') === 'most_helpful' ? 'selected' : '' }}>
-                    {{ __('Most Helpful') }}
+                    {{ __('الأكثر فائدة') }}
                 </option>
             </select>
         </div>
@@ -660,9 +670,9 @@
                     <div class="testimonial-card fade-in" data-rating="{{ $testimonial->rating }}">
                         <!-- Testimonial Badge -->
                         @if($testimonial->created_at->diffInDays() < 7)
-                            <div class="testimonial-badge badge-recent">{{ __('Recent') }}</div>
+                            <div class="testimonial-badge badge-recent">{{ __('جديد') }}</div>
                         @elseif($testimonial->rating === 5)
-                            <div class="testimonial-badge badge-featured">{{ __('Featured') }}</div>
+                            <div class="testimonial-badge badge-featured">{{ __('مميز') }}</div>
                         @endif
                         
                         <!-- Testimonial Header -->
@@ -705,15 +715,15 @@
                         <div class="testimonial-footer">
                             <div class="order-info">
                                 <i class="fas fa-receipt"></i>
-                                {{ __('Order') }} #{{ $testimonial->order_id }}
+                                {{ __('طلب') }} #{{ $testimonial->order_id }}
                                 <span>•</span>
                                 <i class="fas fa-check-circle"></i>
-                                {{ __('Verified Purchase') }}
+                                {{ __('شراء موثوق') }}
                             </div>
                             
                             <div class="verified-badge">
                                 <i class="fas fa-shield-check"></i>
-                                {{ __('Verified Review') }}
+                                {{ __('تقييم موثوق') }}
                             </div>
                         </div>
                     </div>
@@ -724,7 +734,7 @@
             @if($testimonials->hasMorePages())
                 <button class="load-more-btn fade-in" onclick="loadMoreTestimonials()">
                     <i class="fas fa-plus"></i>
-                    {{ __('Load More Reviews') }}
+                    {{ __('تحميل المزيد') }}
                 </button>
             @endif
             
@@ -740,13 +750,13 @@
                 <div class="empty-icon">
                     <i class="fas fa-comment-dots"></i>
                 </div>
-                <h3 class="empty-title">{{ __('No Reviews Yet') }}</h3>
+                <h3 class="empty-title">{{ __('لا توجد تقييمات بعد') }}</h3>
                 <p class="empty-text">
-                    {{ __('Be the first to share your experience! Your review helps other customers make informed decisions.') }}
+                    {{ __('كن أول من يشارك تجربته! تقييمك يساعد العملاء الآخرين على اتخاذ قرارات مستنيرة.') }}
                 </p>
                 <a href="{{ route('products.index') }}" class="empty-cta">
                     <i class="fas fa-shopping-bag"></i>
-                    {{ __('Start Shopping') }}
+                    {{ __('ابدأ التسوق') }}
                 </a>
             </div>
         @endif
@@ -755,7 +765,7 @@
 
 <!-- Floating Action Button -->
 @auth
-    <button class="floating-action" onclick="scrollToTop()" title="{{ __('Back to Top') }}">
+    <button class="floating-action" onclick="scrollToTop()" title="{{ __('العودة للأعلى') }}">
         <i class="fas fa-arrow-up"></i>
     </button>
 @endauth
@@ -801,7 +811,7 @@
         const loadMoreBtn = document.querySelector('.load-more-btn');
         const originalText = loadMoreBtn.innerHTML;
         
-        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("Loading...") }}';
+        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("جاري التحميل...") }}';
         loadMoreBtn.disabled = true;
         
         const url = new URL(window.location);
@@ -841,7 +851,7 @@
         })
         .catch(error => {
             console.error('Error loading more testimonials:', error);
-            showNotification('{{ __("Failed to load more reviews") }}', 'error');
+            showNotification('{{ __("فشل تحميل المزيد من التقييمات") }}', 'error');
         })
         .finally(() => {
             isLoading = false;
@@ -989,7 +999,8 @@
         notification.style.cssText = `
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
+            right: auto;
             z-index: 9999;
             max-width: 300px;
             box-shadow: var(--shadow-xl);
@@ -1058,15 +1069,15 @@
     function shareTestimonial(testimonialId) {
         if (navigator.share) {
             navigator.share({
-                title: '{{ config("app.name") }} - Customer Review',
-                text: 'Check out this customer review',
+                title: '{{ config("app.name") }} - تقييم العميل',
+                text: 'اطلع على هذا التقييم',
                 url: window.location.href + '#testimonial-' + testimonialId
             });
         } else {
             // Fallback: copy URL to clipboard
             const url = window.location.href + '#testimonial-' + testimonialId;
             navigator.clipboard.writeText(url).then(() => {
-                showNotification('{{ __("Review link copied to clipboard") }}', 'success');
+                showNotification('{{ __("تم نسخ رابط التقييم") }}', 'success');
             });
         }
     }

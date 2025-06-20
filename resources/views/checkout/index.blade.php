@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
-@section('title', __('Checkout') . ' - ' . config('app.name'))
+@section('title', __('الدفع') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+    
     .checkout-container {
         padding: var(--space-2xl) 0;
         background: var(--surface-variant);
@@ -49,6 +55,7 @@
         color: var(--on-surface-variant);
         font-weight: 500;
         transition: all var(--transition-fast);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .step.active {
@@ -114,6 +121,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .section-icon {
@@ -159,6 +167,7 @@
         color: var(--on-surface);
         font-size: 1rem;
         transition: all var(--transition-fast);
+        text-align: right; /* RTL text alignment */
     }
     
     .form-input:focus {
@@ -180,6 +189,8 @@
         display: flex;
         align-items: center;
         gap: var(--space-xs);
+        flex-direction: row-reverse; /* Reverse for RTL */
+        justify-content: flex-end; /* Align to right */
     }
     
     .coupon-section {
@@ -195,6 +206,7 @@
         align-items: center;
         justify-content: space-between;
         margin-bottom: var(--space-md);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .coupon-title {
@@ -203,6 +215,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .coupon-toggle {
@@ -217,6 +230,7 @@
     .coupon-form {
         display: flex;
         gap: var(--space-sm);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .coupon-input {
@@ -225,6 +239,7 @@
         border: 1px solid var(--accent-300);
         border-radius: var(--radius-md);
         background: var(--surface);
+        text-align: right; /* RTL text alignment */
     }
     
     .coupon-btn {
@@ -252,6 +267,7 @@
         align-items: center;
         justify-content: space-between;
         margin-top: var(--space-md);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .coupon-info {
@@ -260,6 +276,7 @@
         gap: var(--space-sm);
         color: var(--success-700);
         font-weight: 500;
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .remove-coupon {
@@ -286,6 +303,7 @@
         border-radius: var(--radius-lg);
         cursor: pointer;
         transition: all var(--transition-fast);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .payment-option:hover {
@@ -360,6 +378,7 @@
         gap: var(--space-sm);
         box-shadow: var(--shadow-lg);
         margin-top: var(--space-xl);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .place-order-btn:hover:not(:disabled) {
@@ -395,6 +414,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .order-items {
@@ -411,6 +431,7 @@
         margin-bottom: var(--space-lg);
         padding-bottom: var(--space-lg);
         border-bottom: 1px solid var(--border-color);
+        flex-direction: row-reverse; /* Reverse for RTL */
     }
     
     .order-item:last-child {
@@ -582,8 +603,8 @@
 <div class="container checkout-container">
     <!-- Checkout Header -->
     <div class="checkout-header">
-        <h1 class="checkout-title">{{ __('Checkout') }}</h1>
-        <p class="checkout-subtitle">{{ __('Complete your order') }}</p>
+        <h1 class="checkout-title">{{ __('الدفع') }}</h1>
+        <p class="checkout-subtitle">{{ __('أكمل طلبك') }}</p>
     </div>
     
     <!-- Checkout Steps -->
@@ -592,17 +613,17 @@
             <div class="step-icon">
                 <i class="fas fa-check"></i>
             </div>
-            <span>{{ __('Cart Review') }}</span>
+            <span>{{ __('مراجعة السلة') }}</span>
         </div>
         
         <div class="step active">
             <div class="step-icon">2</div>
-            <span>{{ __('Shipping & Payment') }}</span>
+            <span>{{ __('الشحن والدفع') }}</span>
         </div>
         
         <div class="step">
             <div class="step-icon">3</div>
-            <span>{{ __('Order Complete') }}</span>
+            <span>{{ __('اكتمال الطلب') }}</span>
         </div>
     </div>
     
@@ -618,13 +639,13 @@
                         <div class="section-icon">
                             <i class="fas fa-shipping-fast"></i>
                         </div>
-                        {{ __('Shipping Information') }}
+                        {{ __('معلومات الشحن') }}
                     </h2>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label for="phone_number" class="form-label">
-                                {{ __('Phone Number') }} <span class="required">*</span>
+                                {{ __('رقم الهاتف') }} <span class="required">*</span>
                             </label>
                             <input 
                                 type="tel" 
@@ -633,7 +654,7 @@
                                 class="form-input @error('phone_number') error @enderror"
                                 value="{{ old('phone_number', Auth::user()->phone) }}"
                                 required
-                                placeholder="{{ __('Enter your phone number') }}"
+                                placeholder="{{ __('أدخل رقم هاتفك') }}"
                             >
                             @error('phone_number')
                                 <div class="error-message">
@@ -646,7 +667,7 @@
                     
                     <div class="form-group">
                         <label for="shipping_address" class="form-label">
-                            {{ __('Shipping Address') }} <span class="required">*</span>
+                            {{ __('عنوان الشحن') }} <span class="required">*</span>
                         </label>
                         <textarea 
                             id="shipping_address" 
@@ -654,7 +675,7 @@
                             class="form-input @error('shipping_address') error @enderror"
                             rows="3"
                             required
-                            placeholder="{{ __('Enter your full shipping address') }}"
+                            placeholder="{{ __('أدخل عنوان الشحن الكامل') }}"
                         >{{ old('shipping_address', Auth::user()->address) }}</textarea>
                         @error('shipping_address')
                             <div class="error-message">
@@ -666,7 +687,7 @@
                     
                     <div class="form-group">
                         <label for="billing_address" class="form-label">
-                            {{ __('Billing Address') }} <span class="required">*</span>
+                            {{ __('عنوان الفاتورة') }} <span class="required">*</span>
                         </label>
                         <textarea 
                             id="billing_address" 
@@ -674,7 +695,7 @@
                             class="form-input @error('billing_address') error @enderror"
                             rows="3"
                             required
-                            placeholder="{{ __('Enter your billing address') }}"
+                            placeholder="{{ __('أدخل عنوان الفاتورة') }}"
                         >{{ old('billing_address', Auth::user()->address) }}</textarea>
                         @error('billing_address')
                             <div class="error-message">
@@ -686,7 +707,7 @@
                         <div style="margin-top: var(--space-sm);">
                             <label style="display: flex; align-items: center; gap: var(--space-sm); font-size: 0.875rem; color: var(--on-surface-variant);">
                                 <input type="checkbox" id="sameAsShipping" onchange="copyShippingAddress()">
-                                {{ __('Same as shipping address') }}
+                                {{ __('نفس عنوان الشحن') }}
                             </label>
                         </div>
                     </div>
@@ -699,10 +720,10 @@
                             <div class="coupon-header">
                                 <h3 class="coupon-title">
                                     <i class="fas fa-ticket-alt"></i>
-                                    {{ __('Discount Coupon') }}
+                                    {{ __('كوبون خصم') }}
                                 </h3>
                                 <button type="button" class="coupon-toggle" onclick="toggleCouponForm()">
-                                    {{ __('Have a coupon?') }}
+                                    {{ __('لديك كوبون؟') }}
                                 </button>
                             </div>
                             
@@ -710,7 +731,7 @@
                                 <div class="applied-coupon">
                                     <div class="coupon-info">
                                         <i class="fas fa-check-circle"></i>
-                                        {{ __('Coupon Applied') }}: {{ $appliedCoupon->code }}
+                                        {{ __('تم تطبيق الكوبون') }}: {{ $appliedCoupon->code }}
                                         (-${{ number_format($discountAmount, 2) }})
                                     </div>
                                     <form method="POST" action="{{ route('checkout.removeCoupon') }}" style="display: inline;">
@@ -727,18 +748,18 @@
                                         type="text" 
                                         class="coupon-input" 
                                         name="coupon_code" 
-                                        placeholder="{{ __('Enter coupon code') }}"
+                                        placeholder="{{ __('أدخل كود الكوبون') }}"
                                         id="couponInput"
                                     >
                                     <button type="button" class="coupon-btn" onclick="applyCoupon()">
-                                        {{ __('Apply') }}
+                                        {{ __('تطبيق') }}
                                     </button>
                                 </div>
                                 
                                 @if($availableCoupons->count() > 0)
                                     <div style="margin-top: var(--space-md);">
                                         <p style="font-size: 0.875rem; color: var(--on-surface-variant); margin-bottom: var(--space-sm);">
-                                            {{ __('Available coupons:') }}
+                                            {{ __('الكوبونات المتاحة:') }}
                                         </p>
                                         @foreach($availableCoupons as $coupon)
                                             <button 
@@ -763,15 +784,15 @@
                         <div class="section-icon">
                             <i class="fas fa-credit-card"></i>
                         </div>
-                        {{ __('Payment Method') }}
+                        {{ __('طريقة الدفع') }}
                     </h2>
                     
                     <div class="payment-methods">
                         <div class="payment-option selected" onclick="selectPayment(this)" data-method="cash">
                             <div class="payment-radio"></div>
                             <div class="payment-info">
-                                <div class="payment-title">{{ __('Cash on Delivery') }}</div>
-                                <div class="payment-description">{{ __('Pay when you receive your order') }}</div>
+                                <div class="payment-title">{{ __('الدفع عند الاستلام') }}</div>
+                                <div class="payment-description">{{ __('ادفع عند استلام طلبك') }}</div>
                             </div>
                             <i class="payment-icon fas fa-money-bill-wave"></i>
                         </div>
@@ -784,7 +805,7 @@
                 <div class="form-section">
                     <button type="submit" class="place-order-btn" id="placeOrderBtn">
                         <i class="fas fa-lock"></i>
-                        <span id="orderBtnText">{{ __('Place Order') }}</span>
+                        <span id="orderBtnText">{{ __('تأكيد الطلب') }}</span>
                         <div class="loading-spinner" id="orderSpinner" style="display: none;"></div>
                     </button>
                 </div>
@@ -796,7 +817,7 @@
             <div class="summary-header">
                 <h3 class="summary-title">
                     <i class="fas fa-receipt"></i>
-                    {{ __('Order Summary') }}
+                    {{ __('ملخص الطلب') }}
                 </h3>
             </div>
             
@@ -809,7 +830,7 @@
                         <div class="item-details">
                             <div class="item-name">{{ $item->item_name }}</div>
                             <div class="item-info">
-                                <span class="item-quantity">{{ __('Qty') }}: {{ $item->quantity }}</span>
+                                <span class="item-quantity">{{ __('الكمية') }}: {{ $item->quantity }}</span>
                                 <span class="item-price">${{ number_format($item->item_price, 2) }}</span>
                             </div>
                         </div>
@@ -819,29 +840,29 @@
             
             <div class="summary-calculations">
                 <div class="calc-row">
-                    <span class="calc-label">{{ __('Subtotal') }}</span>
+                    <span class="calc-label">{{ __('المجموع الجزئي') }}</span>
                     <span class="calc-value">${{ number_format($cartTotal, 2) }}</span>
                 </div>
                 
                 <div class="calc-row">
-                    <span class="calc-label">{{ __('Shipping') }}</span>
-                    <span class="calc-value">{{ __('Free') }}</span>
+                    <span class="calc-label">{{ __('الشحن') }}</span>
+                    <span class="calc-value">{{ __('مجاني') }}</span>
                 </div>
                 
                 @if($appliedCoupon && $discountAmount > 0)
                     <div class="calc-row discount-row">
-                        <span class="calc-label">{{ __('Discount') }} ({{ $appliedCoupon->code }})</span>
+                        <span class="calc-label">{{ __('الخصم') }} ({{ $appliedCoupon->code }})</span>
                         <span class="calc-value">-${{ number_format($discountAmount, 2) }}</span>
                     </div>
                 @endif
                 
                 <div class="calc-row">
-                    <span class="calc-label">{{ __('Tax') }}</span>
-                    <span class="calc-value">{{ __('Included') }}</span>
+                    <span class="calc-label">{{ __('الضريبة') }}</span>
+                    <span class="calc-value">{{ __('مشمولة') }}</span>
                 </div>
                 
                 <div class="calc-row total-row">
-                    <span class="total-label">{{ __('Total') }}</span>
+                    <span class="total-label">{{ __('الإجمالي') }}</span>
                     <span class="total-value">${{ number_format($cartTotal - $discountAmount, 2) }}</span>
                 </div>
             </div>
@@ -890,7 +911,7 @@
         const code = input.value.trim();
         
         if (!code) {
-            showNotification('{{ __("Please enter a coupon code") }}', 'error');
+            showNotification('{{ __("الرجاء إدخال كود الكوبون") }}', 'error');
             return;
         }
         
@@ -910,10 +931,10 @@
                 location.reload(); // Reload to show applied coupon
             } else {
                 const data = await response.json();
-                showNotification(data.message || '{{ __("Invalid coupon code") }}', 'error');
+                showNotification(data.message || '{{ __("كود الكوبون غير صالح") }}', 'error');
             }
         } catch (error) {
-            showNotification('{{ __("Error applying coupon") }}', 'error');
+            showNotification('{{ __("خطأ في تطبيق الكوبون") }}', 'error');
         }
     }
     
@@ -962,7 +983,7 @@
             btn.disabled = false;
             btnText.style.display = 'inline';
             spinner.style.display = 'none';
-            showNotification('{{ __("Please fill in all required fields") }}', 'error');
+            showNotification('{{ __("الرجاء ملء جميع الحقول المطلوبة") }}', 'error');
             return;
         }
     });
@@ -973,7 +994,7 @@
         notification.className = `alert alert-${type} slide-in`;
         notification.style.position = 'fixed';
         notification.style.top = '20px';
-        notification.style.right = '20px';
+        notification.style.left = '20px'; /* Changed from right to left for RTL */
         notification.style.zIndex = '9999';
         notification.style.maxWidth = '300px';
         notification.innerHTML = `
@@ -1052,7 +1073,7 @@
 <style>
     @keyframes slideOut {
         to {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
     }

@@ -11,7 +11,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-$orders = Order::with('user')->orderBy('id', 'asc')->paginate(10);
+        $orders = Order::with('user')->orderBy('id', 'asc')->paginate(10);
         return view('admin.orders.index', compact('orders'));
     }
     
@@ -23,39 +23,42 @@ $orders = Order::with('user')->orderBy('id', 'asc')->paginate(10);
     
     public function update(Request $request, Order $order)
     {
-        // Add debugging to trace the execution
-        Log::info('Order update called', ['order_id' => $order->id, 'request_data' => $request->all()]);
+        // إضافة تتبع للتشخيص
+        Log::info('تم استدعاء تحديث الطلب', ['order_id' => $order->id, 'request_data' => $request->all()]);
         
-        // Validate the status field
+        // التحقق من صحة حقل الحالة
         $validated = $request->validate([
             'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
+        ], [
+            'status.required' => 'حالة الطلب مطلوبة.',
+            'status.in' => 'حالة الطلب يجب أن تكون إحدى القيم التالية: قيد الانتظار، قيد المعالجة، تم الشحن، تم التسليم، ملغي.',
         ]);
         
-        // Update the order status
+        // تحديث حالة الطلب
         $order->status = $validated['status'];
         $order->save();
         
-        // Redirect back with success message
+        // العودة مع رسالة نجاح
         return redirect()->route('admin.orders.show', $order)
-            ->with('success', 'Order status updated successfully.');
+            ->with('success', 'تم تحديث حالة الطلب بنجاح.');
     }
     
     public function destroy(Order $order)
     {
         try {
-            // Delete related order items first to maintain database integrity
+            // حذف عناصر الطلب المرتبطة أولاً للحفاظ على سلامة قاعدة البيانات
             $order->orderItems()->delete();
             
-            // Then delete the order
+            // ثم حذف الطلب
             $order->delete();
             
             return redirect()->route('admin.orders.index')
-                ->with('success', 'Order #' . $order->id . ' has been deleted successfully.');
+                ->with('success', 'تم حذف الطلب رقم ' . $order->id . ' بنجاح.');
         } catch (\Exception $e) {
-            Log::error('Error deleting order: ' . $e->getMessage());
+            Log::error('خطأ في حذف الطلب: ' . $e->getMessage());
             
             return redirect()->route('admin.orders.index')
-                ->with('error', 'Failed to delete order. Please try again.');
+                ->with('error', 'فشل في حذف الطلب. يرجى المحاولة مرة أخرى.');
         }
     }
 }

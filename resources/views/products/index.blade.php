@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
-@section('title', __('Products') . ' - ' . config('app.name'))
+@section('title', __('المنتجات') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    html[dir="rtl"] {
+        direction: rtl;
+        text-align: right;
+    }
+
     .products-hero {
         background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
         color: white;
@@ -219,7 +225,7 @@
     .product-badge {
         position: absolute;
         top: var(--space-sm);
-        left: var(--space-sm);
+        right: var(--space-sm);
         background: linear-gradient(135deg, var(--accent-500), var(--accent-600));
         color: white;
         padding: var(--space-xs) var(--space-sm);
@@ -233,12 +239,12 @@
     .product-actions {
         position: absolute;
         top: var(--space-sm);
-        right: var(--space-sm);
+        left: var(--space-sm);
         display: flex;
         flex-direction: column;
         gap: var(--space-xs);
         opacity: 0;
-        transform: translateX(20px);
+        transform: translateX(-20px);
         transition: all var(--transition-normal);
     }
     
@@ -503,9 +509,9 @@
             flex-direction: row;
             bottom: var(--space-sm);
             top: auto;
-            right: var(--space-sm);
             left: var(--space-sm);
-            justify-content: flex-end;
+            right: var(--space-sm);
+            justify-content: flex-start;
         }
     }
 </style>
@@ -516,8 +522,8 @@
 <section class="products-hero">
     <div class="container">
         <div class="hero-content">
-            <h1 class="hero-title">{{ __('Our Products') }}</h1>
-            <p class="hero-subtitle">{{ __('Discover high-quality products for your learning journey') }}</p>
+            <h1 class="hero-title">{{ __('منتجاتنا') }}</h1>
+            <p class="hero-subtitle">{{ __('اكتشف منتجات عالية الجودة لرحلتك التعليمية') }}</p>
         </div>
     </div>
 </section>
@@ -528,25 +534,25 @@
     <div class="filters-section fade-in">
         <h2 class="filters-title">
             <i class="fas fa-filter"></i>
-            {{ __('Filter Products') }}
+            {{ __('تصفية المنتجات') }}
         </h2>
         
         <form method="GET" action="{{ route('products.index') }}" class="filters-form">
             <div class="filter-group">
-                <label class="filter-label">{{ __('Search') }}</label>
+                <label class="filter-label">{{ __('بحث') }}</label>
                 <input 
                     type="text" 
                     name="search" 
                     class="filter-input" 
-                    placeholder="{{ __('Search products...') }}"
+                    placeholder="{{ __('ابحث عن منتجات...') }}"
                     value="{{ request('search') }}"
                 >
             </div>
             
             <div class="filter-group">
-                <label class="filter-label">{{ __('Category') }}</label>
+                <label class="filter-label">{{ __('الفئة') }}</label>
                 <select name="category" class="filter-input">
-                    <option value="">{{ __('All Categories') }}</option>
+                    <option value="">{{ __('كل الفئات') }}</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
                             {{ $category->name }}
@@ -556,26 +562,26 @@
             </div>
             
             <div class="filter-group">
-                <label class="filter-label">{{ __('Price Range') }}</label>
+                <label class="filter-label">{{ __('نطاق السعر') }}</label>
                 <select name="price_range" class="filter-input">
-                    <option value="">{{ __('Any Price') }}</option>
-                    <option value="0-50" {{ request('price_range') == '0-50' ? 'selected' : '' }}>{{ __('Under $50') }}</option>
+                    <option value="">{{ __('أي سعر') }}</option>
+                    <option value="0-50" {{ request('price_range') == '0-50' ? 'selected' : '' }}>{{ __('أقل من $50') }}</option>
                     <option value="50-100" {{ request('price_range') == '50-100' ? 'selected' : '' }}>$50 - $100</option>
                     <option value="100-200" {{ request('price_range') == '100-200' ? 'selected' : '' }}>$100 - $200</option>
-                    <option value="200+" {{ request('price_range') == '200+' ? 'selected' : '' }}>{{ __('Over $200') }}</option>
+                    <option value="200+" {{ request('price_range') == '200+' ? 'selected' : '' }}>{{ __('أكثر من $200') }}</option>
                 </select>
             </div>
             
             <div style="display: flex; gap: var(--space-sm);">
                 <button type="submit" class="filter-btn">
                     <i class="fas fa-search"></i>
-                    {{ __('Filter') }}
+                    {{ __('تصفية') }}
                 </button>
                 
                 @if(request()->hasAny(['search', 'category', 'price_range']))
                     <a href="{{ route('products.index') }}" class="filter-btn clear-filters">
                         <i class="fas fa-times"></i>
-                        {{ __('Clear') }}
+                        {{ __('مسح') }}
                     </a>
                 @endif
             </div>
@@ -585,18 +591,18 @@
     <!-- Products Header -->
     <div class="products-header">
         <div class="products-count">
-            {{ __('Showing') }} <strong>{{ $products->count() }}</strong> {{ __('of') }} <strong>{{ $products->total() }}</strong> {{ __('products') }}
+            {{ __('عرض') }} <strong>{{ $products->count() }}</strong> {{ __('من') }} <strong>{{ $products->total() }}</strong> {{ __('منتجات') }}
         </div>
         
         <div class="sort-options">
-            <label class="sort-label">{{ __('Sort by:') }}</label>
+            <label class="sort-label">{{ __('ترتيب حسب:') }}</label>
             <select class="sort-select" onchange="sortProducts(this.value)">
-                <option value="newest">{{ __('Newest First') }}</option>
-                <option value="oldest">{{ __('Oldest First') }}</option>
-                <option value="price_low">{{ __('Price: Low to High') }}</option>
-                <option value="price_high">{{ __('Price: High to Low') }}</option>
-                <option value="name_asc">{{ __('Name: A to Z') }}</option>
-                <option value="name_desc">{{ __('Name: Z to A') }}</option>
+                <option value="newest">{{ __('الأحدث أولاً') }}</option>
+                <option value="oldest">{{ __('الأقدم أولاً') }}</option>
+                <option value="price_low">{{ __('السعر: من الأقل للأعلى') }}</option>
+                <option value="price_high">{{ __('السعر: من الأعلى للأقل') }}</option>
+                <option value="name_asc">{{ __('الاسم: أ-ي') }}</option>
+                <option value="name_desc">{{ __('الاسم: ي-أ') }}</option>
             </select>
         </div>
     </div>
@@ -611,7 +617,7 @@
                         <img src="{{ $product->main_image_url }}" alt="{{ $product->name }}" loading="lazy">
                         
                         @if($product->featured)
-                            <div class="product-badge">{{ __('Featured') }}</div>
+                            <div class="product-badge">{{ __('مميز') }}</div>
                         @endif
                         
                         <!-- Product Actions -->
@@ -620,7 +626,7 @@
                                 <button 
                                     class="action-btn wishlist-btn {{ Auth::user()->hasInWishlist($product->id) ? 'active' : '' }}" 
                                     onclick="toggleWishlist('{{ $product->id }}')"
-                                    title="{{ __('Add to Wishlist') }}"
+                                    title="{{ __('إضافة إلى قائمة الرغبات') }}"
                                 >
                                     <i class="fas fa-heart"></i>
                                 </button>
@@ -628,7 +634,7 @@
                                 <button 
                                     class="action-btn quick-view-btn" 
                                     onclick="quickView('{{ $product->id }}')"
-                                    title="{{ __('Quick View') }}"
+                                    title="{{ __('عرض سريع') }}"
                                 >
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -652,13 +658,13 @@
                         <div class="stock-indicator">
                             @if($product->stock > 10)
                                 <div class="stock-dot stock-in"></div>
-                                <span class="stock-text">{{ __('In Stock') }}</span>
+                                <span class="stock-text">{{ __('متوفر') }}</span>
                             @elseif($product->stock > 0)
                                 <div class="stock-dot stock-low"></div>
-                                <span class="stock-text">{{ __('Low Stock') }} ({{ $product->stock }})</span>
+                                <span class="stock-text">{{ __('كمية محدودة') }} ({{ $product->stock }})</span>
                             @else
                                 <div class="stock-dot stock-out"></div>
-                                <span class="stock-text">{{ __('Out of Stock') }}</span>
+                                <span class="stock-text">{{ __('غير متوفر') }}</span>
                             @endif
                         </div>
                         
@@ -673,18 +679,18 @@
                                         onclick="addToCart('{{ $product->id }}')"
                                     >
                                         <i class="fas fa-shopping-cart"></i>
-                                        {{ __('Add to Cart') }}
+                                        {{ __('إضافة إلى السلة') }}
                                     </button>
                                 @else
                                     <a href="{{ route('login') }}" class="add-to-cart-btn">
                                         <i class="fas fa-sign-in-alt"></i>
-                                        {{ __('Login to Buy') }}
+                                        {{ __('تسجيل الدخول للشراء') }}
                                     </a>
                                 @endauth
                             @else
                                 <button class="add-to-cart-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
                                     <i class="fas fa-times"></i>
-                                    {{ __('Out of Stock') }}
+                                    {{ __('غير متوفر') }}
                                 </button>
                             @endif
                             
@@ -709,11 +715,11 @@
             <div class="no-products-icon">
                 <i class="fas fa-search"></i>
             </div>
-            <h3 class="no-products-title">{{ __('No Products Found') }}</h3>
-            <p class="no-products-text">{{ __('Try adjusting your search criteria or browse our categories.') }}</p>
+            <h3 class="no-products-title">{{ __('لا توجد منتجات') }}</h3>
+            <p class="no-products-text">{{ __('حاول تعديل معايير البحث أو تصفح الفئات.') }}</p>
             <a href="{{ route('products.index') }}" class="btn btn-primary">
                 <i class="fas fa-refresh"></i>
-                {{ __('View All Products') }}
+                {{ __('عرض كل المنتجات') }}
             </a>
         </div>
     @endif
@@ -748,13 +754,13 @@
             const data = await response.json();
             
             if (data.success) {
-                showNotification('{{ __("Product added to cart!") }}', 'success');
+                showNotification('{{ __("تمت إضافة المنتج إلى السلة!") }}', 'success');
                 updateCartCount();
             } else {
-                showNotification(data.message || '{{ __("Error adding to cart") }}', 'error');
+                showNotification(data.message || '{{ __("خطأ في إضافة المنتج إلى السلة") }}', 'error');
             }
         } catch (error) {
-            showNotification('{{ __("Error adding to cart") }}', 'error');
+            showNotification('{{ __("خطأ في إضافة المنتج إلى السلة") }}', 'error');
         }
     }
     
@@ -780,7 +786,7 @@
                 showNotification(data.message, 'success');
             }
         } catch (error) {
-            showNotification('{{ __("Error updating wishlist") }}', 'error');
+            showNotification('{{ __("خطأ في تحديث قائمة الرغبات") }}', 'error');
         }
     }
     
@@ -812,7 +818,8 @@
         notification.className = `alert alert-${type} slide-in`;
         notification.style.position = 'fixed';
         notification.style.top = '20px';
-        notification.style.right = '20px';
+        notification.style.left = '20px';
+        notification.style.right = 'auto';
         notification.style.zIndex = '9999';
         notification.style.maxWidth = '300px';
         notification.innerHTML = `
@@ -826,7 +833,9 @@
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease-out forwards';
             setTimeout(() => {
-                document.body.removeChild(notification);
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
             }, 300);
         }, 3000);
     }

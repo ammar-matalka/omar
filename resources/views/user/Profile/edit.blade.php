@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
-@section('title', __('Edit Profile') . ' - ' . config('app.name'))
+@section('title', __('تعديل الملف الشخصي') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+
     .edit-hero {
         background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
         color: white;
@@ -51,6 +57,7 @@
         font-size: 0.875rem;
         opacity: 0.9;
         flex-wrap: wrap;
+        flex-direction: row-reverse;
     }
     
     .breadcrumb-link {
@@ -86,6 +93,7 @@
         font-weight: 600;
         transition: all var(--transition-fast);
         margin-bottom: var(--space-xl);
+        flex-direction: row-reverse;
     }
     
     .back-button:hover {
@@ -239,6 +247,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .tips-list {
@@ -255,6 +264,7 @@
         display: flex;
         align-items: flex-start;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .tips-list li::before {
@@ -272,6 +282,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .form-grid {
@@ -302,6 +313,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .form-label.required::after {
@@ -320,6 +332,7 @@
         font-size: 1rem;
         transition: all var(--transition-fast);
         font-family: inherit;
+        text-align: right;
     }
     
     .form-input:focus,
@@ -345,6 +358,10 @@
         font-size: 0.75rem;
         color: var(--on-surface-variant);
         line-height: 1.4;
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+        flex-direction: row-reverse;
     }
     
     .form-error {
@@ -353,6 +370,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-xs);
+        flex-direction: row-reverse;
     }
     
     .input-icon {
@@ -360,12 +378,14 @@
     }
     
     .input-icon .form-input {
-        padding-left: var(--space-3xl);
+        padding-right: var(--space-3xl);
+        padding-left: var(--space-md);
     }
     
     .input-icon i {
         position: absolute;
-        left: var(--space-md);
+        right: var(--space-md);
+        left: auto;
         top: 50%;
         transform: translateY(-50%);
         color: var(--on-surface-variant);
@@ -375,7 +395,7 @@
     .form-actions {
         display: flex;
         gap: var(--space-lg);
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-top: var(--space-2xl);
         padding-top: var(--space-xl);
         border-top: 1px solid var(--border-color);
@@ -395,6 +415,7 @@
         cursor: pointer;
         transition: all var(--transition-fast);
         min-width: 120px;
+        flex-direction: row-reverse;
     }
     
     .btn:focus {
@@ -456,6 +477,7 @@
         display: flex;
         align-items: center;
         gap: var(--space-sm);
+        flex-direction: row-reverse;
     }
     
     .preview-card {
@@ -550,18 +572,18 @@
             <nav class="breadcrumb">
                 <a href="{{ route('home') }}" class="breadcrumb-link">
                     <i class="fas fa-home"></i>
-                    {{ __('Home') }}
+                    {{ __('الرئيسية') }}
                 </a>
                 <span class="breadcrumb-separator">/</span>
                 <a href="{{ route('user.profile.show') }}" class="breadcrumb-link">
-                    {{ __('Profile') }}
+                    {{ __('الملف الشخصي') }}
                 </a>
                 <span class="breadcrumb-separator">/</span>
-                <span>{{ __('Edit') }}</span>
+                <span>{{ __('تعديل') }}</span>
             </nav>
             
-            <h1 class="hero-title">{{ __('Edit Profile') }}</h1>
-            <p class="hero-subtitle">{{ __('Update your personal information and preferences') }}</p>
+            <h1 class="hero-title">{{ __('تعديل الملف الشخصي') }}</h1>
+            <p class="hero-subtitle">{{ __('قم بتحديث معلوماتك الشخصية والتفضيلات') }}</p>
         </div>
     </div>
 </section>
@@ -572,7 +594,7 @@
         <!-- Back Button -->
         <a href="{{ route('user.profile.show') }}" class="back-button fade-in">
             <i class="fas fa-arrow-left"></i>
-            {{ __('Back to Profile') }}
+            {{ __('العودة إلى الملف الشخصي') }}
         </a>
         
         <!-- Edit Content -->
@@ -598,12 +620,12 @@
                     <div class="avatar-actions">
                         <button type="button" class="avatar-btn primary" onclick="document.getElementById('avatar-input').click()">
                             <i class="fas fa-upload"></i>
-                            {{ __('Upload') }}
+                            {{ __('رفع') }}
                         </button>
                         @if($user->profile_image)
                             <button type="button" class="avatar-btn" onclick="removeAvatar()">
                                 <i class="fas fa-trash"></i>
-                                {{ __('Remove') }}
+                                {{ __('حذف') }}
                             </button>
                         @endif
                     </div>
@@ -613,13 +635,13 @@
                 <div class="tips-section fade-in">
                     <h3 class="tips-title">
                         <i class="fas fa-lightbulb"></i>
-                        {{ __('Profile Tips') }}
+                        {{ __('نصائح الملف الشخصي') }}
                     </h3>
                     <ul class="tips-list">
-                        <li>{{ __('Use a clear, high-quality photo for your profile picture') }}</li>
-                        <li>{{ __('Keep your contact information up to date for order notifications') }}</li>
-                        <li>{{ __('Add your address to speed up the checkout process') }}</li>
-                        <li>{{ __('Verify your email address to receive important updates') }}</li>
+                        <li>{{ __('استخدم صورة واضحة وعالية الجودة لصورة ملفك الشخصي') }}</li>
+                        <li>{{ __('حافظ على تحديث معلومات الاتصال الخاصة بك لإشعارات الطلبات') }}</li>
+                        <li>{{ __('أضف عنوانك لتسريع عملية الدفع') }}</li>
+                        <li>{{ __('تحقق من عنوان بريدك الإلكتروني لتلقي التحديثات المهمة') }}</li>
                     </ul>
                 </div>
                 
@@ -627,7 +649,7 @@
                 <div class="preview-section fade-in">
                     <h3 class="preview-title">
                         <i class="fas fa-eye"></i>
-                        {{ __('Profile Preview') }}
+                        {{ __('معاينة الملف الشخصي') }}
                     </h3>
                     <div class="preview-card">
                         <div class="preview-avatar">
@@ -653,7 +675,7 @@
                     
                     <h2 class="form-title">
                         <i class="fas fa-user-edit"></i>
-                        {{ __('Personal Information') }}
+                        {{ __('المعلومات الشخصية') }}
                     </h2>
                     
                     <div class="form-grid">
@@ -662,7 +684,7 @@
                             <div class="form-group">
                                 <label for="name" class="form-label required">
                                     <i class="fas fa-user"></i>
-                                    {{ __('Full Name') }}
+                                    {{ __('الاسم الكامل') }}
                                 </label>
                                 <div class="input-icon">
                                     <i class="fas fa-user"></i>
@@ -682,13 +704,13 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                <div class="form-help">{{ __('Your full name as you want it to appear on your profile') }}</div>
+                                <div class="form-help">{{ __('اسمك الكامل كما تريد أن يظهر في ملفك الشخصي') }}</div>
                             </div>
                             
                             <div class="form-group">
                                 <label for="email" class="form-label required">
                                     <i class="fas fa-envelope"></i>
-                                    {{ __('Email Address') }}
+                                    {{ __('البريد الإلكتروني') }}
                                 </label>
                                 <div class="input-icon">
                                     <i class="fas fa-envelope"></i>
@@ -708,7 +730,7 @@
                                         {{ $message }}
                                     </div>
                                 @enderror
-                                <div class="form-help">{{ __('We\'ll use this email for order confirmations and updates') }}</div>
+                                <div class="form-help">{{ __('سنستخدم هذا البريد لتأكيدات الطلبات والتحديثات') }}</div>
                             </div>
                         </div>
                         
@@ -716,7 +738,7 @@
                         <div class="form-group">
                             <label for="phone" class="form-label">
                                 <i class="fas fa-phone"></i>
-                                {{ __('Phone Number') }}
+                                {{ __('رقم الهاتف') }}
                             </label>
                             <div class="input-icon">
                                 <i class="fas fa-phone"></i>
@@ -735,20 +757,20 @@
                                     {{ $message }}
                                 </div>
                             @enderror
-                            <div class="form-help">{{ __('Optional: For order status updates via SMS') }}</div>
+                            <div class="form-help">{{ __('اختياري: لتحديثات حالة الطلب عبر الرسائل النصية') }}</div>
                         </div>
                         
                         <!-- Address -->
                         <div class="form-group full-width">
                             <label for="address" class="form-label">
                                 <i class="fas fa-map-marker-alt"></i>
-                                {{ __('Address') }}
+                                {{ __('العنوان') }}
                             </label>
                             <textarea 
                                 id="address" 
                                 name="address" 
                                 class="form-textarea {{ $errors->has('address') ? 'error' : '' }}"
-                                placeholder="{{ __('Enter your full address...') }}"
+                                placeholder="{{ __('أدخل عنوانك الكامل...') }}"
                             >{{ old('address', $user->address) }}</textarea>
                             @error('address')
                                 <div class="form-error">
@@ -756,7 +778,7 @@
                                     {{ $message }}
                                 </div>
                             @enderror
-                            <div class="form-help">{{ __('Your address will be used as default shipping address') }}</div>
+                            <div class="form-help">{{ __('سيتم استخدام عنوانك كعنوان شحن افتراضي') }}</div>
                         </div>
                         
                         <!-- Hidden file input for avatar -->
@@ -767,11 +789,11 @@
                     <div class="form-actions">
                         <a href="{{ route('user.profile.show') }}" class="btn btn-secondary">
                             <i class="fas fa-times"></i>
-                            {{ __('Cancel') }}
+                            {{ __('إلغاء') }}
                         </a>
                         <button type="submit" class="btn btn-primary" id="submit-btn">
                             <i class="fas fa-save"></i>
-                            {{ __('Save Changes') }}
+                            {{ __('حفظ التغييرات') }}
                         </button>
                     </div>
                 </form>
@@ -843,7 +865,7 @@
     
     // Remove avatar functionality
     function removeAvatar() {
-        if (!confirm('{{ __("Are you sure you want to remove your profile picture?") }}')) {
+        if (!confirm('{{ __("هل أنت متأكد أنك تريد حذف صورتك الشخصية؟") }}')) {
             return;
         }
         
@@ -921,7 +943,7 @@
         const submitBtn = document.getElementById('submit-btn');
         
         // Show loading state
-        submitBtn.innerHTML = '<div class="loading-spinner"></div> {{ __("Saving...") }}';
+        submitBtn.innerHTML = '<div class="loading-spinner"></div> {{ __("جاري الحفظ...") }}';
         submitBtn.disabled = true;
         
         // Validate form before submission
@@ -939,9 +961,9 @@
         
         if (!isValid) {
             e.preventDefault();
-            submitBtn.innerHTML = '<i class="fas fa-save"></i> {{ __("Save Changes") }}';
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> {{ __("حفظ التغييرات") }}';
             submitBtn.disabled = false;
-            showNotification('{{ __("Please fill in all required fields") }}', 'error');
+            showNotification('{{ __("الرجاء ملء جميع الحقول المطلوبة") }}', 'error');
             return;
         }
     });
@@ -1002,17 +1024,17 @@
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(value)) {
                 field.classList.add('error');
-                showFieldError(field, '{{ __("Please enter a valid email address") }}');
+                showFieldError(field, '{{ __("الرجاء إدخال عنوان بريد إلكتروني صالح") }}');
                 return false;
             }
         }
         
-        // Validate phone6
+        // Validate phone
         if (field.name === 'phone' && value) {
             const phoneRegex = /^(\+962|07)\d{8,9}$/;
             if (!phoneRegex.test(value.replace(/\s/g, ''))) {
                 field.classList.add('error');
-                showFieldError(field, '{{ __("Please enter a valid phone number") }}');
+                showFieldError(field, '{{ __("الرجاء إدخال رقم هاتف صالح") }}');
                 return false;
             }
         }
@@ -1070,7 +1092,7 @@
     
     function showAutoSaveIndicator() {
         const indicator = document.createElement('div');
-        indicator.textContent = '{{ __("Draft saved") }}';
+        indicator.textContent = '{{ __("تم حفظ المسودة") }}';
         indicator.style.cssText = `
             position: fixed;
             bottom: 20px;
@@ -1108,7 +1130,8 @@
         notification.style.cssText = `
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
+            right: auto;
             z-index: 9999;
             max-width: 300px;
             box-shadow: var(--shadow-xl);
@@ -1141,7 +1164,7 @@
         
         // Cancel with Escape
         if (e.key === 'Escape') {
-            if (confirm('{{ __("Are you sure you want to cancel? Any unsaved changes will be lost.") }}')) {
+            if (confirm('{{ __("هل أنت متأكد أنك تريد الإلغاء؟ أي تغييرات غير محفوظة سيتم فقدانها.") }}')) {
                 window.location.href = '{{ route("user.profile.show") }}';
             }
         }
@@ -1159,7 +1182,7 @@
     window.addEventListener('beforeunload', function(e) {
         if (formChanged) {
             e.preventDefault();
-            e.returnValue = '{{ __("You have unsaved changes. Are you sure you want to leave?") }}';
+            e.returnValue = '{{ __("لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد المغادرة؟") }}';
             return e.returnValue;
         }
     });
@@ -1173,7 +1196,7 @@
 <style>
     @keyframes slideIn {
         from {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
         to {
@@ -1184,7 +1207,7 @@
     
     @keyframes slideOut {
         to {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
         }
     }

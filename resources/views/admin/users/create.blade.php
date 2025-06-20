@@ -1,89 +1,104 @@
 @extends('layouts.admin')
 
-@section('title', __('Create User'))
-@section('page-title', __('Create User'))
+@section('title', 'إنشاء مستخدم جديد')
+@section('page-title', 'إنشاء مستخدم جديد')
 
 @section('breadcrumb')
     <div class="breadcrumb-item">
-        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">{{ __('Dashboard') }}</a>
+        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">لوحة التحكم</a>
     </div>
     <div class="breadcrumb-item">
-        <i class="fas fa-chevron-right"></i>
-        <a href="{{ route('admin.users.index') }}" class="breadcrumb-link">{{ __('Users') }}</a>
+        <i class="fas fa-chevron-left"></i>
+        <a href="{{ route('admin.users.index') }}" class="breadcrumb-link">المستخدمون</a>
     </div>
     <div class="breadcrumb-item">
-        <i class="fas fa-chevron-right"></i>
-        {{ __('Create') }}
+        <i class="fas fa-chevron-left"></i>
+        إنشاء جديد
     </div>
 @endsection
 
 @push('styles')
 <style>
+    * {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    body {
+        font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8fafc;
+    }
+    
     .create-user-container {
         max-width: 800px;
         margin: 0 auto;
+        padding: 2rem;
     }
     
     .form-card {
         background: white;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-lg);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         overflow: hidden;
-        border: 1px solid var(--admin-secondary-200);
     }
     
     .form-header {
-        background: linear-gradient(135deg, #10b981, #059669);
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
         color: white;
-        padding: var(--space-xl);
+        padding: 2rem;
         text-align: center;
     }
     
     .form-title {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         font-weight: 700;
         margin: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: var(--space-sm);
+        gap: 0.75rem;
     }
     
     .form-subtitle {
-        margin: var(--space-sm) 0 0 0;
+        margin: 0.75rem 0 0 0;
         opacity: 0.9;
-        font-size: 0.875rem;
+        font-size: 1rem;
     }
     
     .form-body {
-        padding: var(--space-2xl);
+        padding: 2rem;
     }
     
     .form-section {
-        margin-bottom: var(--space-2xl);
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
     }
     
     .section-title {
         font-size: 1.125rem;
         font-weight: 600;
-        color: var(--admin-secondary-900);
-        margin-bottom: var(--space-lg);
+        color: #1f2937;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
-        gap: var(--space-sm);
-        border-bottom: 2px solid var(--admin-secondary-200);
-        padding-bottom: var(--space-sm);
+        gap: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.75rem;
     }
     
-    .form-grid {
-        display: grid;
-        gap: var(--space-lg);
+    .section-title i {
+        color: #4f46e5;
+        font-size: 1.25rem;
     }
     
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--space-lg);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
     }
     
     .form-row.single {
@@ -97,74 +112,99 @@
     
     .form-label {
         font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--admin-secondary-700);
-        margin-bottom: var(--space-sm);
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
         display: flex;
         align-items: center;
-        gap: var(--space-xs);
+        gap: 0.25rem;
     }
     
     .required {
-        color: var(--error-500);
+        color: #dc2626;
     }
     
     .form-input,
-    .form-textarea,
     .form-select {
-        padding: var(--space-md);
-        border: 1px solid var(--admin-secondary-300);
-        border-radius: var(--radius-md);
+        padding: 0.75rem 1rem;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
         font-size: 0.875rem;
         font-family: inherit;
-        transition: all var(--transition-fast);
+        transition: all 0.2s ease;
         background: white;
     }
     
     .form-input:focus,
-    .form-textarea:focus,
     .form-select:focus {
         outline: none;
-        border-color: var(--admin-primary-500);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
     
-    .form-textarea {
-        resize: vertical;
-        min-height: 100px;
+    .form-select {
+        cursor: pointer;
+        appearance: auto;
     }
     
     .form-help {
         font-size: 0.75rem;
-        color: var(--admin-secondary-500);
-        margin-top: var(--space-xs);
+        color: #6b7280;
+        margin-top: 0.25rem;
     }
     
     .checkbox-group {
         display: flex;
         align-items: center;
-        gap: var(--space-sm);
-        margin-top: var(--space-sm);
+        gap: 0.75rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        margin-top: 0.5rem;
     }
     
     .checkbox-input {
         width: 18px;
         height: 18px;
-        accent-color: var(--admin-primary-500);
+        accent-color: #4f46e5;
     }
     
     .checkbox-label {
         font-size: 0.875rem;
-        color: var(--admin-secondary-700);
+        color: #374151;
         margin: 0;
+        font-weight: 500;
     }
     
     .avatar-upload-section {
-        background: var(--admin-secondary-50);
-        border: 1px solid var(--admin-secondary-200);
-        border-radius: var(--radius-lg);
-        padding: var(--space-lg);
+        background: #f9fafb;
+        border: 2px dashed #d1d5db;
+        border-radius: 12px;
+        padding: 2rem;
         text-align: center;
+        transition: all 0.2s ease;
+    }
+    
+    .avatar-upload-section:hover {
+        border-color: #4f46e5;
+        background: #f0f4ff;
+    }
+    
+    .avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 auto 1rem;
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     .avatar-preview {
@@ -172,150 +212,189 @@
         height: 120px;
         border-radius: 50%;
         object-fit: cover;
-        border: 4px solid var(--admin-secondary-200);
-        margin: 0 auto var(--space-md);
+        border: 4px solid white;
+        margin: 0 auto 1rem;
         display: block;
-    }
-    
-    .avatar-placeholder {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: var(--admin-primary-100);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--admin-primary-600);
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0 auto var(--space-md);
-        border: 4px solid var(--admin-secondary-200);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     .avatar-upload-btn {
-        background: var(--admin-primary-500);
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
         color: white;
         border: none;
-        padding: var(--space-sm) var(--space-lg);
-        border-radius: var(--radius-md);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 0.875rem;
-        font-weight: 500;
-        transition: all var(--transition-fast);
+        font-weight: 600;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
     }
     
     .avatar-upload-btn:hover {
-        background: var(--admin-primary-600);
         transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(79, 70, 229, 0.4);
     }
     
     .password-strength {
-        margin-top: var(--space-sm);
-        padding: var(--space-sm);
-        border-radius: var(--radius-md);
-        background: var(--admin-secondary-50);
-        border: 1px solid var(--admin-secondary-200);
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background: white;
+        border: 1px solid #d1d5db;
         display: none;
     }
     
     .strength-bar {
         width: 100%;
         height: 4px;
-        background: var(--admin-secondary-200);
-        border-radius: var(--radius-sm);
+        background: #e5e7eb;
+        border-radius: 2px;
         overflow: hidden;
-        margin-bottom: var(--space-sm);
+        margin-bottom: 0.5rem;
     }
     
     .strength-fill {
         height: 100%;
-        transition: all var(--transition-fast);
-        border-radius: var(--radius-sm);
+        transition: all 0.3s ease;
+        border-radius: 2px;
     }
     
     .strength-weak .strength-fill {
         width: 25%;
-        background: var(--error-500);
+        background: #dc2626;
     }
     
     .strength-fair .strength-fill {
         width: 50%;
-        background: var(--warning-500);
+        background: #f59e0b;
     }
     
     .strength-good .strength-fill {
         width: 75%;
-        background: var(--success-400);
+        background: #10b981;
     }
     
     .strength-strong .strength-fill {
         width: 100%;
-        background: var(--success-500);
+        background: #059669;
     }
     
     .strength-text {
         font-size: 0.75rem;
-        font-weight: 500;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        text-align: center;
     }
     
     .strength-requirements {
-        margin-top: var(--space-sm);
+        margin-top: 0.75rem;
         font-size: 0.75rem;
-        color: var(--admin-secondary-600);
+        color: #6b7280;
     }
     
     .requirement {
         display: flex;
         align-items: center;
-        gap: var(--space-xs);
-        margin-bottom: var(--space-xs);
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
     }
     
     .requirement-icon {
         width: 16px;
-        color: var(--admin-secondary-400);
+        color: #9ca3af;
     }
     
     .requirement.met .requirement-icon {
-        color: var(--success-500);
+        color: #10b981;
     }
     
     .form-actions {
-        background: var(--admin-secondary-50);
-        padding: var(--space-xl);
-        border-top: 1px solid var(--admin-secondary-200);
+        background: #f8fafc;
+        padding: 2rem;
+        border-top: 1px solid #e2e8f0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: var(--space-md);
+        gap: 1rem;
     }
     
     .btn-group {
         display: flex;
-        gap: var(--space-md);
+        gap: 1rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(79, 70, 229, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+        box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        background: #4b5563;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(107, 114, 128, 0.4);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-success:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
     }
     
     .error-message {
-        color: var(--error-500);
+        color: #dc2626;
         font-size: 0.75rem;
-        margin-top: var(--space-xs);
+        margin-top: 0.5rem;
         display: flex;
         align-items: center;
-        gap: var(--space-xs);
+        gap: 0.25rem;
+        padding: 0.5rem;
+        background: rgba(220, 38, 38, 0.1);
+        border-radius: 4px;
+        border-right: 3px solid #dc2626;
     }
     
     .form-input.error,
-    .form-textarea.error,
     .form-select.error {
-        border-color: var(--error-500);
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     }
     
     @media (max-width: 768px) {
         .create-user-container {
-            margin: 0;
+            padding: 1rem;
         }
         
         .form-row {
@@ -330,30 +409,41 @@
         .btn-group {
             flex-direction: column;
         }
+        
+        .form-title {
+            font-size: 1.5rem;
+        }
+        
+        .avatar-placeholder,
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            font-size: 2rem;
+        }
     }
 </style>
 @endpush
 
 @section('content')
 <div class="create-user-container">
-    <div class="form-card fade-in">
+    <div class="form-card">
         <div class="form-header">
             <h1 class="form-title">
                 <i class="fas fa-user-plus"></i>
-                {{ __('Create New User') }}
+                إنشاء مستخدم جديد
             </h1>
-            <p class="form-subtitle">{{ __('Add a new user to the system') }}</p>
+            <p class="form-subtitle">إضافة مستخدم جديد إلى النظام</p>
         </div>
         
         <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data" id="userForm">
             @csrf
             
             <div class="form-body">
-                <!-- Avatar Section -->
+                <!-- قسم الصورة الشخصية -->
                 <div class="form-section">
                     <h2 class="section-title">
                         <i class="fas fa-camera"></i>
-                        {{ __('Profile Picture') }}
+                        الصورة الشخصية
                     </h2>
                     
                     <div class="avatar-upload-section">
@@ -364,7 +454,7 @@
                         <input type="file" id="avatar" name="avatar" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
                         <button type="button" class="avatar-upload-btn" onclick="document.getElementById('avatar').click()">
                             <i class="fas fa-upload"></i>
-                            {{ __('Choose Photo') }}
+                            اختيار صورة
                         </button>
                         
                         @error('avatar')
@@ -374,231 +464,225 @@
                             </div>
                         @enderror
                         
-                        <div class="form-help">{{ __('Upload a profile picture (optional). Max size: 2MB') }}</div>
+                        <div class="form-help">رفع صورة شخصية (اختياري). الحد الأقصى: 2 ميجابايت</div>
                     </div>
                 </div>
                 
-                <!-- Basic Information -->
+                <!-- المعلومات الأساسية -->
                 <div class="form-section">
                     <h2 class="section-title">
                         <i class="fas fa-info-circle"></i>
-                        {{ __('Basic Information') }}
+                        المعلومات الأساسية
                     </h2>
                     
-                    <div class="form-grid">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name" class="form-label">
-                                    {{ __('Full Name') }}
-                                    <span class="required">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="name" 
-                                    name="name" 
-                                    class="form-input @error('name') error @enderror"
-                                    value="{{ old('name') }}"
-                                    placeholder="{{ __('Enter full name') }}"
-                                    required
-                                >
-                                @error('name')
-                                    <div class="error-message">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="email" class="form-label">
-                                    {{ __('Email Address') }}
-                                    <span class="required">*</span>
-                                </label>
-                                <input 
-                                    type="email" 
-                                    id="email" 
-                                    name="email" 
-                                    class="form-input @error('email') error @enderror"
-                                    value="{{ old('email') }}"
-                                    placeholder="{{ __('Enter email address') }}"
-                                    required
-                                >
-                                @error('email')
-                                    <div class="error-message">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name" class="form-label">
+                                الاسم الكامل
+                                <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="name" 
+                                name="name" 
+                                class="form-input @error('name') error @enderror"
+                                value="{{ old('name') }}"
+                                placeholder="أدخل الاسم الكامل"
+                                required
+                            >
+                            @error('name')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="phone" class="form-label">
-                                    {{ __('Phone Number') }}
-                                </label>
-                                <input 
-                                    type="tel" 
-                                    id="phone" 
-                                    name="phone" 
-                                    class="form-input @error('phone') error @enderror"
-                                    value="{{ old('phone') }}"
-                                    placeholder="{{ __('Enter phone number') }}"
-                                >
-                                @error('phone')
-                                    <div class="error-message">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="role" class="form-label">
-                                    {{ __('User Role') }}
-                                    <span class="required">*</span>
-                                </label>
-                                <select 
-                                    id="role" 
-                                    name="role" 
-                                    class="form-select @error('role') error @enderror"
-                                    required
-                                >
-                                    <option value="">{{ __('Select Role') }}</option>
-                                    <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>{{ __('User') }}</option>
-                                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
-                                </select>
-                                @error('role')
-                                    <div class="error-message">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                                <div class="form-help">{{ __('Select the user role and permissions') }}</div>
-                            </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">
+                                البريد الإلكتروني
+                                <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                class="form-input @error('email') error @enderror"
+                                value="{{ old('email') }}"
+                                placeholder="أدخل البريد الإلكتروني"
+                                required
+                            >
+                            @error('email')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone" class="form-label">
+                                رقم الهاتف
+                            </label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                name="phone" 
+                                class="form-input @error('phone') error @enderror"
+                                value="{{ old('phone') }}"
+                                placeholder="أدخل رقم الهاتف"
+                            >
+                            @error('phone')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="role" class="form-label">
+                                نوع المستخدم
+                                <span class="required">*</span>
+                            </label>
+                            <select 
+                                id="role" 
+                                name="role" 
+                                class="form-select @error('role') error @enderror"
+                                required
+                            >
+                                <option value="" disabled selected>اختر نوع المستخدم</option>
+                                <option value="customer" {{ old('role') == 'customer' ? 'selected' : '' }}>مستخدم عادي</option>
+                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>مدير</option>
+                            </select>
+                            @error('role')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                            <div class="form-help">اختر نوع المستخدم والصلاحيات المطلوبة</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Password Section -->
+                <!-- قسم كلمة المرور -->
                 <div class="form-section">
                     <h2 class="section-title">
                         <i class="fas fa-lock"></i>
-                        {{ __('Password') }}
+                        كلمة المرور
                     </h2>
                     
-                    <div class="form-grid">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="password" class="form-label">
-                                    {{ __('Password') }}
-                                    <span class="required">*</span>
-                                </label>
-                                <input 
-                                    type="password" 
-                                    id="password" 
-                                    name="password" 
-                                    class="form-input @error('password') error @enderror"
-                                    placeholder="{{ __('Enter password') }}"
-                                    required
-                                    oninput="checkPasswordStrength(this.value)"
-                                >
-                                @error('password')
-                                    <div class="error-message">
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        {{ $message }}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password" class="form-label">
+                                كلمة المرور
+                                <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-input @error('password') error @enderror"
+                                placeholder="أدخل كلمة المرور"
+                                required
+                                oninput="checkPasswordStrength(this.value)"
+                            >
+                            @error('password')
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                            
+                            <div id="passwordStrength" class="password-strength">
+                                <div class="strength-bar">
+                                    <div class="strength-fill"></div>
+                                </div>
+                                <div class="strength-text"></div>
+                                <div class="strength-requirements">
+                                    <div class="requirement" id="req-length">
+                                        <i class="fas fa-times requirement-icon"></i>
+                                        8 أحرف على الأقل
                                     </div>
-                                @enderror
-                                
-                                <div id="passwordStrength" class="password-strength">
-                                    <div class="strength-bar">
-                                        <div class="strength-fill"></div>
+                                    <div class="requirement" id="req-uppercase">
+                                        <i class="fas fa-times requirement-icon"></i>
+                                        حرف كبير واحد
                                     </div>
-                                    <div class="strength-text"></div>
-                                    <div class="strength-requirements">
-                                        <div class="requirement" id="req-length">
-                                            <i class="fas fa-times requirement-icon"></i>
-                                            {{ __('At least 8 characters') }}
-                                        </div>
-                                        <div class="requirement" id="req-uppercase">
-                                            <i class="fas fa-times requirement-icon"></i>
-                                            {{ __('One uppercase letter') }}
-                                        </div>
-                                        <div class="requirement" id="req-lowercase">
-                                            <i class="fas fa-times requirement-icon"></i>
-                                            {{ __('One lowercase letter') }}
-                                        </div>
-                                        <div class="requirement" id="req-number">
-                                            <i class="fas fa-times requirement-icon"></i>
-                                            {{ __('One number') }}
-                                        </div>
+                                    <div class="requirement" id="req-lowercase">
+                                        <i class="fas fa-times requirement-icon"></i>
+                                        حرف صغير واحد
+                                    </div>
+                                    <div class="requirement" id="req-number">
+                                        <i class="fas fa-times requirement-icon"></i>
+                                        رقم واحد
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="password_confirmation" class="form-label">
-                                    {{ __('Confirm Password') }}
-                                    <span class="required">*</span>
-                                </label>
-                                <input 
-                                    type="password" 
-                                    id="password_confirmation" 
-                                    name="password_confirmation" 
-                                    class="form-input"
-                                    placeholder="{{ __('Confirm password') }}"
-                                    required
-                                >
-                                <div class="form-help">{{ __('Re-enter the password to confirm') }}</div>
-                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password_confirmation" class="form-label">
+                                تأكيد كلمة المرور
+                                <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="password" 
+                                id="password_confirmation" 
+                                name="password_confirmation" 
+                                class="form-input"
+                                placeholder="أعد إدخال كلمة المرور"
+                                required
+                            >
+                            <div class="form-help">أعد إدخال كلمة المرور للتأكيد</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Settings -->
+                <!-- الإعدادات -->
                 <div class="form-section">
                     <h2 class="section-title">
                         <i class="fas fa-cog"></i>
-                        {{ __('Account Settings') }}
+                        إعدادات الحساب
                     </h2>
                     
-                    <div class="form-grid">
-                        <div class="form-row single">
-                            <div class="form-group">
-                                <div class="checkbox-group">
-                                    <input 
-                                        type="checkbox" 
-                                        id="email_verified" 
-                                        name="email_verified" 
-                                        class="checkbox-input"
-                                        value="1"
-                                        {{ old('email_verified') ? 'checked' : '' }}
-                                    >
-                                    <label for="email_verified" class="checkbox-label">
-                                        {{ __('Mark email as verified') }}
-                                    </label>
-                                </div>
-                                <div class="form-help">{{ __('Skip email verification for this user') }}</div>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input 
+                                    type="checkbox" 
+                                    id="email_verified" 
+                                    name="email_verified" 
+                                    class="checkbox-input"
+                                    value="1"
+                                    {{ old('email_verified') ? 'checked' : '' }}
+                                >
+                                <label for="email_verified" class="checkbox-label">
+                                    تم التحقق من البريد الإلكتروني
+                                </label>
                             </div>
+                            <div class="form-help">تخطي عملية التحقق من البريد الإلكتروني لهذا المستخدم</div>
                         </div>
-                        
-                        <div class="form-row single">
-                            <div class="form-group">
-                                <div class="checkbox-group">
-                                    <input 
-                                        type="checkbox" 
-                                        id="send_welcome_email" 
-                                        name="send_welcome_email" 
-                                        class="checkbox-input"
-                                        value="1"
-                                        {{ old('send_welcome_email', true) ? 'checked' : '' }}
-                                    >
-                                    <label for="send_welcome_email" class="checkbox-label">
-                                        {{ __('Send welcome email') }}
-                                    </label>
-                                </div>
-                                <div class="form-help">{{ __('Send account creation notification to the user') }}</div>
+                    </div>
+                    
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input 
+                                    type="checkbox" 
+                                    id="send_welcome_email" 
+                                    name="send_welcome_email" 
+                                    class="checkbox-input"
+                                    value="1"
+                                    {{ old('send_welcome_email', true) ? 'checked' : '' }}
+                                >
+                                <label for="send_welcome_email" class="checkbox-label">
+                                    إرسال رسالة ترحيب
+                                </label>
                             </div>
+                            <div class="form-help">إرسال إشعار إنشاء الحساب إلى المستخدم</div>
                         </div>
                     </div>
                 </div>
@@ -607,20 +691,20 @@
             <div class="form-actions">
                 <div>
                     <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i>
-                        {{ __('Back to Users') }}
+                        <i class="fas fa-arrow-right"></i>
+                        العودة للمستخدمين
                     </a>
                 </div>
                 
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="resetForm()">
                         <i class="fas fa-undo"></i>
-                        {{ __('Reset') }}
+                        إعادة تعيين
                     </button>
                     
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-user-plus"></i>
-                        {{ __('Create User') }}
+                        إنشاء المستخدم
                     </button>
                 </div>
             </div>
@@ -631,19 +715,19 @@
 
 @push('scripts')
 <script>
-    // Preview avatar
+    // معاينة الصورة الشخصية
     function previewAvatar(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const preview = document.getElementById('avatarPreview');
-                preview.innerHTML = `<img src="${e.target.result}" class="avatar-preview" alt="Avatar Preview">`;
+                preview.innerHTML = `<img src="${e.target.result}" class="avatar-preview" alt="معاينة الصورة">`;
             };
             reader.readAsDataURL(input.files[0]);
         }
     }
     
-    // Password strength checker
+    // فحص قوة كلمة المرور
     function checkPasswordStrength(password) {
         const strengthDiv = document.getElementById('passwordStrength');
         const strengthBar = strengthDiv.querySelector('.strength-fill');
@@ -659,7 +743,7 @@
         let score = 0;
         let strength = '';
         
-        // Check requirements
+        // فحص المتطلبات
         const requirements = {
             'req-length': password.length >= 8,
             'req-uppercase': /[A-Z]/.test(password),
@@ -667,7 +751,7 @@
             'req-number': /[0-9]/.test(password)
         };
         
-        // Update requirement indicators
+        // تحديث مؤشرات المتطلبات
         Object.keys(requirements).forEach(reqId => {
             const req = document.getElementById(reqId);
             const icon = req.querySelector('.requirement-icon');
@@ -682,90 +766,68 @@
             }
         });
         
-        // Determine strength
+        // تحديد قوة كلمة المرور
         strengthDiv.className = 'password-strength';
         
         if (score === 0) {
-            strength = '{{ __("Very Weak") }}';
+            strength = 'ضعيف جداً';
             strengthDiv.classList.add('strength-weak');
         } else if (score === 1) {
-            strength = '{{ __("Weak") }}';
+            strength = 'ضعيف';
             strengthDiv.classList.add('strength-weak');
         } else if (score === 2) {
-            strength = '{{ __("Fair") }}';
+            strength = 'متوسط';
             strengthDiv.classList.add('strength-fair');
         } else if (score === 3) {
-            strength = '{{ __("Good") }}';
+            strength = 'جيد';
             strengthDiv.classList.add('strength-good');
         } else if (score === 4) {
-            strength = '{{ __("Strong") }}';
+            strength = 'قوي';
             strengthDiv.classList.add('strength-strong');
         }
         
         strengthText.textContent = strength;
     }
     
-    // Reset form
+    // إعادة تعيين النموذج
     function resetForm() {
-        if (confirm('{{ __("Are you sure you want to reset the form? All entered data will be lost.") }}')) {
+        if (confirm('هل أنت متأكد من إعادة تعيين النموذج؟ سيتم فقدان جميع البيانات المدخلة.')) {
             document.getElementById('userForm').reset();
             document.getElementById('avatarPreview').innerHTML = '<i class="fas fa-user"></i>';
             document.getElementById('passwordStrength').style.display = 'none';
         }
     }
     
-    // Form validation
+    // التحقق من صحة النموذج
     document.getElementById('userForm').addEventListener('submit', function(e) {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('password_confirmation').value;
         
         if (password !== confirmPassword) {
             e.preventDefault();
-            alert('{{ __("Passwords do not match") }}');
+            alert('كلمات المرور غير متطابقة');
             document.getElementById('password_confirmation').focus();
             return;
         }
         
         if (password.length < 8) {
             e.preventDefault();
-            alert('{{ __("Password must be at least 8 characters long") }}');
+            alert('يجب أن تكون كلمة المرور 8 أحرف على الأقل');
             document.getElementById('password').focus();
             return;
         }
         
-        // Show loading state
+        // إظهار حالة التحميل
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("Creating...") }}';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...';
         submitBtn.disabled = true;
         
-        // Re-enable button after 10 seconds in case of error
+        // إعادة تفعيل الزر بعد 10 ثوان في حالة الخطأ
         setTimeout(() => {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }, 10000);
-    });
-    
-    // Initialize animations
-    document.addEventListener('DOMContentLoaded', function() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }, index * 100);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'all 0.6s ease-out';
-            observer.observe(el);
-        });
     });
 </script>
 @endpush

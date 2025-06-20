@@ -1,21 +1,15 @@
-// Rating descriptions
-    const ratingDescriptions = {
-        1: '{{ __("Poor - Very unsatisfied with the experience") }}',
-        2: '{{ __("Fair - Below expectations") }}',
-        3: '{{ __("Good - Meets expectations") }}',
-        4: '{{ __("Very Good - Exceeds expectations") }}',
-        5: '{{ __("Excellent - Outstanding experience") }}'
-    };
-    
-    const ratingTexts = {
-        1: '{{ __("Poor") }}',
-        2: '{{ __("Fair") }}',
-        3: '@extends('layouts.app')
+@extends('layouts.app')
 
-@section('title', __('Share Your Experience') . ' - ' . config('app.name'))
+@section('title', __('مشاركة تجربتك') . ' - ' . config('app.name'))
 
 @push('styles')
 <style>
+    /* RTL Direction */
+    html[dir="rtl"] {
+        direction: rtl;
+        text-align: right;
+    }
+
     .testimonial-hero {
         background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
         color: white;
@@ -448,7 +442,7 @@
     .form-actions {
         display: flex;
         gap: var(--space-lg);
-        justify-content: flex-end;
+        justify-content: flex-start;
         margin-top: var(--space-2xl);
         padding-top: var(--space-xl);
         border-top: 1px solid var(--border-color);
@@ -572,7 +566,7 @@
         }
         
         .form-actions {
-            flex-direction: column-reverse;
+            flex-direction: column;
             gap: var(--space-md);
         }
         
@@ -601,18 +595,18 @@
             <nav class="breadcrumb">
                 <a href="{{ route('home') }}" class="breadcrumb-link">
                     <i class="fas fa-home"></i>
-                    {{ __('Home') }}
+                    {{ __('الرئيسية') }}
                 </a>
                 <span class="breadcrumb-separator">/</span>
                 <a href="{{ route('orders.index') }}" class="breadcrumb-link">
-                    {{ __('Orders') }}
+                    {{ __('الطلبات') }}
                 </a>
                 <span class="breadcrumb-separator">/</span>
-                <span>{{ __('Testimonial') }}</span>
+                <span>{{ __('التقييم') }}</span>
             </nav>
             
-            <h1 class="hero-title">{{ __('Share Your Experience') }}</h1>
-            <p class="hero-subtitle">{{ __('Help other customers by sharing your honest review of our products and service') }}</p>
+            <h1 class="hero-title">{{ __('شارك تجربتك') }}</h1>
+            <p class="hero-subtitle">{{ __('ساعد العملاء الآخرين بمشاركة تقييمك الصادق لمنتجاتنا وخدماتنا') }}</p>
         </div>
     </div>
 </section>
@@ -623,7 +617,7 @@
         <!-- Back Button -->
         <a href="{{ route('orders.show', $order) }}" class="back-button fade-in">
             <i class="fas fa-arrow-left"></i>
-            {{ __('Back to Order') }}
+            {{ __('العودة للطلب') }}
         </a>
         
         <div class="testimonial-content">
@@ -631,24 +625,24 @@
             <div class="order-summary fade-in">
                 <h3 class="summary-title">
                     <i class="fas fa-receipt"></i>
-                    {{ __('Order Summary') }}
+                    {{ __('ملخص الطلب') }}
                 </h3>
                 
                 <div class="order-details">
                     <div class="detail-item">
-                        <div class="detail-label">{{ __('Order Number') }}</div>
+                        <div class="detail-label">{{ __('رقم الطلب') }}</div>
                         <div class="detail-value">#{{ $order->id }}</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">{{ __('Order Date') }}</div>
+                        <div class="detail-label">{{ __('تاريخ الطلب') }}</div>
                         <div class="detail-value">{{ $order->created_at->format('M d, Y') }}</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">{{ __('Total Amount') }}</div>
+                        <div class="detail-label">{{ __('المبلغ الإجمالي') }}</div>
                         <div class="detail-value">${{ number_format($order->total_amount, 2) }}</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">{{ __('Status') }}</div>
+                        <div class="detail-label">{{ __('الحالة') }}</div>
                         <div class="detail-value">{{ ucfirst($order->status) }}</div>
                     </div>
                 </div>
@@ -656,7 +650,7 @@
                 <div class="order-items">
                     <div class="items-title">
                         <i class="fas fa-box"></i>
-                        {{ __('Items in this order') }}
+                        {{ __('المنتجات في هذا الطلب') }}
                     </div>
                     <div class="items-list">
                         @foreach($order->orderItems as $item)
@@ -676,9 +670,9 @@
                 <div class="reward-icon">
                     <i class="fas fa-gift"></i>
                 </div>
-                <div class="reward-title">{{ __('Thank You Reward!') }}</div>
+                <div class="reward-title">{{ __('مكافأة الشكر!') }}</div>
                 <div class="reward-text">
-                    {{ __('Complete your review to receive a special discount coupon for your next purchase') }}
+                    {{ __('أكمل تقييمك لتحصل على كوبون خصص خاص لشرائك القادم') }}
                 </div>
             </div>
             
@@ -690,14 +684,14 @@
                     
                     <h2 class="form-title">
                         <i class="fas fa-star"></i>
-                        {{ __('Your Review') }}
+                        {{ __('تقييمك') }}
                     </h2>
                     
                     <!-- Rating Section -->
                     <div class="rating-section">
                         <div class="rating-label required">
                             <i class="fas fa-star"></i>
-                            {{ __('Overall Rating') }}
+                            {{ __('التقييم العام') }}
                         </div>
                         
                         <div class="rating-container">
@@ -709,11 +703,11 @@
                                 @endfor
                             </div>
                             
-                            <div class="rating-text" id="rating-text">{{ __('Click to rate') }}</div>
+                            <div class="rating-text" id="rating-text">{{ __('انقر للتقييم') }}</div>
                         </div>
                         
                         <div class="rating-description" id="rating-description">
-                            {{ __('How would you rate your overall experience with this order?') }}
+                            {{ __('كيف تقيم تجربتك العامة مع هذا الطلب؟') }}
                         </div>
                         
                         <input type="hidden" name="rating" id="rating-input" value="{{ old('rating', '') }}" required>
@@ -730,14 +724,14 @@
                     <div class="form-group">
                         <label for="comment" class="form-label required">
                             <i class="fas fa-comment-alt"></i>
-                            {{ __('Your Review') }}
+                            {{ __('تقييمك') }}
                         </label>
                         
                         <textarea 
                             id="comment" 
                             name="comment" 
                             class="form-textarea {{ $errors->has('comment') ? 'error' : '' }}"
-                            placeholder="{{ __('Share your thoughts about the products, delivery, and overall experience...') }}"
+                            placeholder="{{ __('شارك أفكارك عن المنتجات، التوصيل، والتجربة العامة...') }}"
                             required
                             minlength="5"
                             maxlength="500"
@@ -754,22 +748,22 @@
                         <div class="character-count" id="character-count">0 / 500</div>
                         
                         <div class="form-help">
-                            {{ __('Please provide honest feedback about your experience. Your review will help other customers make informed decisions.') }}
+                            {{ __('يرجى تقديم ملاحظات صادقة عن تجربتك. تقييمك سيساعد العملاء الآخرين على اتخاذ قرارات مستنيرة.') }}
                         </div>
                         
                         <!-- Suggestion Prompts -->
                         <div class="suggestion-prompts">
                             <div class="prompts-title">
                                 <i class="fas fa-lightbulb"></i>
-                                {{ __('Need ideas? Click to add:') }}
+                                {{ __('بحاجة إلى أفكار؟ انقر لإضافة:') }}
                             </div>
                             <div class="prompt-buttons">
-                                <button type="button" class="prompt-btn" onclick="addPrompt('product_quality')">{{ __('Product Quality') }}</button>
-                                <button type="button" class="prompt-btn" onclick="addPrompt('delivery_speed')">{{ __('Delivery Speed') }}</button>
-                                <button type="button" class="prompt-btn" onclick="addPrompt('packaging')">{{ __('Packaging') }}</button>
-                                <button type="button" class="prompt-btn" onclick="addPrompt('customer_service')">{{ __('Customer Service') }}</button>
-                                <button type="button" class="prompt-btn" onclick="addPrompt('value_money')">{{ __('Value for Money') }}</button>
-                                <button type="button" class="prompt-btn" onclick="addPrompt('recommend')">{{ __('Would Recommend') }}</button>
+                                <button type="button" class="prompt-btn" onclick="addPrompt('product_quality')">{{ __('جودة المنتج') }}</button>
+                                <button type="button" class="prompt-btn" onclick="addPrompt('delivery_speed')">{{ __('سرعة التوصيل') }}</button>
+                                <button type="button" class="prompt-btn" onclick="addPrompt('packaging')">{{ __('التغليف') }}</button>
+                                <button type="button" class="prompt-btn" onclick="addPrompt('customer_service')">{{ __('خدمة العملاء') }}</button>
+                                <button type="button" class="prompt-btn" onclick="addPrompt('value_money')">{{ __('القيمة مقابل السعر') }}</button>
+                                <button type="button" class="prompt-btn" onclick="addPrompt('recommend')">{{ __('سأوصي به') }}</button>
                             </div>
                         </div>
                     </div>
@@ -778,10 +772,10 @@
                     <div class="privacy-notice">
                         <div class="privacy-title">
                             <i class="fas fa-shield-alt"></i>
-                            {{ __('Privacy & Review Policy') }}
+                            {{ __('سياسة الخصوصية') }}
                         </div>
                         <div class="privacy-text">
-                            {{ __('Your review will be published publicly after moderation. Personal information will be kept private. You can only submit one review per order.') }}
+                            {{ __('سيتم نشر تقييمك علناً بعد المراجعة. سيتم الحفاظ على خصوصية المعلومات الشخصية. يمكنك تقديم تقييم واحد فقط لكل طلب.') }}
                         </div>
                     </div>
                     
@@ -789,11 +783,11 @@
                     <div class="form-actions">
                         <a href="{{ route('orders.show', $order) }}" class="btn btn-secondary">
                             <i class="fas fa-times"></i>
-                            {{ __('Cancel') }}
+                            {{ __('إلغاء') }}
                         </a>
                         <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
                             <i class="fas fa-paper-plane"></i>
-                            {{ __('Submit Review') }}
+                            {{ __('إرسال التقييم') }}
                         </button>
                     </div>
                 </form>
@@ -808,29 +802,29 @@
     let currentRating = 0;
     
     const ratingDescriptions = {
-        1: '{{ __("Poor - Very unsatisfied with the experience") }}',
-        2: '{{ __("Fair - Below expectations") }}',
-        3: '{{ __("Good - Meets expectations") }}',
-        4: '{{ __("Very Good - Exceeds expectations") }}',
-        5: '{{ __("Excellent - Outstanding experience") }}'
+        1: '{{ __("سيء - غير راضٍ تمامًا عن التجربة") }}',
+        2: '{{ __("متوسط - أقل من التوقعات") }}',
+        3: '{{ __("جيد - يلبي التوقعات") }}',
+        4: '{{ __("جيد جدًا - يفوق التوقعات") }}',
+        5: '{{ __("ممتاز - تجربة استثنائية") }}'
     };
     
     const ratingTexts = {
-        1: '{{ __("Poor") }}',
-        2: '{{ __("Fair") }}',
-        3: '{{ __("Good") }}',
-        4: '{{ __("Very Good") }}',
-        5: '{{ __("Excellent") }}'
+        1: '{{ __("سيء") }}',
+        2: '{{ __("متوسط") }}',
+        3: '{{ __("جيد") }}',
+        4: '{{ __("جيد جدًا") }}',
+        5: '{{ __("ممتاز") }}'
     };
     
     // Suggestion prompts
     const prompts = {
-        product_quality: '{{ __("The product quality was excellent and met my expectations.") }}',
-        delivery_speed: '{{ __("The delivery was fast and arrived on time.") }}',
-        packaging: '{{ __("The packaging was secure and protected the items well.") }}',
-        customer_service: '{{ __("Customer service was helpful and responsive.") }}',
-        value_money: '{{ __("Great value for money, very satisfied with the purchase.") }}',
-        recommend: '{{ __("I would definitely recommend this to others.") }}'
+        product_quality: '{{ __("جودة المنتج كانت ممتازة ووافقت توقعاتي.") }}',
+        delivery_speed: '{{ __("التوصيل كان سريعًا ووصل في الوقت المحدد.") }}',
+        packaging: '{{ __("التغليف كان آمنًا وحافظ على المنتجات جيدًا.") }}',
+        customer_service: '{{ __("خدمة العملاء كانت مفيدة وسريعة الاستجابة.") }}',
+        value_money: '{{ __("قيمة ممتازة مقابل السعر، راضٍ جدًا عن الشراء.") }}',
+        recommend: '{{ __("سأوصي بهذا المنتج للآخرين بالتأكيد.") }}'
     };
     
     // Initialize animations
@@ -942,9 +936,9 @@
                 textarea.focus();
                 textarea.setSelectionRange(textarea.value.length, textarea.value.length);
                 
-                showNotification('{{ __("Suggestion added to your review") }}', 'success');
+                showNotification('{{ __("تمت إضافة الاقتراح إلى تقييمك") }}', 'success');
             } else {
-                showNotification('{{ __("Not enough space to add this suggestion") }}', 'warning');
+                showNotification('{{ __("لا يوجد مساحة كافية لإضافة هذا الاقتراح") }}', 'warning');
             }
         }
     }
@@ -970,24 +964,24 @@
         // Final validation
         if (!rating || rating < 1 || rating > 5) {
             e.preventDefault();
-            showNotification('{{ __("Please select a rating") }}', 'error');
+            showNotification('{{ __("الرجاء اختيار تقييم") }}', 'error');
             return;
         }
         
         if (comment.length < 5) {
             e.preventDefault();
-            showNotification('{{ __("Review must be at least 5 characters") }}', 'error');
+            showNotification('{{ __("يجب أن يكون التقييم 5 أحرف على الأقل") }}', 'error');
             return;
         }
         
         if (comment.length > 500) {
             e.preventDefault();
-            showNotification('{{ __("Review is too long") }}', 'error');
+            showNotification('{{ __("التقييم طويل جدًا") }}', 'error');
             return;
         }
         
         // Show loading state
-        submitBtn.innerHTML = '<div class="loading-spinner"></div> {{ __("Submitting...") }}';
+        submitBtn.innerHTML = '<div class="loading-spinner"></div> {{ __("جاري الإرسال...") }}';
         submitBtn.disabled = true;
     });
     
@@ -1034,7 +1028,7 @@
         
         // Cancel with Escape
         if (e.key === 'Escape') {
-            if (confirm('{{ __("Are you sure you want to cancel? Your review will be lost.") }}')) {
+            if (confirm('{{ __("هل أنت متأكد أنك تريد الإلغاء؟ سيتم فقدان تقييمك.") }}')) {
                 window.location.href = '{{ route("orders.show", $order) }}';
             }
         }
@@ -1047,7 +1041,8 @@
         notification.style.cssText = `
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
+            right: auto;
             z-index: 9999;
             max-width: 300px;
             box-shadow: var(--shadow-xl);
@@ -1101,7 +1096,7 @@
             try {
                 const data = JSON.parse(draft);
                 
-                if (confirm('{{ __("A draft review was found. Would you like to restore it?") }}')) {
+                if (confirm('{{ __("تم العثور على مسودة تقييم. هل ترغب في استعادتها؟") }}')) {
                     if (data.rating) {
                         setRating(parseInt(data.rating));
                     }
