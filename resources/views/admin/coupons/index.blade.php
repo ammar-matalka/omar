@@ -1,37 +1,37 @@
 @extends('layouts.admin')
 
-@section('title', __('Coupons Management'))
-@section('page-title', __('Coupons'))
+@section('title', 'إدارة الكوبونات')
+@section('page-title', 'الكوبونات')
 
 @section('breadcrumb')
 <div class="breadcrumb-item">
-    <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">{{ __('Dashboard') }}</a>
+    <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">لوحة التحكم</a>
 </div>
 <div class="breadcrumb-item">
-    <i class="fas fa-chevron-right"></i>
-    {{ __('Coupons') }}
+    <i class="fas fa-chevron-left"></i>
+    الكوبونات
 </div>
 @endsection
 
 @section('content')
-<div class="fade-in">
+<div class="fade-in" style="direction: rtl;">
     <!-- Header Actions -->
-    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: var(--space-xl); gap: var(--space-md);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl); gap: var(--space-md);">
         <div>
-            <h2 style="font-size: 1.875rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-sm);">
-                {{ __('Coupons Management') }}
+            <h2 style="font-size: 1.875rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-sm); font-family: 'Cairo', sans-serif;">
+                إدارة الكوبونات
             </h2>
-            <p style="color: var(--admin-secondary-600);">{{ __('Manage discount coupons for your customers') }}</p>
+            <p style="color: var(--admin-secondary-600); font-family: 'Cairo', sans-serif;">إدارة كوبونات الخصم لعملائك</p>
         </div>
 
         <div style="display: flex; gap: var(--space-md);">
-            <a href="{{ route('admin.coupons.generate') }}" class="btn btn-accent">
-                <i class="fas fa-magic"></i>
-                {{ __('Generate Multiple') }}
+            <a href="{{ route('admin.coupons.generate') }}" class="btn btn-accent" style="font-family: 'Cairo', sans-serif;">
+                <i class="fas fa-magic" style="margin-left: 8px;"></i>
+                إنشاء متعدد
             </a>
-            <a href="{{ route('admin.coupons.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i>
-                {{ __('Create Coupon') }}
+            <a href="{{ route('admin.coupons.create') }}" class="btn btn-primary" style="font-family: 'Cairo', sans-serif;">
+                <i class="fas fa-plus" style="margin-left: 8px;"></i>
+                إنشاء كوبون
             </a>
         </div>
     </div>
@@ -46,7 +46,7 @@
                 <h3 style="font-size: 2rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-xs);">
                     {{ $activeCoupons->count() }}
                 </h3>
-                <p style="color: var(--admin-secondary-600); font-weight: 500;">{{ __('Active Coupons') }}</p>
+                <p style="color: var(--admin-secondary-600); font-weight: 500; font-family: 'Cairo', sans-serif;">الكوبونات النشطة</p>
             </div>
         </div>
 
@@ -58,7 +58,7 @@
                 <h3 style="font-size: 2rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-xs);">
                     {{ $usedCoupons->count() }}
                 </h3>
-                <p style="color: var(--admin-secondary-600); font-weight: 500;">{{ __('Used Coupons') }}</p>
+                <p style="color: var(--admin-secondary-600); font-weight: 500; font-family: 'Cairo', sans-serif;">الكوبونات المُستخدمة</p>
             </div>
         </div>
 
@@ -70,7 +70,7 @@
                 <h3 style="font-size: 2rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-xs);">
                     {{ $expiredCoupons->count() }}
                 </h3>
-                <p style="color: var(--admin-secondary-600); font-weight: 500;">{{ __('Expired Coupons') }}</p>
+                <p style="color: var(--admin-secondary-600); font-weight: 500; font-family: 'Cairo', sans-serif;">الكوبونات المنتهية</p>
             </div>
         </div>
 
@@ -82,7 +82,7 @@
                 <h3 style="font-size: 2rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-xs);">
                     ${{ number_format($usedCoupons->sum('amount'), 2) }}
                 </h3>
-                <p style="color: var(--admin-secondary-600); font-weight: 500;">{{ __('Total Discounts') }}</p>
+                <p style="color: var(--admin-secondary-600); font-weight: 500; font-family: 'Cairo', sans-serif;">إجمالي الخصومات</p>
             </div>
         </div>
     </div>
@@ -91,24 +91,24 @@
     <div class="card">
         <div class="card-header">
             <div style="display: flex; align-items: center; justify-content: space-between;">
-                <h3 class="card-title">
-                    <i class="fas fa-ticket-alt"></i>
-                    {{ __('All Coupons') }}
+                <h3 class="card-title" style="font-family: 'Cairo', sans-serif;">
+                    <i class="fas fa-ticket-alt" style="margin-left: 8px;"></i>
+                    جميع الكوبونات
                 </h3>
 
                 <!-- Tab Navigation -->
                 <div style="display: flex; gap: var(--space-sm);">
-                    <button class="btn btn-sm tab-btn active" data-tab="active">
-                        {{ __('Active') }}
-                        <span class="badge badge-success" style="margin-left: var(--space-xs);">{{ $activeCoupons->count() }}</span>
+                    <button class="btn btn-sm tab-btn active" data-tab="active" style="font-family: 'Cairo', sans-serif;">
+                        النشطة
+                        <span class="badge badge-success" style="margin-right: var(--space-xs);">{{ $activeCoupons->count() }}</span>
                     </button>
-                    <button class="btn btn-sm tab-btn" data-tab="used">
-                        {{ __('Used') }}
-                        <span class="badge badge-info" style="margin-left: var(--space-xs);">{{ $usedCoupons->count() }}</span>
+                    <button class="btn btn-sm tab-btn" data-tab="used" style="font-family: 'Cairo', sans-serif;">
+                        المُستخدمة
+                        <span class="badge badge-info" style="margin-right: var(--space-xs);">{{ $usedCoupons->count() }}</span>
                     </button>
-                    <button class="btn btn-sm tab-btn" data-tab="expired">
-                        {{ __('Expired') }}
-                        <span class="badge badge-warning" style="margin-left: var(--space-xs);">{{ $expiredCoupons->count() }}</span>
+                    <button class="btn btn-sm tab-btn" data-tab="expired" style="font-family: 'Cairo', sans-serif;">
+                        المنتهية
+                        <span class="badge badge-warning" style="margin-right: var(--space-xs);">{{ $expiredCoupons->count() }}</span>
                     </button>
                 </div>
             </div>
@@ -122,13 +122,13 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>{{ __('Code') }}</th>
-                                <th>{{ __('Amount') }}</th>
-                                <th>{{ __('User') }}</th>
-                                <th>{{ __('Min Purchase') }}</th>
-                                <th>{{ __('Valid Until') }}</th>
-                                <th>{{ __('Created') }}</th>
-                                <th>{{ __('Actions') }}</th>
+                                <th style="font-family: 'Cairo', sans-serif;">الكود</th>
+                                <th style="font-family: 'Cairo', sans-serif;">المبلغ</th>
+                                <th style="font-family: 'Cairo', sans-serif;">المستخدم</th>
+                                <th style="font-family: 'Cairo', sans-serif;">الحد الأدنى</th>
+                                <th style="font-family: 'Cairo', sans-serif;">صالح حتى</th>
+                                <th style="font-family: 'Cairo', sans-serif;">تاريخ الإنشاء</th>
+                                <th style="font-family: 'Cairo', sans-serif;">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -151,32 +151,32 @@
                                             {{ strtoupper(substr($coupon->user->name, 0, 1)) }}
                                         </div>
                                         <div>
-                                            <div style="font-weight: 500;">{{ $coupon->user->name }}</div>
+                                            <div style="font-weight: 500; font-family: 'Cairo', sans-serif;">{{ $coupon->user->name }}</div>
                                             <div style="font-size: 0.75rem; color: var(--admin-secondary-500);">{{ $coupon->user->email }}</div>
                                         </div>
                                     </div>
                                     @else
-                                    <span class="badge badge-info">{{ __('General') }}</span>
+                                    <span class="badge badge-info" style="font-family: 'Cairo', sans-serif;">عام</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if($coupon->min_purchase_amount > 0)
                                     ${{ number_format($coupon->min_purchase_amount, 2) }}
                                     @else
-                                    <span style="color: var(--admin-secondary-400);">{{ __('No minimum') }}</span>
+                                    <span style="color: var(--admin-secondary-400); font-family: 'Cairo', sans-serif;">لا يوجد حد</span>
                                     @endif
                                 </td>
                                 <td>
                                     <div style="font-size: 0.875rem;">
-                                        {{ $coupon->valid_until->format('M d, Y') }}
+                                        {{ $coupon->valid_until->format('d M, Y') }}
                                     </div>
-                                    <div style="font-size: 0.75rem; color: var(--admin-secondary-500);">
+                                    <div style="font-size: 0.75rem; color: var(--admin-secondary-500); font-family: 'Cairo', sans-serif;">
                                         {{ $coupon->valid_until->diffForHumans() }}
                                     </div>
                                 </td>
                                 <td>
                                     <div style="font-size: 0.875rem;">
-                                        {{ $coupon->created_at->format('M d, Y') }}
+                                        {{ $coupon->created_at->format('d M, Y') }}
                                     </div>
                                 </td>
                                 <td>
@@ -187,29 +187,12 @@
                                         <a href="{{ route('admin.coupons.edit', $coupon) }}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" style="display: inline;" class="delete-form" data-confirm="{{ __('Are you sure you want to delete this coupon?') }}">
+                                        <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" style="display: inline;" class="delete-form" data-confirm="هل أنت متأكد من حذف هذا الكوبون؟">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                        </form>
-
-                                        <script>
-                                            document.addEventListener('DOMContentLoaded', function() {
-                                                const deleteForms = document.querySelectorAll('.delete-form');
-                                                deleteForms.forEach(function(form) {
-                                                    form.addEventListener('submit', function(e) {
-                                                        const message = this.getAttribute('data-confirm');
-                                                        if (!confirm(message)) {
-                                                            e.preventDefault();
-                                                        }
-                                                    });
-                                                });
-                                            });
-                                        </script> @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </form>
                                     </div>
                                 </td>
@@ -221,11 +204,11 @@
                 @else
                 <div style="text-align: center; padding: var(--space-2xl); color: var(--admin-secondary-500);">
                     <i class="fas fa-ticket-alt" style="font-size: 3rem; margin-bottom: var(--space-lg); opacity: 0.3;"></i>
-                    <h3 style="margin-bottom: var(--space-sm);">{{ __('No Active Coupons') }}</h3>
-                    <p>{{ __('Create your first coupon to start offering discounts to customers.') }}</p>
-                    <a href="{{ route('admin.coupons.create') }}" class="btn btn-primary" style="margin-top: var(--space-md);">
-                        <i class="fas fa-plus"></i>
-                        {{ __('Create Coupon') }}
+                    <h3 style="margin-bottom: var(--space-sm); font-family: 'Cairo', sans-serif;">لا توجد كوبونات نشطة</h3>
+                    <p style="font-family: 'Cairo', sans-serif;">أنشئ أول كوبون لبدء تقديم خصومات للعملاء.</p>
+                    <a href="{{ route('admin.coupons.create') }}" class="btn btn-primary" style="margin-top: var(--space-md); font-family: 'Cairo', sans-serif;">
+                        <i class="fas fa-plus" style="margin-left: 8px;"></i>
+                        إنشاء كوبون
                     </a>
                 </div>
                 @endif
@@ -238,12 +221,12 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>{{ __('Code') }}</th>
-                                <th>{{ __('Amount') }}</th>
-                                <th>{{ __('User') }}</th>
-                                <th>{{ __('Order') }}</th>
-                                <th>{{ __('Used Date') }}</th>
-                                <th>{{ __('Actions') }}</th>
+                                <th style="font-family: 'Cairo', sans-serif;">الكود</th>
+                                <th style="font-family: 'Cairo', sans-serif;">المبلغ</th>
+                                <th style="font-family: 'Cairo', sans-serif;">المستخدم</th>
+                                <th style="font-family: 'Cairo', sans-serif;">الطلب</th>
+                                <th style="font-family: 'Cairo', sans-serif;">تاريخ الاستخدام</th>
+                                <th style="font-family: 'Cairo', sans-serif;">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -266,12 +249,12 @@
                                             {{ strtoupper(substr($coupon->user->name, 0, 1)) }}
                                         </div>
                                         <div>
-                                            <div style="font-weight: 500;">{{ $coupon->user->name }}</div>
+                                            <div style="font-weight: 500; font-family: 'Cairo', sans-serif;">{{ $coupon->user->name }}</div>
                                             <div style="font-size: 0.75rem; color: var(--admin-secondary-500);">{{ $coupon->user->email }}</div>
                                         </div>
                                     </div>
                                     @else
-                                    <span class="badge badge-info">{{ __('General') }}</span>
+                                    <span class="badge badge-info" style="font-family: 'Cairo', sans-serif;">عام</span>
                                     @endif
                                 </td>
                                 <td>
@@ -280,14 +263,14 @@
                                         #{{ $coupon->order->id }}
                                     </a>
                                     @else
-                                    <span style="color: var(--admin-secondary-400);">{{ __('N/A') }}</span>
+                                    <span style="color: var(--admin-secondary-400); font-family: 'Cairo', sans-serif;">غير متوفر</span>
                                     @endif
                                 </td>
                                 <td>
                                     <div style="font-size: 0.875rem;">
-                                        {{ $coupon->updated_at->format('M d, Y H:i') }}
+                                        {{ $coupon->updated_at->format('d M, Y H:i') }}
                                     </div>
-                                    <div style="font-size: 0.75rem; color: var(--admin-secondary-500);">
+                                    <div style="font-size: 0.75rem; color: var(--admin-secondary-500); font-family: 'Cairo', sans-serif;">
                                         {{ $coupon->updated_at->diffForHumans() }}
                                     </div>
                                 </td>
@@ -304,8 +287,8 @@
                 @else
                 <div style="text-align: center; padding: var(--space-2xl); color: var(--admin-secondary-500);">
                     <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: var(--space-lg); opacity: 0.3;"></i>
-                    <h3 style="margin-bottom: var(--space-sm);">{{ __('No Used Coupons') }}</h3>
-                    <p>{{ __('Used coupons will appear here once customers start redeeming them.') }}</p>
+                    <h3 style="margin-bottom: var(--space-sm); font-family: 'Cairo', sans-serif;">لا توجد كوبونات مُستخدمة</h3>
+                    <p style="font-family: 'Cairo', sans-serif;">ستظهر الكوبونات المُستخدمة هنا عندما يبدأ العملاء في استردادها.</p>
                 </div>
                 @endif
             </div>
@@ -317,11 +300,11 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>{{ __('Code') }}</th>
-                                <th>{{ __('Amount') }}</th>
-                                <th>{{ __('User') }}</th>
-                                <th>{{ __('Expired Date') }}</th>
-                                <th>{{ __('Actions') }}</th>
+                                <th style="font-family: 'Cairo', sans-serif;">الكود</th>
+                                <th style="font-family: 'Cairo', sans-serif;">المبلغ</th>
+                                <th style="font-family: 'Cairo', sans-serif;">المستخدم</th>
+                                <th style="font-family: 'Cairo', sans-serif;">تاريخ الانتهاء</th>
+                                <th style="font-family: 'Cairo', sans-serif;">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -344,19 +327,19 @@
                                             {{ strtoupper(substr($coupon->user->name, 0, 1)) }}
                                         </div>
                                         <div>
-                                            <div style="font-weight: 500;">{{ $coupon->user->name }}</div>
+                                            <div style="font-weight: 500; font-family: 'Cairo', sans-serif;">{{ $coupon->user->name }}</div>
                                             <div style="font-size: 0.75rem; color: var(--admin-secondary-500);">{{ $coupon->user->email }}</div>
                                         </div>
                                     </div>
                                     @else
-                                    <span class="badge badge-secondary">{{ __('General') }}</span>
+                                    <span class="badge badge-secondary" style="font-family: 'Cairo', sans-serif;">عام</span>
                                     @endif
                                 </td>
                                 <td>
                                     <div style="font-size: 0.875rem; color: var(--warning-600);">
-                                        {{ $coupon->valid_until->format('M d, Y') }}
+                                        {{ $coupon->valid_until->format('d M, Y') }}
                                     </div>
-                                    <div style="font-size: 0.75rem; color: var(--admin-secondary-500);">
+                                    <div style="font-size: 0.75rem; color: var(--admin-secondary-500); font-family: 'Cairo', sans-serif;">
                                         {{ $coupon->valid_until->diffForHumans() }}
                                     </div>
                                 </td>
@@ -365,29 +348,12 @@
                                         <a href="{{ route('admin.coupons.show', $coupon) }}" class="btn btn-sm btn-secondary">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" style="display: inline;" class="delete-form" data-confirm="{{ __('Are you sure you want to delete this  expirt coupon?') }}">
+                                        <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" style="display: inline;" class="delete-form" data-confirm="هل أنت متأكد من حذف هذا الكوبون المنتهي الصلاحية؟">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                        </form>
-
-                                        <script>
-                                            document.addEventListener('DOMContentLoaded', function() {
-                                                const deleteForms = document.querySelectorAll('.delete-form');
-                                                deleteForms.forEach(function(form) {
-                                                    form.addEventListener('submit', function(e) {
-                                                        const message = this.getAttribute('data-confirm');
-                                                        if (!confirm(message)) {
-                                                            e.preventDefault();
-                                                        }
-                                                    });
-                                                });
-                                            });
-                                        </script> @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </form>
                                     </div>
                                 </td>
@@ -399,8 +365,8 @@
                 @else
                 <div style="text-align: center; padding: var(--space-2xl); color: var(--admin-secondary-500);">
                     <i class="fas fa-clock" style="font-size: 3rem; margin-bottom: var(--space-lg); opacity: 0.3;"></i>
-                    <h3 style="margin-bottom: var(--space-sm);">{{ __('No Expired Coupons') }}</h3>
-                    <p>{{ __('Expired coupons will appear here when they pass their validity date.') }}</p>
+                    <h3 style="margin-bottom: var(--space-sm); font-family: 'Cairo', sans-serif;">لا توجد كوبونات منتهية الصلاحية</h3>
+                    <p style="font-family: 'Cairo', sans-serif;">ستظهر الكوبونات منتهية الصلاحية هنا عندما تتجاوز تاريخ انتهاء صلاحيتها.</p>
                 </div>
                 @endif
             </div>
@@ -409,60 +375,105 @@
 </div>
 
 <style>
-    .tab-btn {
-        border: 1px solid var(--admin-secondary-300);
-        background: white;
-        color: var(--admin-secondary-700);
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+
+.tab-btn {
+    border: 1px solid var(--admin-secondary-300);
+    background: white;
+    color: var(--admin-secondary-700);
+}
+
+.tab-btn.active {
+    background: var(--admin-primary-600);
+    color: white;
+    border-color: var(--admin-primary-600);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.btn {
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));
+    border: none;
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--warning-500), var(--warning-600));
+    border: none;
+    color: white;
+}
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 10px;
+    border: 1px solid var(--admin-secondary-200);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .tab-btn.active {
-        background: var(--admin-primary-600);
-        color: white;
-        border-color: var(--admin-primary-600);
+    .table {
+        font-size: 0.75rem;
     }
-
-    .tab-content {
-        display: none;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-
-    .table-responsive {
-        overflow-x: auto;
-    }
-
-    @media (max-width: 768px) {
-        .grid-cols-4 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .table {
-            font-size: 0.75rem;
-        }
-    }
+}
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tab functionality
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-        tabButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const targetTab = this.getAttribute('data-tab');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
 
-                // Remove active class from all buttons and contents
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
 
-                // Add active class to clicked button and corresponding content
-                this.classList.add('active');
-                document.getElementById(`tab-${targetTab}`).classList.add('active');
-            });
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            document.getElementById(`tab-${targetTab}`).classList.add('active');
         });
     });
+
+    // Delete confirmation
+    const deleteForms = document.querySelectorAll('.delete-form');
+    deleteForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            const message = this.getAttribute('data-confirm');
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        });
+    });
+});
 </script>
 @endsection

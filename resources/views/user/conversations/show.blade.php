@@ -4,6 +4,9 @@
 
 @push('styles')
 <style>
+/* إضافة دعم الخط العربي */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+
 /* تحسينات CSS للرسائل الفورية مع تحسين التمرير */
 .message-sending {
     opacity: 0.7;
@@ -13,7 +16,7 @@
 .new-message-indicator {
     position: fixed;
     bottom: 100px;
-    right: 20px;
+    left: 20px; /* تغيير من right إلى left للعربية */
     background: #0ea5e9;
     color: white;
     padding: 0.5rem 1rem;
@@ -24,6 +27,8 @@
     transform: translateY(100px);
     transition: transform 0.3s ease;
     display: none;
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
 }
 
 .new-message-indicator.show {
@@ -39,6 +44,8 @@
     margin: 0.5rem 0;
     font-style: italic;
     color: #6b7280;
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
 }
 
 .typing-indicator.show {
@@ -59,6 +66,7 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    font-family: 'Cairo', sans-serif;
 }
 
 .connection-dot {
@@ -85,19 +93,22 @@
     font-weight: 600;
     min-width: 20px;
     text-align: center;
+    font-family: 'Cairo', sans-serif;
 }
 
 .success-message {
     position: fixed;
     top: 20px;
-    right: 20px;
+    left: 20px; /* تغيير من right إلى left */
     background: #10b981;
     color: white;
     padding: 1rem;
     border-radius: 0.5rem;
     z-index: 1001;
-    transform: translateX(100%);
+    transform: translateX(-100%); /* تغيير الاتجاه */
     transition: transform 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
 }
 
 .success-message.show {
@@ -107,14 +118,16 @@
 .error-message {
     position: fixed;
     top: 20px;
-    right: 20px;
+    left: 20px; /* تغيير من right إلى left */
     background: #ef4444;
     color: white;
     padding: 1rem;
     border-radius: 0.5rem;
     z-index: 1001;
-    transform: translateX(100%);
+    transform: translateX(-100%); /* تغيير الاتجاه */
     transition: transform 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
 }
 
 .error-message.show {
@@ -123,8 +136,8 @@
 
 /* تحسينات التمرير المحسنة */
 .conversation-container {
-    height: calc(100vh - 100px) !important; /* تقليل المساحة المحجوزة */
-    min-height: 700px !important; /* زيادة الحد الأدنى للارتفاع */
+    height: calc(100vh - 100px) !important;
+    min-height: 700px !important;
 }
 
 .messages-container {
@@ -139,11 +152,12 @@
     padding: 1.5rem;
     overflow-y: auto;
     background: linear-gradient(180deg, white 0%, #f8f9fa 100%);
-    max-height: calc(100vh - 320px) !important; /* تحسين الارتفاع */
+    max-height: calc(100vh - 320px) !important;
     min-height: 450px !important;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: rgba(0,0,0,0.2) transparent;
+    direction: rtl;
 }
 
 #messagesList::-webkit-scrollbar {
@@ -244,27 +258,44 @@ a[style*="display: flex"]:hover {
         transform: translateY(0);
     }
 }
+
+/* تحسينات RTL للنماذج */
+textarea, input {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Cairo', sans-serif;
+}
+
+textarea::placeholder, input::placeholder {
+    text-align: right;
+    font-family: 'Cairo', sans-serif;
+}
+
+/* تحسينات عامة للنصوص العربية */
+body, * {
+    font-family: 'Cairo', sans-serif;
+}
 </style>
 @endpush
 
 @section('content')
-<div class="container" style="padding: 2rem 0; max-width: 1000px;">
+<div class="container" style="padding: 2rem 0; max-width: 1000px; direction: rtl;">
     <!-- CSRF Token for JavaScript -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Back Link -->
-    <a href="{{ route('user.conversations.index') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #0ea5e9; text-decoration: none; font-weight: 500; margin-bottom: 2rem; transition: color 0.2s ease;">
-        <i class="fas fa-arrow-left"></i>
+    <a href="{{ route('user.conversations.index') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #0ea5e9; text-decoration: none; font-weight: 500; margin-bottom: 2rem; transition: color 0.2s ease; font-family: 'Cairo', sans-serif;">
+        <i class="fas fa-arrow-right"></i>
         العودة إلى المحادثات
     </a>
 
-    <!-- رسالة جديدة Indicator -->
+    <!-- مؤشر رسالة جديدة -->
     <div id="newMessageIndicator" class="new-message-indicator" onclick="scrollToBottom(true, true)">
         <i class="fas fa-arrow-down"></i>
         رسائل جديدة
     </div>
 
-    <!-- Success/Error Messages -->
+    <!-- رسائل النجاح والخطأ -->
     <div id="successMessage" class="success-message">
         <i class="fas fa-check"></i>
         <span id="successText"></span>
@@ -276,53 +307,53 @@ a[style*="display: flex"]:hover {
 
     <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
         <div class="conversation-container">
-            <!-- Conversation Header -->
+            <!-- عنوان المحادثة -->
             <div style="background: white; border: 1px solid #e5e7eb; border-radius: 1rem; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <div style="font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-family: 'Cairo', sans-serif;">
                     <i class="fas fa-comment-dots" style="color: #0ea5e9;"></i>
                     {{ $conversation->title }}
                     <span class="unread-count" id="unreadCount" style="display: none;">0</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 1.5rem; color: #666; font-size: 0.875rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 1.5rem; color: #666; font-size: 0.875rem; flex-wrap: wrap; font-family: 'Cairo', sans-serif;">
                     <span>
-                        <i class="fas fa-calendar-alt" style="margin-right: 0.25rem;"></i>
-                        Started {{ $conversation->created_at->format('M d, Y') }}
+                        <i class="fas fa-calendar-alt" style="margin-left: 0.25rem;"></i>
+                        بدأت في {{ $conversation->created_at->format('d M, Y') }}
                     </span>
                     <span>
-                        <i class="fas fa-clock" style="margin-right: 0.25rem;"></i>
-                        Last updated {{ $conversation->updated_at->diffForHumans() }}
+                        <i class="fas fa-clock" style="margin-left: 0.25rem;"></i>
+                        آخر تحديث {{ $conversation->updated_at->diffForHumans() }}
                     </span>
                     <span>
-                        <i class="fas fa-comment" style="margin-right: 0.25rem;"></i>
-                        <span id="messageCount">{{ $messages->count() }}</span> messages
+                        <i class="fas fa-comment" style="margin-left: 0.25rem;"></i>
+                        <span id="messageCount">{{ $messages->count() }}</span> رسالة
                     </span>
                     <span id="connectionStatus" class="connection-status">
                         <div class="connection-dot connected"></div>
-                        <span>Connected</span>
+                        <span>متصل</span>
                     </span>
                 </div>
             </div>
 
-            <!-- Messages Container -->
+            <!-- حاوية الرسائل -->
             <div class="messages-container" style="background: white; border: 1px solid #e5e7eb; border-radius: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 
-                <!-- Messages Header -->
-                <div style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center;">
+                <!-- عنوان الرسائل -->
+                <div style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; font-family: 'Cairo', sans-serif;">
                     <h3 style="margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
                         <i class="fas fa-comments"></i>
-                        Conversation with Support Team
+                        المحادثة مع فريق الدعم
                     </h3>
-                    <button onclick="scrollToBottom(true, true)" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer;">
+                    <button onclick="scrollToBottom(true, true)" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; cursor: pointer; font-family: 'Cairo', sans-serif;">
                         <i class="fas fa-arrow-down"></i>
-                        Latest
+                        الأحدث
                     </button>
                 </div>
 
-                <!-- Messages List -->
+                <!-- قائمة الرسائل -->
                 <div id="messagesList" class="smooth-scroll">
                     @foreach($messages as $message)
-                    <div data-message-id="{{ $message->id }}" class="message-bubble" style="margin-bottom: 2rem; display: flex; gap: 1rem; {{ $message->is_from_admin ? '' : 'flex-direction: row-reverse;' }}">
-                        <!-- Avatar -->
+                    <div data-message-id="{{ $message->id }}" class="message-bubble" style="margin-bottom: 2rem; display: flex; gap: 1rem; {{ $message->is_from_admin ? 'flex-direction: row-reverse;' : '' }}">
+                        <!-- الصورة الرمزية -->
                         <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, #22c55e, #16a34a);' : 'background: linear-gradient(135deg, #0ea5e9, #0284c7);' }}">
                             @if($message->is_from_admin)
                                 <i class="fas fa-headset"></i>
@@ -331,45 +362,45 @@ a[style*="display: flex"]:hover {
                             @endif
                         </div>
                         
-                        <!-- Message Content -->
+                        <!-- محتوى الرسالة -->
                         <div style="flex: 1; max-width: 75%;">
-                            <!-- إرسالer Info -->
-                            <div style="font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; {{ $message->is_from_admin ? '' : 'justify-content: flex-end;' }}">
+                            <!-- معلومات المرسل -->
+                            <div style="font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; {{ $message->is_from_admin ? 'justify-content: flex-end;' : '' }} font-family: 'Cairo', sans-serif;">
                                 @if($message->is_from_admin)
-                                    <span style="padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.5px; background: #dcfce7; color: #166534;">Support Team</span>
+                                    <span style="padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.5px; background: #dcfce7; color: #166534;">فريق الدعم</span>
                                 @else
-                                    <span style="padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.5px; background: #dbeafe; color: #1e40af;">You</span>
+                                    <span style="padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.5px; background: #dbeafe; color: #1e40af;">أنت</span>
                                 @endif
                                 <span style="font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 0.25rem;">
                                     <i class="fas fa-clock"></i>
-                                    {{ $message->created_at->format('M d, h:i A') }}
+                                    {{ $message->created_at->format('d M, h:i A') }}
                                 </span>
                             </div>
                             
-                            <!-- Message Bubble -->
-                            <div style="padding: 1rem 1.5rem; border-radius: 1.5rem; margin-bottom: 0.25rem; word-wrap: break-word; line-height: 1.6; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.05); {{ $message->is_from_admin ? 'background: white; color: #333; border: 1px solid #e5e7eb; border-bottom-left-radius: 0.375rem;' : 'background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border-bottom-right-radius: 0.375rem;' }}">
+                            <!-- فقاعة الرسالة -->
+                            <div style="padding: 1rem 1.5rem; border-radius: 1.5rem; margin-bottom: 0.25rem; word-wrap: break-word; line-height: 1.6; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.05); {{ $message->is_from_admin ? 'background: white; color: #333; border: 1px solid #e5e7eb; border-bottom-right-radius: 0.375rem;' : 'background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border-bottom-left-radius: 0.375rem;' }}">
                                 {{ $message->message }}
                             </div>
                         </div>
                     </div>
                     @endforeach
                     
-                    <!-- Typing Indicator -->
+                    <!-- مؤشر الكتابة -->
                     <div id="typingIndicator" class="typing-indicator">
                         <i class="fas fa-pencil-alt"></i>
-                        Support team is typing...
+                        فريق الدعم يكتب...
                     </div>
                 </div>
 
-                <!-- Reply Form -->
+                <!-- نموذج الرد -->
                 <form action="{{ route('user.conversations.reply', $conversation) }}" method="POST" id="messageForm" style="border-top: 1px solid #e5e7eb; padding: 1.5rem; background: white;">
                     @csrf
                     <div style="display: flex; gap: 1rem; align-items: flex-end;">
                         <textarea 
                             name="message" 
                             id="messageTextarea"
-                            style="flex: 1; min-height: 60px; max-height: 120px; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; background: white; color: #333; font-size: 0.875rem; font-family: inherit; resize: none; transition: all 0.2s ease;"
-                            placeholder="اكتب رسالتك here... (Press Enter to send, Shift+Enter for new line)"
+                            style="flex: 1; min-height: 60px; max-height: 120px; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; background: white; color: #333; font-size: 0.875rem; font-family: 'Cairo', sans-serif; resize: none; transition: all 0.2s ease; direction: rtl; text-align: right;"
+                            placeholder="اكتب رسالتك هنا... (اضغط Enter للإرسال، Shift+Enter لسطر جديد)"
                             required
                             onfocus="this.style.borderColor='#0ea5e9'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)';"
                             onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none';"
@@ -379,10 +410,10 @@ a[style*="display: flex"]:hover {
                         </button>
                     </div>
                     
-                    <!-- Error Display -->
+                    <!-- عرض الأخطاء -->
                     @if ($errors->any())
-                    <div style="margin-top: 1rem; padding: 0.75rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.5rem; color: #b91c1c;">
-                        <ul style="margin: 0; padding-left: 1rem;">
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.5rem; color: #b91c1c; font-family: 'Cairo', sans-serif;">
+                        <ul style="margin: 0; padding-right: 1rem;">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -390,90 +421,90 @@ a[style*="display: flex"]:hover {
                     </div>
                     @endif
                     
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #666; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #666; display: flex; justify-content: space-between; align-items: center; font-family: 'Cairo', sans-serif;">
                         <span>
                             <i class="fas fa-info-circle"></i>
-                            Press Enter to send, Shift+Enter for new line
+                            اضغط Enter للإرسال، Shift+Enter لسطر جديد
                         </span>
                         <span id="sendingStatus" style="display: none; color: #0ea5e9;">
                             <i class="fas fa-spinner fa-spin"></i>
-                            إرسالing...
+                            جاري الإرسال...
                         </span>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Sidebar Info -->
+        <!-- الشريط الجانبي -->
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            <!-- Conversation Status -->
+            <!-- حالة المحادثة -->
             <div style="background: white; border: 1px solid #e5e7eb; border-radius: 1rem; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <div style="padding: 1rem 1.5rem; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333; display: flex; align-items: center; gap: 0.5rem;">
+                <div style="padding: 1rem 1.5rem; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333; display: flex; align-items: center; gap: 0.5rem; font-family: 'Cairo', sans-serif;">
                     <i class="fas fa-info-circle"></i>
-                    Status
+                    الحالة
                 </div>
                 <div style="padding: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
-                        <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Status:</span>
-                        <span style="color: #333; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.25rem;">
+                        <span style="font-weight: 500; color: #666; font-size: 0.875rem; font-family: 'Cairo', sans-serif;">الحالة:</span>
+                        <span style="color: #333; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.25rem; font-family: 'Cairo', sans-serif;">
                             <div style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></div>
-                            Active
+                            نشطة
                         </span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
-                        <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Messages:</span>
+                        <span style="font-weight: 500; color: #666; font-size: 0.875rem; font-family: 'Cairo', sans-serif;">الرسائل:</span>
                         <span style="color: #333; font-size: 0.875rem; font-weight: 500;" id="sidebarMessageCount">{{ $messages->count() }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
-                        <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Created:</span>
-                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;">{{ $conversation->created_at->format('M d, Y') }}</span>
+                        <span style="font-weight: 500; color: #666; font-size: 0.875rem; font-family: 'Cairo', sans-serif;">تاريخ الإنشاء:</span>
+                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;">{{ $conversation->created_at->format('d M, Y') }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
-                        <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Last Reply:</span>
+                        <span style="font-weight: 500; color: #666; font-size: 0.875rem; font-family: 'Cairo', sans-serif;">آخر رد:</span>
                         <span style="color: #333; font-size: 0.875rem; font-weight: 500;" id="lastReplyTime">{{ $conversation->updated_at->diffForHumans() }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Actions -->
+            <!-- الإجراءات السريعة -->
             <div style="background: white; border: 1px solid #e5e7eb; border-radius: 1rem; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <div style="padding: 1rem 1.5rem; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333; display: flex; align-items: center; gap: 0.5rem;">
+                <div style="padding: 1rem 1.5rem; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333; display: flex; align-items: center; gap: 0.5rem; font-family: 'Cairo', sans-serif;">
                     <i class="fas fa-bolt"></i>
-                    Quick Actions
+                    الإجراءات السريعة
                 </div>
                 <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <a href="{{ route('user.conversations.index') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: white; color: #333; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease;">
+                    <a href="{{ route('user.conversations.index') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: white; color: #333; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; font-family: 'Cairo', sans-serif;">
                         <i class="fas fa-list"></i>
-                        View All Conversations
+                        عرض جميع المحادثات
                     </a>
-                    <a href="{{ route('user.conversations.create') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: white; color: #333; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease;">
+                    <a href="{{ route('user.conversations.create') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: white; color: #333; text-decoration: none; font-size: 0.875rem; transition: all 0.2s ease; font-family: 'Cairo', sans-serif;">
                         <i class="fas fa-plus"></i>
-                        Start New Conversation
+                        بدء محادثة جديدة
                     </a>
-                    <button onclick="toggleRealTimeMessaging()" id="realTimeToggle" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: white; color: #333; font-size: 0.875rem; transition: all 0.2s ease; cursor: pointer; width: 100%;">
+                    <button onclick="toggleRealTimeMessaging()" id="realTimeToggle" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: white; color: #333; font-size: 0.875rem; transition: all 0.2s ease; cursor: pointer; width: 100%; font-family: 'Cairo', sans-serif;">
                         <i class="fas fa-sync-alt"></i>
-                        <span>Disable Auto-refresh</span>
+                        <span>إيقاف التحديث التلقائي</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Support Info -->
+            <!-- معلومات الدعم -->
             <div style="background: white; border: 1px solid #e5e7eb; border-radius: 1rem; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <div style="padding: 1rem 1.5rem; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333; display: flex; align-items: center; gap: 0.5rem;">
+                <div style="padding: 1rem 1.5rem; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #333; display: flex; align-items: center; gap: 0.5rem; font-family: 'Cairo', sans-serif;">
                     <i class="fas fa-question-circle"></i>
-                    Support Info
+                    معلومات الدعم
                 </div>
                 <div style="padding: 1.5rem;">
-                    <p style="font-size: 0.875rem; color: #666; line-height: 1.6; margin-bottom: 1rem;">
-                        Our support team typically responds within 24 hours during business days.
+                    <p style="font-size: 0.875rem; color: #666; line-height: 1.6; margin-bottom: 1rem; font-family: 'Cairo', sans-serif;">
+                        عادةً ما يرد فريق الدعم لدينا خلال 24 ساعة في أيام العمل.
                     </p>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
-                        <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Response Time:</span>
-                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;">< 24 hours</span>
+                        <span style="font-weight: 500; color: #666; font-size: 0.875rem; font-family: 'Cairo', sans-serif;">وقت الاستجابة:</span>
+                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;">أقل من 24 ساعة</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
-                        <span style="font-weight: 500; color: #666; font-size: 0.875rem;">Business Hours:</span>
-                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;">9 AM - 6 PM</span>
+                        <span style="font-weight: 500; color: #666; font-size: 0.875rem; font-family: 'Cairo', sans-serif;">ساعات العمل:</span>
+                        <span style="color: #333; font-size: 0.875rem; font-weight: 500;">9 ص - 6 م</span>
                     </div>
                 </div>
             </div>
@@ -485,7 +516,7 @@ a[style*="display: flex"]:hover {
 @push('scripts')
 <script type="text/javascript">
 // ========================================
-// Real-time Messaging System (مُحدث مع تحسين التمرير)
+// نظام الرسائل الفورية (مُحدث مع تحسين التمرير)
 // ========================================
 
 class RealTimeMessaging {
@@ -505,7 +536,7 @@ class RealTimeMessaging {
         this.getLatestMessageId();
         this.startPolling();
         this.setupVisibilityChange();
-        console.log('Real-time messaging initialized');
+        console.log('تم تهيئة نظام الرسائل الفورية');
     }
 
     getLatestMessageId() {
@@ -578,7 +609,7 @@ class RealTimeMessaging {
                 this.updateConnectionStatus(false);
             }
         } catch (error) {
-            console.error('Error checking for new messages:', error);
+            console.error('خطأ في فحص الرسائل الجديدة:', error);
             this.updateConnectionStatus(false);
         }
     }
@@ -591,7 +622,7 @@ class RealTimeMessaging {
             // تحقق من عدم وجود الرسالة مسبقاً
             const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
             if (existingMessage) {
-                console.log('Message already exists, skipping:', message.id);
+                console.log('الرسالة موجودة مسبقاً، تخطي:', message.id);
                 return;
             }
 
@@ -629,7 +660,7 @@ class RealTimeMessaging {
             opacity: 0; transform: translateY(20px); transition: all 0.3s ease;
         `;
         
-        if (!message.is_from_admin) {
+        if (message.is_from_admin) {
             messageDiv.style.flexDirection = 'row-reverse';
         }
 
@@ -656,9 +687,10 @@ class RealTimeMessaging {
         senderInfo.style.cssText = `
             font-size: 0.75rem; font-weight: 600; color: #666; 
             margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;
+            font-family: 'Cairo', sans-serif;
         `;
         
-        if (!message.is_from_admin) {
+        if (message.is_from_admin) {
             senderInfo.style.justifyContent = 'flex-end';
         }
 
@@ -666,14 +698,15 @@ class RealTimeMessaging {
         senderBadge.style.cssText = `
             padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; 
             text-transform: uppercase; letter-spacing: 0.5px;
+            font-family: 'Cairo', sans-serif;
         `;
         
         if (message.is_from_admin) {
             senderBadge.style.cssText += 'background: #dcfce7; color: #166534;';
-            senderBadge.textContent = 'Support Team';
+            senderBadge.textContent = 'فريق الدعم';
         } else {
             senderBadge.style.cssText += 'background: #dbeafe; color: #1e40af;';
-            senderBadge.textContent = 'You';
+            senderBadge.textContent = 'أنت';
         }
 
         const timeSpan = document.createElement('span');
@@ -688,17 +721,18 @@ class RealTimeMessaging {
             padding: 1rem 1.5rem; border-radius: 1.5rem; margin-bottom: 0.25rem; 
             word-wrap: break-word; line-height: 1.6; position: relative; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            font-family: 'Cairo', sans-serif;
         `;
         
         if (message.is_from_admin) {
             messageBubble.style.cssText += `
                 background: white; color: #333; border: 1px solid #e5e7eb; 
-                border-bottom-left-radius: 0.375rem;
+                border-bottom-right-radius: 0.375rem;
             `;
         } else {
             messageBubble.style.cssText += `
                 background: linear-gradient(135deg, #0ea5e9, #0284c7); 
-                color: white; border-bottom-right-radius: 0.375rem;
+                color: white; border-bottom-left-radius: 0.375rem;
             `;
         }
         
@@ -769,10 +803,10 @@ class RealTimeMessaging {
             
             if (connected) {
                 dot.className = 'connection-dot connected';
-                text.textContent = 'Connected';
+                text.textContent = 'متصل';
             } else {
                 dot.className = 'connection-dot disconnected';
-                text.textContent = 'Disconnected';
+                text.textContent = 'غير متصل';
             }
         }
     }
@@ -814,11 +848,11 @@ class RealTimeMessaging {
             const span = toggleButton.querySelector('span');
             if (this.isRealTimeEnabled) {
                 this.startPolling();
-                span.textContent = 'Disable Auto-refresh';
+                span.textContent = 'إيقاف التحديث التلقائي';
                 toggleButton.style.background = 'white';
             } else {
                 this.stopPolling();
-                span.textContent = 'Enable Auto-refresh';
+                span.textContent = 'تفعيل التحديث التلقائي';
                 toggleButton.style.background = '#fef3c7';
             }
         }
@@ -831,7 +865,7 @@ class RealTimeMessaging {
 }
 
 // ========================================
-// Message Form Handler (محمي من التكرار والازدواجية)
+// معالج نموذج الرسائل (محمي من التكرار والازدواجية)
 // ========================================
 
 // منع إعادة التهيئة
@@ -845,13 +879,13 @@ if (!window.messageFormInitialized) {
         const sendingStatus = document.getElementById('sendingStatus');
         
         if (!form || !textarea || !submitButton) {
-            console.error('Form elements not found');
+            console.error('عناصر النموذج غير موجودة');
             return;
         }
 
         let isSubmitting = false; // منع الإرسال المتعدد
 
-        // منع الإرسال التقليدي للفورم
+        // منع الإرسال التقليدي للنموذج
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             if (!isSubmitting) {
@@ -878,7 +912,7 @@ if (!window.messageFormInitialized) {
         // دالة إرسال الرسالة (محمية من التكرار)
         async function sendMessage() {
             if (isSubmitting) {
-                console.log('Already submitting, ignoring...');
+                console.log('جاري الإرسال بالفعل، تجاهل...');
                 return;
             }
 
@@ -892,7 +926,7 @@ if (!window.messageFormInitialized) {
             
             const originalButtonText = submitButton.innerHTML;
             
-            // تعطيل الـ form
+            // تعطيل النموذج
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             textarea.disabled = true;
@@ -903,7 +937,7 @@ if (!window.messageFormInitialized) {
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                 formData.append('message', message);
                 
-                console.log('إرسالing message:', message);
+                console.log('إرسال الرسالة:', message);
 
                 const response = await fetch(form.action, {
                     method: 'POST',
@@ -914,11 +948,11 @@ if (!window.messageFormInitialized) {
                     }
                 });
 
-                console.log('Response status:', response.status);
+                console.log('حالة الاستجابة:', response.status);
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Response data:', data);
+                    console.log('بيانات الاستجابة:', data);
                     
                     if (data.success) {
                         // إضافة الرسالة إلى المحادثة
@@ -941,7 +975,7 @@ if (!window.messageFormInitialized) {
                         }, 100);
                         
                         showSuccessMessage('تم إرسال الرسالة بنجاح');
-                        console.log('Message sent successfully');
+                        console.log('تم إرسال الرسالة بنجاح');
                     } else {
                         throw new Error(data.error || 'فشل في إرسال الرسالة');
                     }
@@ -959,11 +993,11 @@ if (!window.messageFormInitialized) {
                 }
                 
             } catch (error) {
-                console.error('Error sending message:', error);
+                console.error('خطأ في إرسال الرسالة:', error);
                 showErrorMessage('خطأ في إرسال الرسالة: ' + error.message);
                 
             } finally {
-                // إعادة تفعيل الـ form دائماً
+                // إعادة تفعيل النموذج دائماً
                 isSubmitting = false; // إلغاء القفل
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
@@ -981,7 +1015,7 @@ if (!window.messageFormInitialized) {
             // تحقق من عدم وجود الرسالة مسبقاً (إضافة مهمة)
             const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
             if (existingMessage) {
-                console.log('Message already exists, skipping...');
+                console.log('الرسالة موجودة مسبقاً، تخطي...');
                 return;
             }
 
@@ -989,7 +1023,7 @@ if (!window.messageFormInitialized) {
             messageDiv.setAttribute('data-message-id', message.id);
             messageDiv.className = 'message-bubble';
             messageDiv.style.cssText = `
-                margin-bottom: 2rem; display: flex; gap: 1rem; flex-direction: row-reverse;
+                margin-bottom: 2rem; display: flex; gap: 1rem;
                 opacity: 0; transform: translateY(20px); transition: all 0.3s ease;
             `;
 
@@ -998,20 +1032,20 @@ if (!window.messageFormInitialized) {
                     ${message.avatar}
                 </div>
                 <div style="flex: 1; max-width: 75%;">
-                    <div style="font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
-                        <span style="padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.5px; background: #dbeafe; color: #1e40af;">You</span>
+                    <div style="font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; font-family: 'Cairo', sans-serif;">
+                        <span style="padding: 2px 6px; border-radius: 0.375rem; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.5px; background: #dbeafe; color: #1e40af;">أنت</span>
                         <span style="font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 0.25rem;">
                             <i class="fas fa-clock"></i>
                             ${message.created_at}
                         </span>
                     </div>
-                    <div style="padding: 1rem 1.5rem; border-radius: 1.5rem; margin-bottom: 0.25rem; word-wrap: break-word; line-height: 1.6; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.05); background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border-bottom-right-radius: 0.375rem;">
+                    <div style="padding: 1rem 1.5rem; border-radius: 1.5rem; margin-bottom: 0.25rem; word-wrap: break-word; line-height: 1.6; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.05); background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border-bottom-left-radius: 0.375rem; font-family: 'Cairo', sans-serif;">
                         ${message.message}
                     </div>
                 </div>
             `;
 
-            // إدراج قبل typing indicator إذا وجد
+            // إدراج قبل مؤشر الكتابة إذا وجد
             const typingIndicator = document.getElementById('typingIndicator');
             if (typingIndicator) {
                 messagesList.insertBefore(messageDiv, typingIndicator);
@@ -1035,12 +1069,12 @@ if (!window.messageFormInitialized) {
             this.style.height = this.scrollHeight + 'px';
         });
 
-        console.log('Message form initialized successfully');
+        console.log('تم تهيئة نموذج الرسائل بنجاح');
     });
 }
 
 // ========================================
-// Helper Functions (محسنة مع التمرير القوي)
+// دوال مساعدة (محسنة مع التمرير القوي)
 // ========================================
 
 function scrollToBottom(smooth = true, force = false) {
@@ -1051,7 +1085,7 @@ function scrollToBottom(smooth = true, force = false) {
     const scrollHeight = messagesList.scrollHeight;
     const extraSpace = force ? 200 : 50; // مساحة إضافية أكبر عند الإرسال
     
-    console.log('Scrolling to bottom:', {
+    console.log('التمرير إلى الأسفل:', {
         scrollHeight,
         extraSpace,
         total: scrollHeight + extraSpace,
@@ -1140,10 +1174,10 @@ function showErrorMessage(message) {
 }
 
 // ========================================
-// Auto-initialization مع تحسين التمرير
+// التهيئة التلقائية مع تحسين التمرير
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing real-time messaging...');
+    console.log('تم تحميل DOM، تهيئة نظام الرسائل الفورية...');
     
     // استخراج معرف المحادثة من الـ URL
     const pathParts = window.location.pathname.split('/');
@@ -1152,14 +1186,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // التحقق من وجود صفحة المحادثة
     const messagesList = document.getElementById('messagesList');
     
-    console.log('Conversation ID:', conversationId);
-    console.log('Messages list found:', !!messagesList);
+    console.log('معرف المحادثة:', conversationId);
+    console.log('قائمة الرسائل موجودة:', !!messagesList);
     
     if (messagesList && conversationId && !isNaN(conversationId)) {
         // إنشاء مثيل من نظام الرسائل الفورية (مرة واحدة فقط)
         if (!window.realTimeMessaging) {
             window.realTimeMessaging = new RealTimeMessaging(conversationId, false);
-            console.log('Real-time messaging started for conversation:', conversationId);
+            console.log('تم بدء نظام الرسائل الفورية للمحادثة:', conversationId);
         }
         
         // التمرير إلى أسفل عند التحميل مع تحسينات
@@ -1185,7 +1219,7 @@ document.addEventListener('DOMContentLoaded', function() {
             textarea.focus();
         }
     } else {
-        console.error('Failed to initialize real-time messaging:', {
+        console.error('فشل في تهيئة نظام الرسائل الفورية:', {
             messagesList: !!messagesList,
             conversationId,
             isValidId: !isNaN(conversationId)

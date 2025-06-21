@@ -224,9 +224,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::patch('/{coupon}', [AdminCouponController::class, 'update'])->name('update');
         Route::delete('/{coupon}', [AdminCouponController::class, 'destroy'])->name('destroy');
         
-        // Multiple Coupons Generation
-        Route::get('/generate/multiple', [AdminCouponController::class, 'generateMultiple'])->name('generate-multiple');
-        Route::post('/generate/multiple', [AdminCouponController::class, 'storeMultiple'])->name('store-multiple');
+        // Multiple Coupons Generation - FIXED ROUTES
+        Route::get('/generate/multiple', [AdminCouponController::class, 'generateMultiple'])->name('generate');
+        Route::post('/generate/multiple', [AdminCouponController::class, 'storeMultiple'])->name('storeMultiple');
     });
     
     // ⚡ Conversations Management - مُحدث للرسائل الفورية
