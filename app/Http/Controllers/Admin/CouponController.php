@@ -5,306 +5,264 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
 use App\Models\User;
+use App\Services\CouponService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 
 class CouponController extends Controller
 {
-    /**
-     * عرض قائمة القسائم.
-     */
-    public function index()
+    protected $couponService;
+
+    public function __construct()
     {
-        $activeCoupons = Coupon::with('user')
-            ->where('is_used', false)
-            ->where('valid_until', '>=', now())
-            ->latest()
-            ->get();
-            
-        $usedCoupons = Coupon::with(['user', 'order'])
-            ->where('is_used', true)
-            ->latest()
-            ->get();
-            
-        $expiredCoupons = Coupon::with('user')
-            ->where('is_used', false)
-            ->where('valid_until', '<', now())
-            ->latest()
-            ->get();
-            
-        return view('admin.coupons.index', compact(
-            'activeCoupons',
-            'usedCoupons',
-            'expiredCoupons'
-        ));
+        if (class_exists('App\Services\CouponService')) {
+            $this->couponService = app(CouponService::class);
+        }
     }
 
     /**
-     * عرض نموذج إنشاء قسيمة جديدة.
+     * عرض قائمة الكوبونات
+     */
+    public function index(Request $request)
+    {
+        $query = Coupon::with('user', 'order');
+
+        // فلترة حسب الحالة
+        if ($request->has('status')) {
+            switch ($request->status) {
+                case 'active':
+                    $query->where('is_used', false)->where('valid_until', '>=', now());
+                    break;
+                case 'used':
+                    $query->where('is_used', true);
+                    break;
+                case 'expired':
+                    $query->where('is_used', false)->where('valid_until', '<', now());
+                    break;
+            }
+        }
+
+        // البحث
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // ترتيب
+        $sortBy = $request->get('sort', 'created_at');
+        $sortOrder = $request->get('order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $coupons = $query->paginate(15);
+
+        // إحصائيات
+        $stats = [
+            'total' => Coupon::count(),
+            'active' => Coupon::where('is_used', false)->where('valid_until', '>=', now())->count(),
+            'used' => Coupon::where('is_used', true)->count(),
+            'expired' => Coupon::where('is_used', false)->where('valid_until', '<', now())->count(),
+        ];
+
+        return view('admin.coupons.index', compact('coupons', 'stats'));
+    }
+
+    /**
+     * عرض نموذج إنشاء كوبون
      */
     public function create()
     {
-        // إصلاح: تغيير 'user' إلى 'customer' لتطابق قاعدة البيانات
-        $users = User::where('role', 'customer')->get();
+        $users = User::select('id', 'name', 'email')->get();
         return view('admin.coupons.create', compact('users'));
     }
 
     /**
-     * حفظ قسيمة جديدة في قاعدة البيانات.
+     * حفظ كوبون جديد
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'nullable|exists:users,id', // جعل user_id اختياري للقسائم العامة
-            'amount' => 'required|numeric|min:1',
-            'min_purchase_amount' => 'nullable|numeric|min:0',
-            'valid_months' => 'required|integer|min:1',
-            'code' => 'nullable|string|unique:coupons,code',
-        ], [
-            'user_id.exists' => 'المستخدم المحدد غير موجود.',
-            'amount.required' => 'قيمة القسيمة مطلوبة.',
-            'amount.numeric' => 'قيمة القسيمة يجب أن تكون رقم.',
-            'amount.min' => 'قيمة القسيمة يجب أن تكون على الأقل 1.',
-            'min_purchase_amount.numeric' => 'الحد الأدنى للشراء يجب أن يكون رقم.',
-            'min_purchase_amount.min' => 'الحد الأدنى للشراء لا يمكن أن يكون سالب.',
-            'valid_months.required' => 'مدة صلاحية القسيمة مطلوبة.',
-            'valid_months.integer' => 'مدة الصلاحية يجب أن تكون رقم صحيح.',
-            'valid_months.min' => 'مدة الصلاحية يجب أن تكون شهر واحد على الأقل.',
-            'code.string' => 'رمز القسيمة يجب أن يكون نص.',
-            'code.unique' => 'رمز القسيمة موجود مسبقاً.',
+        $request->validate([
+            'code' => 'nullable|string|max:50|unique:coupons,code',
+            'amount' => 'required|numeric|min:0',
+            'type' => 'required|in:fixed,percentage',
+            'user_id' => 'required|exists:users,id',
+            'valid_until' => 'required|date|after:today',
+            'minimum_amount' => 'nullable|numeric|min:0',
+            'max_discount_amount' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:255',
         ]);
-        
-        // تحويل إلى أعداد صحيحة لتجنب مشاكل Carbon
-        $validMonths = (int) $validated['valid_months'];
-        $amount = (float) $validated['amount'];
-        $minPurchaseAmount = isset($validated['min_purchase_amount']) ? (float) $validated['min_purchase_amount'] : 0;
-        
-        // توليد رمز قسيمة فريد إذا لم يتم توفيره
-        if (empty($validated['code'])) {
-            $code = strtoupper(Str::random(8));
+
+        try {
+            $data = $request->all();
             
-            // التأكد من أن الرمز فريد
-            while (Coupon::where('code', $code)->exists()) {
-                $code = strtoupper(Str::random(8));
+            // توليد كود إذا لم يتم إدخاله
+            if (empty($data['code'])) {
+                $data['code'] = 'ADMIN-' . strtoupper(Str::random(8));
+                // التأكد من عدم تكرار الكود
+                while (Coupon::where('code', $data['code'])->exists()) {
+                    $data['code'] = 'ADMIN-' . strtoupper(Str::random(8));
+                }
             }
-        } else {
-            $code = $validated['code'];
+
+            Coupon::create($data);
+
+            return redirect()->route('admin.coupons.index')
+                ->with('success', 'تم إنشاء الكوبون بنجاح!');
+
+        } catch (\Exception $e) {
+            Log::error('خطأ في إنشاء الكوبون', [
+                'message' => $e->getMessage(),
+                'data' => $request->all()
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'حدث خطأ في إنشاء الكوبون.');
         }
-        
-        Coupon::create([
-            'code' => $code,
-            'amount' => $amount,
-            'min_purchase_amount' => $minPurchaseAmount,
-            'valid_from' => now(),
-            'valid_until' => now()->addMonths($validMonths),
-            'is_used' => false,
-            'user_id' => $validated['user_id'] ?? null, // السماح بـ null للقسائم العامة
-            'order_id' => null,
-        ]);
-        
-        return redirect()->route('admin.coupons.index')
-            ->with('success', 'تم إنشاء القسيمة بنجاح.');
     }
 
     /**
-     * عرض القسيمة المحددة.
+     * عرض تفاصيل كوبون
      */
     public function show(Coupon $coupon)
     {
-        $coupon->load(['user', 'order']);
+        $coupon->load('user', 'order', 'generatedFromOrder');
         return view('admin.coupons.show', compact('coupon'));
     }
 
     /**
-     * عرض نموذج تعديل القسيمة المحددة.
+     * عرض نموذج تعديل كوبون
      */
     public function edit(Coupon $coupon)
     {
-        // عدم السماح بتعديل القسائم المستخدمة
-        if ($coupon->is_used) {
-            return redirect()->route('admin.coupons.show', $coupon)
-                ->with('error', 'لا يمكن تعديل القسائم المستخدمة.');
-        }
-        
-        // إصلاح: تغيير 'user' إلى 'customer'
-        $users = User::where('role', 'customer')->get();
+        $users = User::select('id', 'name', 'email')->get();
         return view('admin.coupons.edit', compact('coupon', 'users'));
     }
 
     /**
-     * تحديث القسيمة المحددة في قاعدة البيانات.
+     * تحديث كوبون
      */
     public function update(Request $request, Coupon $coupon)
     {
-        // عدم السماح بتحديث القسائم المستخدمة
-        if ($coupon->is_used) {
-            return redirect()->route('admin.coupons.show', $coupon)
-                ->with('error', 'لا يمكن تحديث القسائم المستخدمة.');
+        $request->validate([
+            'code' => 'required|string|max:50|unique:coupons,code,' . $coupon->id,
+            'amount' => 'required|numeric|min:0',
+            'type' => 'required|in:fixed,percentage',
+            'user_id' => 'required|exists:users,id',
+            'valid_until' => 'required|date',
+            'minimum_amount' => 'nullable|numeric|min:0',
+            'max_discount_amount' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $coupon->update($request->all());
+
+            return redirect()->route('admin.coupons.index')
+                ->with('success', 'تم تحديث الكوبون بنجاح!');
+
+        } catch (\Exception $e) {
+            Log::error('خطأ في تحديث الكوبون', [
+                'message' => $e->getMessage(),
+                'coupon_id' => $coupon->id,
+                'data' => $request->all()
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'حدث خطأ في تحديث الكوبون.');
         }
-        
-        $validated = $request->validate([
-            'user_id' => 'nullable|exists:users,id', // جعله اختياري
-            'amount' => 'required|numeric|min:1',
-            'min_purchase_amount' => 'nullable|numeric|min:0',
-            'valid_until' => 'required|date|after:today',
-            'code' => 'required|string|unique:coupons,code,'.$coupon->id,
-        ], [
-            'user_id.exists' => 'المستخدم المحدد غير موجود.',
-            'amount.required' => 'قيمة القسيمة مطلوبة.',
-            'amount.numeric' => 'قيمة القسيمة يجب أن تكون رقم.',
-            'amount.min' => 'قيمة القسيمة يجب أن تكون على الأقل 1.',
-            'min_purchase_amount.numeric' => 'الحد الأدنى للشراء يجب أن يكون رقم.',
-            'min_purchase_amount.min' => 'الحد الأدنى للشراء لا يمكن أن يكون سالب.',
-            'valid_until.required' => 'تاريخ انتهاء الصلاحية مطلوب.',
-            'valid_until.date' => 'تاريخ انتهاء الصلاحية يجب أن يكون تاريخ صحيح.',
-            'valid_until.after' => 'تاريخ انتهاء الصلاحية يجب أن يكون بعد اليوم.',
-            'code.required' => 'رمز القسيمة مطلوب.',
-            'code.string' => 'رمز القسيمة يجب أن يكون نص.',
-            'code.unique' => 'رمز القسيمة موجود مسبقاً.',
-        ]);
-        
-        $coupon->update([
-            'code' => $validated['code'],
-            'amount' => $validated['amount'],
-            'min_purchase_amount' => $validated['min_purchase_amount'] ?? 0,
-            'valid_until' => $validated['valid_until'],
-            'user_id' => $validated['user_id'] ?? null,
-        ]);
-        
-        return redirect()->route('admin.coupons.show', $coupon)
-            ->with('success', 'تم تحديث القسيمة بنجاح.');
     }
 
     /**
-     * حذف القسيمة المحددة من قاعدة البيانات.
+     * حذف كوبون
      */
     public function destroy(Coupon $coupon)
     {
-        $coupon->delete();
-        
-        return redirect()->route('admin.coupons.index')
-            ->with('success', 'تم حذف القسيمة بنجاح.');
+        try {
+            $coupon->delete();
+
+            return redirect()->route('admin.coupons.index')
+                ->with('success', 'تم حذف الكوبون بنجاح!');
+
+        } catch (\Exception $e) {
+            Log::error('خطأ في حذف الكوبون', [
+                'message' => $e->getMessage(),
+                'coupon_id' => $coupon->id
+            ]);
+
+            return back()->with('error', 'حدث خطأ في حذف الكوبون.');
+        }
     }
-    
+
     /**
-     * توليد عدة قسائم في مرة واحدة.
+     * عرض صفحة توليد كوبونات متعددة
      */
     public function generateMultiple()
     {
-        // إصلاح: تغيير 'user' إلى 'customer'
-        $users = User::where('role', 'customer')->get();
+        $users = User::select('id', 'name', 'email')->get();
         return view('admin.coupons.generate', compact('users'));
     }
-    
+
     /**
-     * حفظ عدة قسائم.
+     * توليد كوبونات متعددة
      */
     public function storeMultiple(Request $request)
     {
-        // التحقق إذا كانت قسائم عامة
-        $isGeneral = $request->has('generate_for_all') && $request->generate_for_all == '1';
-        
-        $rules = [
-            'amount' => 'required|numeric|min:1',
-            'min_purchase_amount' => 'nullable|numeric|min:0',
-            'valid_months' => 'required|integer|min:1',
-            'quantity_per_user' => 'required|integer|min:1|max:100',
-        ];
-        
-        // طلب user_ids فقط إذا لم تكن قسائم عامة
-        if (!$isGeneral) {
-            $rules['user_ids'] = 'required|array';
-            $rules['user_ids.*'] = 'exists:users,id';
-        }
-        
-        $validated = $request->validate($rules, [
-            'amount.required' => 'قيمة القسيمة مطلوبة.',
-            'amount.numeric' => 'قيمة القسيمة يجب أن تكون رقم.',
-            'amount.min' => 'قيمة القسيمة يجب أن تكون على الأقل 1.',
-            'min_purchase_amount.numeric' => 'الحد الأدنى للشراء يجب أن يكون رقم.',
-            'min_purchase_amount.min' => 'الحد الأدنى للشراء لا يمكن أن يكون سالب.',
-            'valid_months.required' => 'مدة صلاحية القسيمة مطلوبة.',
-            'valid_months.integer' => 'مدة الصلاحية يجب أن تكون رقم صحيح.',
-            'valid_months.min' => 'مدة الصلاحية يجب أن تكون شهر واحد على الأقل.',
-            'quantity_per_user.required' => 'عدد القسائم لكل مستخدم مطلوب.',
-            'quantity_per_user.integer' => 'عدد القسائم يجب أن يكون رقم صحيح.',
-            'quantity_per_user.min' => 'يجب إنشاء قسيمة واحدة على الأقل.',
-            'quantity_per_user.max' => 'لا يمكن إنشاء أكثر من 100 قسيمة لكل مستخدم.',
-            'user_ids.required' => 'يرجى اختيار المستخدمين.',
-            'user_ids.array' => 'المستخدمون يجب أن يكونوا في شكل مصفوفة.',
-            'user_ids.*.exists' => 'أحد المستخدمين المحددين غير موجود.',
+        $request->validate([
+            'count' => 'required|integer|min:1|max:100',
+            'amount' => 'required|numeric|min:0',
+            'type' => 'required|in:fixed,percentage',
+            'valid_until' => 'required|date|after:today',
+            'minimum_amount' => 'nullable|numeric|min:0',
+            'max_discount_amount' => 'nullable|numeric|min:0',
+            'prefix' => 'nullable|string|max:10',
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'exists:users,id',
         ]);
-        
-        // تحويل إلى الأنواع المناسبة لتجنب مشاكل Carbon
-        $validMonths = (int) $validated['valid_months'];
-        $amount = (float) $validated['amount'];
-        $minPurchaseAmount = isset($validated['min_purchase_amount']) ? (float) $validated['min_purchase_amount'] : 0;
-        $quantityPerUser = (int) $validated['quantity_per_user'];
-        
-        DB::beginTransaction();
-        
+
         try {
-            $couponsCreated = 0;
+            $createdCoupons = [];
+            $prefix = $request->prefix ?: 'BULK';
             
-            // التحقق إذا كانت للقسائم العامة (جميع المستخدمين)
-            if ($isGeneral) {
-                // توليد قسائم عامة (غير مرتبطة بمستخدمين محددين)
-                for ($i = 0; $i < $quantityPerUser; $i++) {
-                    $code = strtoupper(Str::random(8));
-                    
-                    while (Coupon::where('code', $code)->exists()) {
-                        $code = strtoupper(Str::random(8));
-                    }
-                    
-                    Coupon::create([
+            for ($i = 0; $i < $request->count; $i++) {
+                foreach ($request->user_ids as $userId) {
+                    // توليد كود فريد
+                    do {
+                        $code = $prefix . '-' . strtoupper(Str::random(6));
+                    } while (Coupon::where('code', $code)->exists());
+
+                    $coupon = Coupon::create([
                         'code' => $code,
-                        'amount' => $amount,
-                        'min_purchase_amount' => $minPurchaseAmount,
-                        'valid_from' => now(),
-                        'valid_until' => now()->addMonths($validMonths),
-                        'is_used' => false,
-                        'user_id' => null, // قسيمة عامة
-                        'order_id' => null,
+                        'amount' => $request->amount,
+                        'type' => $request->type,
+                        'user_id' => $userId,
+                        'valid_until' => $request->valid_until,
+                        'minimum_amount' => $request->minimum_amount,
+                        'max_discount_amount' => $request->max_discount_amount,
+                        'description' => "كوبون مُولد تلقائياً - دفعة {$prefix}",
                     ]);
-                    
-                    $couponsCreated++;
-                }
-            } else {
-                // توليد قسائم لمستخدمين محددين
-                foreach ($validated['user_ids'] as $userId) {
-                    for ($i = 0; $i < $quantityPerUser; $i++) {
-                        $code = strtoupper(Str::random(8));
-                        
-                        while (Coupon::where('code', $code)->exists()) {
-                            $code = strtoupper(Str::random(8));
-                        }
-                        
-                        Coupon::create([
-                            'code' => $code,
-                            'amount' => $amount,
-                            'min_purchase_amount' => $minPurchaseAmount,
-                            'valid_from' => now(),
-                            'valid_until' => now()->addMonths($validMonths),
-                            'is_used' => false,
-                            'user_id' => $userId,
-                            'order_id' => null,
-                        ]);
-                        
-                        $couponsCreated++;
-                    }
+
+                    $createdCoupons[] = $coupon;
                 }
             }
-            
-            DB::commit();
-            
+
             return redirect()->route('admin.coupons.index')
-                ->with('success', "تم إنشاء $couponsCreated قسيمة بنجاح.");
+                ->with('success', 'تم توليد ' . count($createdCoupons) . ' كوبون بنجاح!');
+
         } catch (\Exception $e) {
-            DB::rollBack();
-            
-            return redirect()->back()
-                ->with('error', 'فشل في إنشاء القسائم: ' . $e->getMessage());
+            Log::error('خطأ في توليد الكوبونات المتعددة', [
+                'message' => $e->getMessage(),
+                'data' => $request->all()
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'حدث خطأ في توليد الكوبونات.');
         }
     }
 }

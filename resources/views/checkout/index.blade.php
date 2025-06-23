@@ -546,6 +546,30 @@
         to { transform: rotate(360deg); }
     }
     
+    @keyframes slideIn {
+        from {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        to {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+    }
+    
+    .coupon-suggestion:hover {
+        background: var(--primary-50) !important;
+        border-color: var(--primary-300) !important;
+        color: var(--primary-600) !important;
+    }
+    
     @media (max-width: 768px) {
         .checkout-content {
             grid-template-columns: 1fr;
@@ -736,7 +760,6 @@
                                     </div>
                                     <form method="POST" action="{{ route('checkout.removeCoupon') }}" style="display: inline;">
                                         @csrf
-                                        @method('DELETE')
                                         <button type="submit" class="remove-coupon">
                                             <i class="fas fa-times"></i>
                                         </button>
@@ -848,8 +871,7 @@
                     <span class="calc-label">{{ __('الشحن') }}</span>
                     <span class="calc-value">{{ __('مجاني') }}</span>
                 </div>
-                
-                @if($appliedCoupon && $discountAmount > 0)
+               @if($appliedCoupon && $discountAmount > 0)
                     <div class="calc-row discount-row">
                         <span class="calc-label">{{ __('الخصم') }} ({{ $appliedCoupon->code }})</span>
                         <span class="calc-value">-${{ number_format($discountAmount, 2) }}</span>
@@ -905,7 +927,7 @@
         document.getElementById('couponForm').style.display = 'flex';
     }
     
-    // Apply coupon
+    // Apply coupon - FIXED للتوافق مع الـ route الجديد
     async function applyCoupon() {
         const input = document.getElementById('couponInput');
         const code = input.value.trim();
@@ -927,13 +949,19 @@
                 })
             });
             
-            if (response.ok) {
-                location.reload(); // Reload to show applied coupon
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                showNotification(data.message, 'success');
+                // Reload after short delay to show applied coupon
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
             } else {
-                const data = await response.json();
                 showNotification(data.message || '{{ __("كود الكوبون غير صالح") }}', 'error');
             }
         } catch (error) {
+            console.error('Coupon application error:', error);
             showNotification('{{ __("خطأ في تطبيق الكوبون") }}', 'error');
         }
     }
@@ -992,11 +1020,24 @@
     function showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type} slide-in`;
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.left = '20px'; /* Changed from right to left for RTL */
-        notification.style.zIndex = '9999';
-        notification.style.maxWidth = '300px';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+            max-width: 300px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out;
+            background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+        `;
+        
         notification.innerHTML = `
             <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
             ${message}
@@ -1062,26 +1103,16 @@
     });
     
     // Coupon input enter key
-    document.getElementById('couponInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            applyCoupon();
+    document.addEventListener('DOMContentLoaded', function() {
+        const couponInput = document.getElementById('couponInput');
+        if (couponInput) {
+            couponInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    applyCoupon();
+                }
+            });
         }
     });
 </script>
-
-<style>
-    @keyframes slideOut {
-        to {
-            transform: translateX(-100%);
-            opacity: 0;
-        }
-    }
-    
-    .coupon-suggestion:hover {
-        background: var(--primary-50) !important;
-        border-color: var(--primary-300) !important;
-        color: var(--primary-600) !important;
-    }
-</style>
 @endpush

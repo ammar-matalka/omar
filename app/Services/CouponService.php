@@ -4,112 +4,50 @@ namespace App\Services;
 
 use App\Models\Coupon;
 use App\Models\Order;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class CouponService
 {
     /**
-     * Generate a coupon for the given order based on purchase amount
-     *
-     * @param Order $order
-     * @return Coupon|null
+     * التحقق من صحة القسيمة
      */
-    public function generateCouponForOrder(Order $order)
+    public function validateCoupon($code, $userId, $cartTotal)
     {
-        $orderTotal = $order->total_amount;
+        $coupon = Coupon::where('code', $code)->first();
         
-        // No coupon for orders less than $50
-        if ($orderTotal < 50) {
-            return null;
-        }
-        
-        // Determine coupon amount based on purchase total
-        $couponAmount = $this->calculateCouponAmount($orderTotal);
-        
-        // Generate a unique coupon code
-        $code = $this->generateUniqueCode();
-        
-        // Create the coupon
-        $coupon = Coupon::create([
-            'code' => $code,
-            'amount' => $couponAmount,
-            'min_purchase_amount' => 0, // Can be used on any purchase
-            'valid_from' => now(),
-            'valid_until' => now()->addMonths(3), // Valid for 3 months
-            'is_used' => false,
-            'user_id' => $order->user_id,
-            'order_id' => null, // This will be set when the coupon is used
-        ]);
-        
-        return $coupon;
-    }
-    
-    /**
-     * Calculate the coupon amount based on the order total
-     *
-     * @param float $orderTotal
-     * @return float
-     */
-    private function calculateCouponAmount($orderTotal)
-    {
-        // Tiered coupon system
-        if ($orderTotal >= 100) {
-            return 20.00; // $20 coupon for orders $100+
-        } else {
-            return 10.00; // $10 coupon for orders $50-$99.99
-        }
-        if ($orderTotal >= 100) {
-            return 20.00; // $20 coupon for orders $100+
-        } else {
-            return 10.00; // $10 coupon for orders $50-$99.99
-        }
-    }
-    
-    /**
-     * Generate a unique coupon code
-     *
-     * @return string
-     */
-    private function generateUniqueCode()
-    {
-        $code = strtoupper(Str::random(8));
-        
-        // Ensure code is unique
-        while (Coupon::where('code', $code)->exists()) {
-            $code = strtoupper(Str::random(8));
-        }
-        
-        return $code;
-    }
-    
-    /**
-     * Validate a coupon for a user and order total
-     *
-     * @param string $code
-     * @param int $userId
-     * @param float $orderTotal
-     * @return array
-     */
-    public function validateCoupon($code, $userId, $orderTotal)
-    {
-        $coupon = Coupon::where('code', $code)
-            ->where('user_id', $userId)
-            ->where('is_used', false)
-            ->where('valid_from', '<=', now())
-            ->where('valid_until', '>=', now())
-            ->first();
-            
         if (!$coupon) {
             return [
                 'valid' => false,
-                'message' => 'Invalid or expired coupon'
+                'message' => 'كود القسيمة غير صحيح.'
             ];
         }
         
-        if ($orderTotal < $coupon->min_purchase_amount) {
+        if ($coupon->is_used) {
             return [
                 'valid' => false,
-                'message' => "Order total must be at least $" . $coupon->min_purchase_amount
+                'message' => 'تم استخدام هذه القسيمة من قبل.'
+            ];
+        }
+        
+        if ($coupon->user_id !== $userId) {
+            return [
+                'valid' => false,
+                'message' => 'هذه القسيمة غير متاحة لك.'
+            ];
+        }
+        
+        if ($coupon->valid_until < now()) {
+            return [
+                'valid' => false,
+                'message' => 'انتهت صلاحية هذه القسيمة.'
+            ];
+        }
+        
+        if ($coupon->minimum_amount && $cartTotal < $coupon->minimum_amount) {
+            return [
+                'valid' => false,
+                'message' => 'الحد الأدنى للطلب هو $' . number_format($coupon->minimum_amount, 2) . ' لاستخدام هذه القسيمة.'
             ];
         }
         
@@ -120,29 +58,119 @@ class CouponService
     }
     
     /**
-     * Apply a coupon to an order
-     *
-     * @param Order $order
-     * @param Coupon $coupon
-     * @return Order
+     * تطبيق القسيمة على الطلب
      */
     public function applyCoupon(Order $order, Coupon $coupon)
     {
-        // Update the order with the discount
-        $discountAmount = min($coupon->amount, $order->total_amount);
-        $newTotal = $order->total_amount - $discountAmount;
-        
-        $order->update([
-            'discount_amount' => $discountAmount,
-            'total_amount' => $newTotal
-        ]);
-        
-        // Mark coupon as used
         $coupon->update([
             'is_used' => true,
+            'used_at' => now(),
             'order_id' => $order->id
         ]);
         
-        return $order;
+        return true;
+    }
+    
+    /**
+     * توليد قسيمة مكافأة للطلب
+     */
+    public function generateCouponForOrder(Order $order)
+    {
+        // شروط توليد القسيمة
+        $minimumOrderAmount = 50; // الحد الأدنى للطلب
+        $rewardPercentage = 10; // نسبة المكافأة
+        
+        if ($order->total_amount < $minimumOrderAmount) {
+            return null;
+        }
+        
+        $rewardAmount = ($order->total_amount * $rewardPercentage) / 100;
+        $rewardAmount = min($rewardAmount, 20); // حد أقصى للمكافأة
+        
+        $coupon = Coupon::create([
+            'code' => 'REWARD-' . strtoupper(Str::random(8)),
+            'amount' => $rewardAmount,
+            'user_id' => $order->user_id,
+            'type' => 'reward',
+            'is_used' => false,
+            'valid_until' => now()->addMonths(3), // صالحة لمدة 3 أشهر
+            'minimum_amount' => 0,
+            'generated_from_order_id' => $order->id,
+            'description' => 'قسيمة مكافأة للطلب رقم #' . $order->id
+        ]);
+        
+        return $coupon;
+    }
+    
+    /**
+     * الحصول على القسائم المتاحة للمستخدم
+     */
+    public function getAvailableCoupons($userId)
+    {
+        return Coupon::where('user_id', $userId)
+            ->where('is_used', false)
+            ->where('valid_until', '>=', now())
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+    
+    /**
+     * توليد كود قسيمة عشوائي
+     */
+    public function generateCouponCode($prefix = '')
+    {
+        $code = $prefix . strtoupper(Str::random(8));
+        
+        // التأكد من عدم وجود الكود من قبل
+        while (Coupon::where('code', $code)->exists()) {
+            $code = $prefix . strtoupper(Str::random(8));
+        }
+        
+        return $code;
+    }
+    
+    /**
+     * حساب الخصم المطبق
+     */
+    public function calculateDiscount(Coupon $coupon, $orderTotal)
+    {
+        if ($coupon->type === 'percentage') {
+            $discount = ($orderTotal * $coupon->amount) / 100;
+            
+            // تطبيق الحد الأقصى للخصم إذا وُجد
+            if ($coupon->max_discount_amount) {
+                $discount = min($discount, $coupon->max_discount_amount);
+            }
+            
+            return $discount;
+        }
+        
+        // خصم ثابت
+        return min($coupon->amount, $orderTotal);
+    }
+    
+    /**
+     * إحصائيات استخدام القسائم
+     */
+    public function getCouponStats($userId = null)
+    {
+        $query = Coupon::query();
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        
+        return [
+            'total_coupons' => $query->count(),
+            'used_coupons' => $query->where('is_used', true)->count(),
+            'available_coupons' => $query->where('is_used', false)
+                                        ->where('valid_until', '>=', now())
+                                        ->count(),
+            'expired_coupons' => $query->where('is_used', false)
+                                      ->where('valid_until', '<', now())
+                                      ->count(),
+            'total_savings' => $query->where('is_used', true)
+                                    ->sum('amount')
+        ];
     }
 }

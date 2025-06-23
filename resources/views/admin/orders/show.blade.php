@@ -1,680 +1,1182 @@
 @extends('layouts.admin')
 
-@section('title', 'Conversation Details')
-@section('page-title', 'Conversation with ' . $conversation->user->name)
+@section('title', 'تفاصيل الطلب #' . $order->id)
+@section('page-title', 'تفاصيل الطلب #' . $order->id)
 
 @section('breadcrumb')
-<div class="breadcrumb-item">
-    <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">Dashboard</a>
-</div>
-<div class="breadcrumb-item">
-    <i class="fas fa-chevron-right"></i>
-    <a href="{{ route('admin.conversations.index') }}" class="breadcrumb-link">Conversations</a>
-</div>
-<div class="breadcrumb-item">
-    <i class="fas fa-chevron-right"></i>
-    {{ Str::limit($conversation->title, 30) }}
-</div>
+    <div class="breadcrumb-item">
+        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">لوحة التحكم</a>
+    </div>
+    <div class="breadcrumb-item">
+        <i class="fas fa-chevron-left"></i>
+        <a href="{{ route('admin.orders.index') }}" class="breadcrumb-link">الطلبات</a>
+    </div>
+    <div class="breadcrumb-item">
+        <i class="fas fa-chevron-left"></i>
+        طلب #{{ $order->id }}
+    </div>
 @endsection
 
 @push('styles')
 <style>
-/* متغيرات CSS للأدمن */
-:root {
-    --admin-primary-500: #3b82f6;
-    --admin-primary-600: #2563eb;
-    --admin-secondary-50: #f8fafc;
-    --admin-secondary-100: #f1f5f9;
-    --admin-secondary-200: #e2e8f0;
-    --admin-secondary-300: #cbd5e1;
-    --admin-secondary-600: #475569;
-    --admin-secondary-700: #334155;
-    --admin-secondary-900: #0f172a;
-    
-    --success-100: #dcfce7;
-    --success-500: #22c55e;
-    --success-600: #16a34a;
-    --success-700: #15803d;
-    
-    --error-50: #fef2f2;
-    --error-200: #fecaca;
-    --error-500: #ef4444;
-    --error-700: #b91c1c;
-    
-    --warning-100: #fef3c7;
-    --info-500: #3b82f6;
-    
-    --space-xs: 0.25rem;
-    --space-sm: 0.5rem;
-    --space-md: 1rem;
-    --space-lg: 1.5rem;
-    --space-xl: 2rem;
-    --space-2xl: 3rem;
-    --space-3xl: 4rem;
-    
-    --radius-sm: 0.25rem;
-    --radius-md: 0.375rem;
-    --radius-lg: 0.5rem;
-    --radius-xl: 1rem;
-    
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    
-    --transition-fast: 150ms ease-in-out;
-    --transition-normal: 300ms ease-in-out;
-}
-
-/* تحسينات CSS للرسائل الفورية */
-.message-sending {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-.new-message-indicator {
-    position: fixed;
-    bottom: 100px;
-    right: 20px;
-    background: var(--admin-primary-500);
-    color: white;
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    cursor: pointer;
-    z-index: 1000;
-    transform: translateY(100px);
-    transition: transform 0.3s ease;
-    display: none;
-}
-
-.new-message-indicator.show {
-    display: block;
-    transform: translateY(0);
-}
-
-.typing-indicator {
-    display: none;
-    padding: var(--space-sm) var(--space-md);
-    background: var(--admin-secondary-100);
-    border-radius: var(--radius-lg);
-    margin: var(--space-sm) 0;
-    font-style: italic;
-    color: var(--admin-secondary-600);
-}
-
-.typing-indicator.show {
-    display: block;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-.pulse {
-    animation: pulse 1s infinite;
-}
-
-.connection-status {
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-}
-
-.connection-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    transition: background 0.3s ease;
-}
-
-.connection-dot.connected {
-    background: var(--success-500);
-}
-
-.connection-dot.disconnected {
-    background: var(--error-500);
-}
-
-.unread-count {
-    background: var(--error-500);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    font-weight: 600;
-    min-width: 20px;
-    text-align: center;
-}
-
-/* تأثير التمرير السلس المحسن */
-.smooth-scroll {
-    scroll-behavior: smooth;
-}
-
-.auto-scroll-indicator {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: var(--admin-primary-500);
-    color: white;
-    padding: 0.5rem;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: var(--shadow-lg);
-    transition: all 0.3s ease;
-    opacity: 0;
-    transform: scale(0.8);
-}
-
-.auto-scroll-indicator.show {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.auto-scroll-indicator:hover {
-    transform: scale(1.1);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-}
-
-/* Base Styles */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: var(--transition-fast);
-}
-
-.btn-primary {
-    background: var(--admin-primary-500);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--admin-primary-600);
-}
-
-.btn-secondary {
-    background: var(--admin-secondary-200);
-    color: var(--admin-secondary-700);
-}
-
-.btn-success {
-    background: var(--success-500);
-    color: white;
-}
-
-.btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.badge-success {
-    background: var(--success-100);
-    color: var(--success-700);
-}
-
-.badge-danger {
-    background: var(--error-200);
-    color: var(--error-700);
-}
-
-.badge-warning {
-    background: var(--warning-100);
-    color: #92400e;
-}
-
-.badge-secondary {
-    background: var(--admin-secondary-100);
-    color: var(--admin-secondary-700);
-}
-
-.card {
-    background: white;
-    border: 1px solid var(--admin-secondary-200);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition-normal);
-}
-
-.card-header {
-    padding: var(--space-lg);
-    border-bottom: 1px solid var(--admin-secondary-200);
-    background: var(--admin-secondary-50);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-body {
-    padding: var(--space-lg);
-}
-
-.card-title {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--admin-secondary-900);
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-}
-
-.form-input {
-    width: 100%;
-    padding: var(--space-md);
-    border: 2px solid var(--admin-secondary-300);
-    border-radius: var(--radius-md);
-    font-family: inherit;
-    transition: var(--transition-fast);
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--admin-primary-500);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Enhanced message animations */
-@keyframes messageSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
+    :root {
+        /* Modern Color Palette */
+        --primary-50: #eff6ff;
+        --primary-100: #dbeafe;
+        --primary-200: #bfdbfe;
+        --primary-300: #93c5fd;
+        --primary-400: #60a5fa;
+        --primary-500: #3b82f6;
+        --primary-600: #2563eb;
+        --primary-700: #1d4ed8;
+        --primary-800: #1e40af;
+        --primary-900: #1e3a8a;
+        
+        --admin-secondary-25: #fafafa;
+        --admin-secondary-50: #f8fafc;
+        --admin-secondary-100: #f1f5f9;
+        --admin-secondary-200: #e2e8f0;
+        --admin-secondary-300: #cbd5e1;
+        --admin-secondary-400: #94a3b8;
+        --admin-secondary-500: #64748b;
+        --admin-secondary-600: #475569;
+        --admin-secondary-700: #334155;
+        --admin-secondary-800: #1e293b;
+        --admin-secondary-900: #0f172a;
+        
+        --admin-primary-500: var(--primary-500);
+        --admin-primary-600: var(--primary-600);
+        --admin-primary-700: var(--primary-700);
+        
+        --success-500: #10b981;
+        --success-600: #059669;
+        --warning-500: #f59e0b;
+        --warning-600: #d97706;
+        --error-500: #ef4444;
+        --error-600: #dc2626;
+        --purple-500: #8b5cf6;
+        --purple-600: #7c3aed;
+        
+        /* Spacing System */
+        --space-xs: 0.25rem;
+        --space-sm: 0.5rem;
+        --space-md: 0.75rem;
+        --space-lg: 1rem;
+        --space-xl: 1.5rem;
+        --space-2xl: 2rem;
+        --space-3xl: 3rem;
+        
+        /* Border Radius */
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+        --radius-2xl: 1.5rem;
+        
+        /* Transitions */
+        --transition-fast: all 0.15s ease;
+        --transition-normal: all 0.3s ease;
+        --transition-slow: all 0.5s ease;
+        
+        /* Shadows */
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
-    to {
+    
+    * {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    body {
+        font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+    }
+
+    /* Order Header */
+    .order-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: var(--radius-2xl);
+        padding: var(--space-2xl);
+        margin-bottom: var(--space-2xl);
+        color: white;
+        box-shadow: var(--shadow-2xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .order-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        z-index: 0;
+    }
+
+    .order-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-xl);
+    }
+
+    .order-title-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .order-title {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        margin: 0;
+    }
+
+    .order-title i {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .order-meta {
+        display: flex;
+        gap: var(--space-lg);
+        flex-wrap: wrap;
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: var(--space-md);
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: var(--space-lg) var(--space-2xl);
+        border: none;
+        border-radius: var(--radius-xl);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: var(--transition-normal);
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 2px solid rgba(255,255,255,0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-primary:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success-500), var(--success-600));
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, var(--warning-500), var(--warning-600));
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--error-500), var(--error-600));
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Main Content Grid */
+    .order-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: var(--space-2xl);
+        margin-bottom: var(--space-2xl);
+    }
+
+    /* Order Details Card */
+    .order-details-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid var(--admin-secondary-100);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--admin-secondary-50), #f1f5f9);
+        padding: var(--space-2xl);
+        border-bottom: 2px solid var(--admin-secondary-200);
+        position: relative;
+    }
+
+    .card-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--admin-primary-500), var(--purple-500));
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--admin-secondary-900);
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        margin: 0;
+    }
+
+    .card-body {
+        padding: var(--space-2xl);
+    }
+
+    /* Order Items Table */
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: var(--space-xl);
+    }
+
+    .items-table th {
+        background: var(--admin-secondary-50);
+        padding: var(--space-lg);
+        text-align: right;
+        font-weight: 700;
+        color: var(--admin-secondary-700);
+        font-size: 0.875rem;
+        border-bottom: 2px solid var(--admin-secondary-200);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .items-table td {
+        padding: var(--space-lg);
+        border-bottom: 1px solid var(--admin-secondary-100);
+        vertical-align: middle;
+    }
+
+    .items-table tbody tr:hover {
+        background: var(--admin-secondary-25);
+    }
+
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+    }
+
+    .product-image {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-md);
+    }
+
+    .product-details h4 {
+        font-weight: 700;
+        color: var(--admin-secondary-900);
+        margin: 0 0 var(--space-xs) 0;
+        font-size: 0.95rem;
+    }
+
+    .product-details p {
+        color: var(--admin-secondary-600);
+        font-size: 0.8rem;
+        margin: 0;
+    }
+
+    .price-cell {
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--admin-primary-600), var(--admin-primary-700));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1rem;
+    }
+
+    /* Order Summary */
+    .order-summary {
+        background: var(--admin-secondary-50);
+        border-radius: var(--radius-xl);
+        padding: var(--space-xl);
+        margin-top: var(--space-xl);
+        border: 2px solid var(--admin-secondary-200);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-md) 0;
+        border-bottom: 1px solid var(--admin-secondary-200);
+    }
+
+    .summary-row:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding-top: var(--space-lg);
+        margin-top: var(--space-lg);
+        border-top: 2px solid var(--admin-secondary-300);
+        background: linear-gradient(135deg, var(--admin-primary-600), var(--admin-primary-700));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Customer Info Card */
+    .customer-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid var(--admin-secondary-100);
+        margin-bottom: var(--space-xl);
+    }
+
+    .customer-profile {
+        display: flex;
+        align-items: center;
+        gap: var(--space-lg);
+        margin-bottom: var(--space-xl);
+    }
+
+    .customer-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 2rem;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .customer-details h3 {
+        font-weight: 700;
+        color: var(--admin-secondary-900);
+        margin: 0 0 var(--space-sm) 0;
+        font-size: 1.25rem;
+    }
+
+    .customer-details p {
+        color: var(--admin-secondary-600);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-lg) 0;
+        border-bottom: 1px solid var(--admin-secondary-100);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--admin-secondary-600);
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+    }
+
+    .info-value {
+        font-weight: 500;
+        color: var(--admin-secondary-900);
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--space-md) var(--space-xl);
+        border-radius: var(--radius-xl);
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        gap: var(--space-sm);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, var(--warning-500), var(--warning-600));
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .status-processing {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .status-shipped {
+        background: linear-gradient(135deg, var(--purple-500), var(--purple-600));
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .status-delivered {
+        background: linear-gradient(135deg, var(--success-500), var(--success-600));
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .status-cancelled {
+        background: linear-gradient(135deg, var(--error-500), var(--error-600));
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Payment Info */
+    .payment-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid var(--admin-secondary-100);
+        margin-bottom: var(--space-xl);
+    }
+
+    .payment-method {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--space-md) var(--space-xl);
+        border-radius: var(--radius-xl);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        color: white;
+        box-shadow: var(--shadow-md);
+        gap: var(--space-sm);
+    }
+
+    /* Shipping Info */
+    .shipping-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid var(--admin-secondary-100);
+    }
+
+    .address-box {
+        background: var(--admin-secondary-25);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+        margin-top: var(--space-lg);
+        border: 1px solid var(--admin-secondary-200);
+    }
+
+    /* Order Timeline */
+    .timeline-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid var(--admin-secondary-100);
+        margin-top: var(--space-xl);
+    }
+
+    .timeline {
+        position: relative;
+        padding: var(--space-xl);
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: var(--space-3xl);
+        margin-bottom: var(--space-xl);
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 12px;
+        top: 0;
+        bottom: -var(--space-xl);
+        width: 2px;
+        background: var(--admin-secondary-200);
+    }
+
+    .timeline-item:last-child::before {
+        display: none;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: white;
+        font-weight: 700;
+        box-shadow: var(--shadow-md);
+    }
+
+    .timeline-marker.completed {
+        background: linear-gradient(135deg, var(--success-500), var(--success-600));
+    }
+
+    .timeline-marker.current {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        animation: pulse 2s infinite;
+    }
+
+    .timeline-marker.pending {
+        background: var(--admin-secondary-300);
+    }
+
+    .timeline-content h4 {
+        font-weight: 700;
+        color: var(--admin-secondary-900);
+        margin: 0 0 var(--space-sm) 0;
+        font-size: 1rem;
+    }
+
+    .timeline-content p {
+        color: var(--admin-secondary-600);
+        margin: 0;
+        font-size: 0.875rem;
+    }
+
+    .timeline-date {
+        color: var(--admin-secondary-500);
+        font-size: 0.8rem;
+        margin-top: var(--space-xs);
+    }
+
+    /* Animation Classes */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fade-in.visible {
         opacity: 1;
         transform: translateY(0);
     }
-}
 
-div[style*="margin-bottom: var(--space-xl)"] {
-    animation: messageSlideIn 0.3s ease-out;
-}
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .order-content {
+            grid-template-columns: 1fr;
+            gap: var(--space-xl);
+        }
+    }
 
-/* Hover effects */
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
+    @media (max-width: 768px) {
+        .order-header {
+            padding: var(--space-xl);
+        }
+        
+        .order-header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: var(--space-lg);
+        }
+        
+        .order-actions {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn {
+            flex: 1;
+            justify-content: center;
+            min-width: 0;
+        }
+        
+        .customer-profile {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .customer-avatar {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+        
+        .items-table {
+            font-size: 0.8rem;
+        }
+        
+        .product-image {
+            width: 50px;
+            height: 50px;
+            font-size: 1rem;
+        }
+        
+        .timeline-item {
+            padding-left: var(--space-2xl);
+        }
+    }
 
-.btn:hover {
-    transform: translateY(-1px);
-}
+    @media (max-width: 480px) {
+        .order-header {
+            padding: var(--space-lg);
+            margin: 0 -var(--space-lg) var(--space-xl) -var(--space-lg);
+            border-radius: var(--radius-xl);
+        }
+        
+        .order-meta {
+            flex-direction: column;
+            gap: var(--space-sm);
+            text-align: center;
+        }
+        
+        .card-header,
+        .card-body {
+            padding: var(--space-xl);
+        }
+        
+        .order-details-card,
+        .customer-card,
+        .payment-card,
+        .shipping-card,
+        .timeline-card {
+            margin: 0 -var(--space-lg) var(--space-xl) -var(--space-lg);
+            border-radius: var(--radius-xl);
+        }
+        
+        .items-table th,
+        .items-table td {
+            padding: var(--space-md);
+        }
+        
+        .product-info {
+            flex-direction: column;
+            text-align: center;
+            gap: var(--space-sm);
+        }
+        
+        .info-row {
+            flex-direction: column;
+            gap: var(--space-sm);
+            text-align: center;
+        }
+    }
 
-/* Message bubble hover effects */
-div[style*="border-radius: var(--radius-xl)"]:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md) !important;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    div[style*="grid-template-columns: 1fr 350px"] {
-        grid-template-columns: 1fr !important;
+    /* Print Styles */
+    @media print {
+        .order-actions,
+        .btn {
+            display: none !important;
+        }
+        
+        .order-header {
+            background: none !important;
+            color: #000 !important;
+            box-shadow: none !important;
+        }
+        
+        .order-details-card,
+        .customer-card,
+        .payment-card,
+        .shipping-card {
+            box-shadow: none !important;
+            border: 1px solid #000;
+        }
     }
-    
-    div[style*="height: calc(100vh - 200px)"] {
-        height: calc(100vh - 300px) !important;
-        min-height: 400px !important;
-    }
-    
-    div[style*="max-width: 75%"] {
-        max-width: 85% !important;
-    }
-    
-    div[style*="display: flex"][style*="justify-content: space-between"] {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: var(--space-md) !important;
-    }
-}
-
-/* Print styles */
-@media print {
-    .btn, .card-header, nav, .sidebar {
-        display: none !important;
-    }
-    
-    .card {
-        border: none !important;
-        box-shadow: none !important;
-    }
-}
 </style>
 @endpush
 
 @section('content')
-<div style="padding: var(--space-xl);">
-    <!-- CSRF Token for JavaScript -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    
-    <!-- Header Section -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2xl);">
-        <div>
-            <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--admin-secondary-900); margin-bottom: var(--space-sm);">
-                <i class="fas fa-comment-dots" style="color: var(--admin-primary-500); margin-right: var(--space-sm);"></i>
-                {{ $conversation->title }}
-                @if(!$conversation->is_read_by_admin)
-                    <span class="badge badge-danger">Unread</span>
-                @else
-                    <span class="badge badge-success">Read</span>
-                @endif
-                <span class="unread-count" id="unreadCount" style="display: none;">0</span>
+<!-- Order Header -->
+<div class="order-header">
+    <div class="order-header-content">
+        <div class="order-title-section">
+            <h1 class="order-title">
+                <i class="fas fa-receipt"></i>
+                طلب #{{ $order->id }}
             </h1>
-            <p style="color: var(--admin-secondary-600); font-size: 0.875rem;">
-                Conversation with {{ $conversation->user->name }} • <span id="messageCount">{{ $messages->count() }}</span> messages
-            </p>
+            
+            <div class="order-meta">
+                <span><i class="fas fa-calendar"></i> {{ $order->created_at->format('d M, Y H:i') }}</span>
+                <span><i class="fas fa-user"></i> {{ $order->user->name }}</span>
+                <span class="status-badge status-{{ $order->status }}">
+                    <i class="fas fa-{{ $order->status == 'pending' ? 'clock' : ($order->status == 'processing' ? 'cog' : ($order->status == 'shipped' ? 'shipping-fast' : ($order->status == 'delivered' ? 'check' : 'times'))) }}"></i>
+                    @switch($order->status)
+                        @case('pending') في الانتظار @break
+                        @case('processing') قيد المعالجة @break
+                        @case('shipped') تم الشحن @break
+                        @case('delivered') تم التسليم @break
+                        @case('cancelled') ملغي @break
+                        @default {{ ucfirst($order->status) }}
+                    @endswitch
+                </span>
+            </div>
         </div>
         
-        <div style="display: flex; gap: var(--space-md);">
-            <a href="{{ route('admin.conversations.index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i>
-                Back to Conversations
+        <div class="order-actions">
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-primary">
+                <i class="fas fa-arrow-right"></i>
+                العودة للطلبات
             </a>
-            @if(!$conversation->is_read_by_admin)
-            <form action="{{ route('admin.conversations.mark-read', $conversation) }}" method="POST" style="display: inline;">
-                @csrf
-                @method('PATCH')
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-check"></i>
-                    Mark as Read
-                </button>
-            </form>
-            @endif
-            <span id="connectionStatus" class="connection-status">
-                <div class="connection-dot connected"></div>
-                <span>Connected</span>
-            </span>
-        </div>
-    </div>
-
-    <!-- New Message Indicator -->
-    <div id="newMessageIndicator" class="new-message-indicator" onclick="scrollToBottom()">
-        <i class="fas fa-arrow-down"></i>
-        رسائل جديدة
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 350px; gap: var(--space-xl);">
-        <!-- Main Conversation Area -->
-        <div style="display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 600px;">
             
-            <!-- Messages Container -->
-            <div class="card" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-comments"></i>
-                        Conversation Messages
-                    </h3>
-                    <button onclick="scrollToBottom()" class="btn btn-sm btn-secondary">
-                        <i class="fas fa-arrow-down"></i>
-                        Latest
-                    </button>
+            @if($order->status == 'pending')
+                <button class="btn btn-success" onclick="updateOrderStatus('processing')">
+                    <i class="fas fa-play"></i>
+                    بدء المعالجة
+                </button>
+            @elseif($order->status == 'processing')
+                <button class="btn btn-warning" onclick="updateOrderStatus('shipped')">
+                    <i class="fas fa-shipping-fast"></i>
+                    شحن الطلب
+                </button>
+            @elseif($order->status == 'shipped')
+                <button class="btn btn-success" onclick="updateOrderStatus('delivered')">
+                    <i class="fas fa-check"></i>
+                    تأكيد التسليم
+                </button>
+            @endif
+            
+            @if($order->status != 'cancelled' && $order->status != 'delivered')
+                <button class="btn btn-danger" onclick="updateOrderStatus('cancelled')">
+                    <i class="fas fa-times"></i>
+                    إلغاء الطلب
+                </button>
+            @endif
+            
+            <button class="btn btn-primary" onclick="printOrder()">
+                <i class="fas fa-print"></i>
+                طباعة
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="order-content">
+    <!-- Order Details -->
+    <div>
+        <!-- Order Items -->
+        <div class="order-details-card fade-in">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-shopping-bag"></i>
+                    تفاصيل الطلب
+                </h2>
+            </div>
+            
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($order->items ?? [] as $item)
+                                <tr>
+                                    <td>
+                                        <div class="product-info">
+                                            <div class="product-image">
+                                                {{ strtoupper(substr($item->product->name ?? 'منتج', 0, 1)) }}
+                                            </div>
+                                            <div class="product-details">
+                                                <h4>{{ $item->product->name ?? 'منتج غير محدد' }}</h4>
+                                                <p>{{ $item->product->description ?? 'وصف المنتج' }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ $item->quantity ?? 1 }}</td>
+                                    <td class="price-cell">${{ number_format($item->price ?? 0, 2) }}</td>
+                                    <td class="price-cell">${{ number_format(($item->quantity ?? 1) * ($item->price ?? 0), 2) }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: var(--space-3xl); color: var(--admin-secondary-500);">
+                                        <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: var(--space-lg); opacity: 0.5;"></i>
+                                        <br>
+                                        لا توجد منتجات في هذا الطلب
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
                 
-                <!-- Messages List -->
-                <div id="messagesList" class="smooth-scroll" style="flex: 1; padding: var(--space-lg); overflow-y: auto; background: linear-gradient(180deg, white 0%, var(--admin-secondary-50) 100%); position: relative;">
-                    @foreach($messages as $message)
-                    <div data-message-id="{{ $message->id }}" style="margin-bottom: var(--space-xl); display: flex; gap: var(--space-md); {{ $message->is_from_admin ? 'flex-direction: row-reverse;' : '' }}">
-                        <!-- Avatar -->
-                        <div style="width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 1rem; flex-shrink: 0; box-shadow: var(--shadow-md); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, var(--success-500), var(--success-600));' : 'background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600));' }}">
-                            @if($message->is_from_admin)
-                                <i class="fas fa-user-shield"></i>
-                            @else
-                                {{ strtoupper(substr($conversation->user->name, 0, 1)) }}
-                            @endif
-                        </div>
-                        
-                        <!-- Message Content -->
-                        <div style="flex: 1; max-width: 75%;">
-                            <!-- Sender Info -->
-                            <div style="font-size: 0.8rem; font-weight: 600; color: var(--admin-secondary-600); margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-sm); {{ $message->is_from_admin ? 'justify-content: flex-end;' : '' }}">
-                                @if($message->is_from_admin)
-                                    <span style="padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; background: var(--success-100); color: var(--success-700);">Admin</span>
-                                @else
-                                    <span style="padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; background: var(--admin-primary-100); color: var(--admin-primary-700);">{{ $conversation->user->name }}</span>
-                                @endif
-                                <span style="font-size: 0.75rem; color: var(--admin-secondary-500); display: flex; align-items: center; gap: var(--space-xs);">
-                                    <i class="fas fa-clock"></i>
-                                    {{ $message->created_at->format('M d, Y h:i A') }}
-                                </span>
-                            </div>
-                            
-                            <!-- Message Bubble -->
-                            <div style="padding: var(--space-md) var(--space-lg); border-radius: var(--radius-xl); margin-bottom: var(--space-xs); word-wrap: break-word; line-height: 1.6; position: relative; box-shadow: var(--shadow-sm); {{ $message->is_from_admin ? 'background: linear-gradient(135deg, var(--success-500), var(--success-600)); color: white; border-bottom-right-radius: var(--radius-sm);' : 'background: white; color: var(--admin-secondary-900); border: 1px solid var(--admin-secondary-200); border-bottom-left-radius: var(--radius-sm);' }}">
-                                {{ $message->message }}
-                            </div>
-                        </div>
+                <!-- Order Summary -->
+                @if(($order->items ?? collect())->count() > 0)
+                <div class="order-summary">
+                    <div class="summary-row">
+                        <span>المجموع الفرعي:</span>
+                        <span>${{ number_format($order->subtotal ?? $order->total_amount, 2) }}</span>
                     </div>
-                    @endforeach
                     
-                    <!-- Typing Indicator -->
-                    <div id="typingIndicator" class="typing-indicator">
-                        <i class="fas fa-pencil-alt"></i>
-                        Customer is typing...
+                    @if(($order->discount_amount ?? 0) > 0)
+                        <div class="summary-row">
+                            <span>الخصم:</span>
+                            <span style="color: var(--success-600);">-${{ number_format($order->discount_amount, 2) }}</span>
+                        </div>
+                    @endif
+                    
+                    @if(($order->tax_amount ?? 0) > 0)
+                        <div class="summary-row">
+                            <span>الضريبة:</span>
+                            <span>${{ number_format($order->tax_amount, 2) }}</span>
+                        </div>
+                    @endif
+                    
+                    @if(($order->shipping_amount ?? 0) > 0)
+                        <div class="summary-row">
+                            <span>رسوم الشحن:</span>
+                            <span>${{ number_format($order->shipping_amount, 2) }}</span>
+                        </div>
+                    @endif
+                    
+                    <div class="summary-row">
+                        <span>المجموع النهائي:</span>
+                        <span>${{ number_format($order->total_amount, 2) }}</span>
                     </div>
                 </div>
-                
-                <!-- Auto Scroll Indicator -->
-                <div id="autoScrollIndicator" class="auto-scroll-indicator" onclick="scrollToBottom()">
-                    <i class="fas fa-arrow-down"></i>
-                </div>
-                
-                <!-- Reply Form - FIXED VERSION -->
-                <div style="border-top: 1px solid var(--admin-secondary-200); padding: var(--space-lg); background: var(--admin-secondary-50);">
-                    <form action="{{ route('admin.conversations.reply', $conversation) }}" method="POST" id="messageForm">
-                        @csrf
-                        <div style="margin-bottom: var(--space-md);">
-                            <label style="display: block; margin-bottom: var(--space-sm); font-weight: 500; color: var(--admin-secondary-700);">
-                                <i class="fas fa-reply"></i>
-                                Your Reply
-                            </label>
-                            <textarea 
-                                name="message" 
-                                id="messageTextarea"
-                                class="form-input"
-                                style="width: 100%; min-height: 100px; padding: var(--space-md); border: 2px solid var(--admin-secondary-300); border-radius: var(--radius-lg); font-family: inherit; resize: vertical; transition: all var(--transition-fast);"
-                                placeholder="Type your reply here..."
-                                required
-                                onkeydown="handleKeyDown(event)"
-                                oninput="autoResize(this)"
-                                onfocus="this.style.borderColor='var(--admin-primary-500)'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
-                                onblur="this.style.borderColor='var(--admin-secondary-300)'; this.style.boxShadow='none';"
-                            >{{ old('message') }}</textarea>
-                            
-                            <!-- Error Display -->
-                            @if ($errors->any())
-                            <div style="margin-top: var(--space-sm); padding: var(--space-sm); background: var(--error-50); border: 1px solid var(--error-200); border-radius: var(--radius-md); color: var(--error-700);">
-                                <ul style="margin: 0; padding-left: var(--space-md);">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                            @endif
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="font-size: 0.875rem; color: var(--admin-secondary-600);">
-                                <i class="fas fa-info-circle"></i>
-                                This will be sent to {{ $conversation->user->name }}
-                                <span id="sendingStatus" style="display: none; margin-left: var(--space-sm); color: var(--admin-primary-500);">
-                                    <i class="fas fa-spinner fa-spin"></i>
-                                    Sending...
-                                </span>
-                            </div>
-                            <div style="display: flex; gap: var(--space-sm); align-items: center;">
-                                <button type="button" onclick="toggleRealTimeMessaging()" id="realTimeToggle" class="btn btn-sm btn-secondary">
-                                    <i class="fas fa-sync-alt"></i>
-                                    <span>Disable Auto-refresh</span>
-                                </button>
-                                <button type="submit" id="sendButton" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane"></i>
-                                    Send Reply
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                @endif
             </div>
         </div>
 
-        <!-- Sidebar -->
-        <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
-            <!-- Customer Information -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-user"></i>
-                        Customer Information
-                    </h3>
+        <!-- Order Timeline -->
+        <div class="timeline-card fade-in">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-history"></i>
+                    تاريخ الطلب
+                </h2>
+            </div>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker completed">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h4>تم إنشاء الطلب</h4>
+                        <p>تم إنشاء الطلب بنجاح وإرسال تأكيد للعميل</p>
+                        <div class="timeline-date">{{ $order->created_at->format('d M, Y H:i') }}</div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div style="text-align: center; margin-bottom: var(--space-lg);">
-                        <div style="width: 80px; height: 80px; margin: 0 auto var(--space-md); border-radius: 50%; background: linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600)); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 700; box-shadow: var(--shadow-lg);">
-                            {{ strtoupper(substr($conversation->user->name, 0, 1)) }}
+                
+                @if($order->status != 'pending')
+                    <div class="timeline-item">
+                        <div class="timeline-marker {{ $order->status == 'processing' ? 'current' : 'completed' }}">
+                            <i class="fas fa-cog"></i>
                         </div>
-                        <h4 style="font-size: 1.125rem; font-weight: 600; color: var(--admin-secondary-900); margin-bottom: var(--space-xs);">
-                            {{ $conversation->user->name }}
-                        </h4>
-                        <p style="color: var(--admin-secondary-600); font-size: 0.875rem;">
-                            {{ $conversation->user->email }}
-                        </p>
-                    </div>
-                    
-                    <div style="border-top: 1px solid var(--admin-secondary-200); padding-top: var(--space-lg);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Member Since:</span>
-                            <span style="color: var(--admin-secondary-900); font-size: 0.875rem;">{{ $conversation->user->created_at->format('M d, Y') }}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
-                            <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Role:</span>
-                            <span class="badge badge-secondary">{{ ucfirst($conversation->user->role ?? 'customer') }}</span>
+                        <div class="timeline-content">
+                            <h4>قيد المعالجة</h4>
+                            <p>بدأت معالجة الطلب وتحضير المنتجات</p>
+                            <div class="timeline-date">{{ $order->updated_at->format('d M, Y H:i') }}</div>
                         </div>
                     </div>
+                @endif
+                
+                @if(in_array($order->status, ['shipped', 'delivered']))
+                    <div class="timeline-item">
+                        <div class="timeline-marker {{ $order->status == 'shipped' ? 'current' : 'completed' }}">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>تم الشحن</h4>
+                            <p>تم شحن الطلب وهو في الطريق للعميل</p>
+                            <div class="timeline-date">{{ $order->updated_at->format('d M, Y H:i') }}</div>
+                        </div>
+                    </div>
+                @endif
+                
+                @if($order->status == 'delivered')
+                    <div class="timeline-item">
+                        <div class="timeline-marker current">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>تم التسليم</h4>
+                            <p>تم تسليم الطلب بنجاح للعميل</p>
+                            <div class="timeline-date">{{ $order->updated_at->format('d M, Y H:i') }}</div>
+                        </div>
+                    </div>
+                @endif
+                
+                @if($order->status == 'cancelled')
+                    <div class="timeline-item">
+                        <div class="timeline-marker" style="background: linear-gradient(135deg, var(--error-500), var(--error-600));">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>تم الإلغاء</h4>
+                            <p>تم إلغاء الطلب</p>
+                            <div class="timeline-date">{{ $order->updated_at->format('d M, Y H:i') }}</div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div>
+        <!-- Customer Info -->
+        <div class="customer-card fade-in">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-user"></i>
+                    معلومات العميل
+                </h2>
+            </div>
+            
+            <div class="card-body">
+                <div class="customer-profile">
+                    <div class="customer-avatar">
+                        {{ strtoupper(substr($order->user->name, 0, 1)) }}
+                    </div>
+                    <div class="customer-details">
+                        <h3>{{ $order->user->name }}</h3>
+                        <p>{{ $order->user->email }}</p>
+                    </div>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-envelope"></i>
+                        البريد الإلكتروني
+                    </span>
+                    <span class="info-value">{{ $order->user->email }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-phone"></i>
+                        رقم الهاتف
+                    </span>
+                    <span class="info-value">{{ $order->user->phone ?? 'غير محدد' }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-calendar-plus"></i>
+                        تاريخ التسجيل
+                    </span>
+                    <span class="info-value">{{ $order->user->created_at->format('d M, Y') }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-shopping-cart"></i>
+                        إجمالي الطلبات
+                    </span>
+                    <span class="info-value">{{ $order->user->orders()->count() ?? 0 }} طلب</span>
                 </div>
             </div>
-
-            <!-- Conversation Status -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-info-circle"></i>
-                        Conversation Details
-                    </h3>
+        </div>
+        
+        <!-- Payment Info -->
+        <div class="payment-card fade-in">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-credit-card"></i>
+                    معلومات الدفع
+                </h2>
+            </div>
+            
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-money-bill"></i>
+                        طريقة الدفع
+                    </span>
+                    <span class="payment-method">
+                        <i class="fas fa-{{ $order->payment_method == 'credit_card' ? 'credit-card' : ($order->payment_method == 'paypal' ? 'paypal' : ($order->payment_method == 'cash' ? 'money-bill' : 'university')) }}"></i>
+                        @switch($order->payment_method)
+                            @case('credit_card') بطاقة ائتمان @break
+                            @case('paypal') باي بال @break
+                            @case('cash') نقداً @break
+                            @case('bank_transfer') تحويل بنكي @break
+                            @default {{ ucfirst($order->payment_method) }}
+                        @endswitch
+                    </span>
                 </div>
-                <div class="card-body">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Status:</span>
-                        <span>
-                            @if(!$conversation->is_read_by_admin)
-                                <span class="badge badge-warning">Needs Attention</span>
-                            @else
-                                <span class="badge badge-success">Handled</span>
-                            @endif
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-check-circle"></i>
+                        حالة الدفع
+                    </span>
+                    <span class="info-value">
+                        <span class="status-badge {{ $order->payment_status == 'paid' ? 'status-delivered' : 'status-pending' }}">
+                            <i class="fas fa-{{ $order->payment_status == 'paid' ? 'check' : 'clock' }}"></i>
+                            {{ $order->payment_status == 'paid' ? 'مدفوع' : 'في الانتظار' }}
                         </span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Messages:</span>
-                        <span style="color: var(--admin-secondary-900); font-size: 0.875rem;" id="sidebarMessageCount">{{ $messages->count() }}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; border-bottom: 1px solid var(--admin-secondary-100);">
-                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Started:</span>
-                        <span style="color: var(--admin-secondary-900); font-size: 0.875rem;">{{ $conversation->created_at->format('M d, Y h:i A') }}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
-                        <span style="font-weight: 500; color: var(--admin-secondary-700); font-size: 0.875rem;">Last Updated:</span>
-                        <span style="color: var(--admin-secondary-900); font-size: 0.875rem;" id="lastReplyTime">{{ $conversation->updated_at->diffForHumans() }}</span>
-                    </div>
+                    </span>
                 </div>
+                
+                @if(($order->payment_date ?? null))
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-calendar-check"></i>
+                            تاريخ الدفع
+                        </span>
+                        <span class="info-value">{{ $order->payment_date->format('d M, Y H:i') }}</span>
+                    </div>
+                @endif
+                
+                @if($order->transaction_id ?? null)
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-hashtag"></i>
+                            رقم المعاملة
+                        </span>
+                        <span class="info-value">{{ $order->transaction_id }}</span>
+                    </div>
+                @endif
             </div>
-
-            <!-- Quick Actions -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-bolt"></i>
-                        Quick Actions
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
-                        @if(!$conversation->is_read_by_admin)
-                        <form action="{{ route('admin.conversations.mark-read', $conversation) }}" method="POST">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="btn btn-success" style="width: 100%;">
-                                <i class="fas fa-check"></i>
-                                Mark as Read
-                            </button>
-                        </form>
-                        @endif
-                        
-                        <a href="{{ route('admin.users.show', $conversation->user) }}" class="btn btn-secondary" style="width: 100%; text-decoration: none;">
-                            <i class="fas fa-user"></i>
-                            View Customer Profile
-                        </a>
-                        
-                        <a href="{{ route('admin.conversations.index') }}" class="btn btn-secondary" style="width: 100%; text-decoration: none;">
-                            <i class="fas fa-arrow-left"></i>
-                            Back to Conversations
-                        </a>
-                        
-                        <button onclick="window.print()" class="btn btn-secondary" style="width: 100%;">
-                            <i class="fas fa-print"></i>
-                            Print Conversation
-                        </button>
-                    </div>
-                </div>
+        </div>
+        
+        <!-- Shipping Info -->
+        <div class="shipping-card fade-in">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-truck"></i>
+                    معلومات الشحن
+                </h2>
             </div>
-
-            <!-- Support Info -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-question-circle"></i>
-                        Support Guidelines
-                    </h3>
+            
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-shipping-fast"></i>
+                        طريقة الشحن
+                    </span>
+                    <span class="info-value">{{ $order->shipping_method ?? 'شحن عادي' }}</span>
                 </div>
-                <div class="card-body">
-                    <div style="font-size: 0.875rem; color: var(--admin-secondary-700); line-height: 1.6;">
-                        <div style="margin-bottom: var(--space-md);">
-                            <strong>Response Goals:</strong>
-                            <ul style="margin: var(--space-sm) 0 0 var(--space-lg); padding: 0;">
-                                <li>First response: < 2 hours</li>
-                                <li>Resolution: < 24 hours</li>
-                                <li>Follow-up: Within 48 hours</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <strong>Tips:</strong>
-                            <ul style="margin: var(--space-sm) 0 0 var(--space-lg); padding: 0;">
-                                <li>Be empathetic and professional</li>
-                                <li>Provide clear, actionable solutions</li>
-                                <li>Ask for clarification if needed</li>
-                                <li>Follow up to ensure satisfaction</li>
-                            </ul>
-                        </div>
+                
+                @if($order->tracking_number ?? null)
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-barcode"></i>
+                            رقم التتبع
+                        </span>
+                        <span class="info-value">{{ $order->tracking_number }}</span>
                     </div>
+                @endif
+                
+                @if(($order->estimated_delivery_date ?? null))
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            تاريخ التسليم المتوقع
+                        </span>
+                        <span class="info-value">{{ $order->estimated_delivery_date->format('d M, Y') }}</span>
+                    </div>
+                @endif
+                
+                <div class="address-box">
+                    <h4 style="margin: 0 0 var(--space-md) 0; color: var(--admin-secondary-700); font-size: 0.9rem;">
+                        <i class="fas fa-map-marker-alt"></i>
+                        عنوان التسليم
+                    </h4>
+                    <p style="margin: 0; color: var(--admin-secondary-600); line-height: 1.6;">
+                        {{ $order->shipping_address ?? $order->user->address ?? 'لا يوجد عنوان محدد' }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -683,572 +1185,168 @@ div[style*="border-radius: var(--radius-xl)"]:hover {
 @endsection
 
 @push('scripts')
-<script type="text/javascript">
-// ========================================
-// Real-time Messaging System for Admin (مُحسن مع التمرير التلقائي)
-// ========================================
-
-class RealTimeMessaging {
-    constructor(conversationId, isAdmin = false) {
-        this.conversationId = conversationId;
-        this.isAdmin = isAdmin;
-        this.lastMessageId = 0;
-        this.checkInterval = null;
-        this.isActive = true;
-        this.checkFrequency = 3000; // 3 ثواني
-        this.isRealTimeEnabled = true;
-        this.autoScroll = true; // التمرير التلقائي
-        this.isUserScrolledUp = false; // تتبع إذا كان المستخدم مرر لأعلى
+<script>
+    // Update order status
+    function updateOrderStatus(status) {
+        const statusText = {
+            'processing': 'قيد المعالجة',
+            'shipped': 'تم الشحن',
+            'delivered': 'تم التسليم',
+            'cancelled': 'ملغي'
+        };
         
-        this.init();
-    }
-
-    init() {
-        // الحصول على آخر معرف رسالة عند التحميل
-        this.getLatestMessageId();
-        
-        // بدء التحقق الدوري
-        this.startPolling();
-        
-        // إيقاف التحقق عند مغادرة الصفحة
-        this.setupVisibilityChange();
-        
-        // تحسين الـ form submission
-        this.setupFormSubmission();
-        
-        // إعداد مراقبة التمرير
-        this.setupScrollDetection();
-        
-        console.log('Real-time messaging initialized for admin');
-    }
-
-    getLatestMessageId() {
-        const messages = document.querySelectorAll('#messagesList > div[data-message-id]');
-        if (messages.length > 0) {
-            const lastMessage = messages[messages.length - 1];
-            const messageId = lastMessage.getAttribute('data-message-id');
-            if (messageId) {
-                this.lastMessageId = parseInt(messageId);
-            }
+        if (!confirm('هل أنت متأكد من تحديث حالة الطلب إلى "' + statusText[status] + '"؟')) {
+            return;
         }
-    }
-
-    setupScrollDetection() {
-        const messagesList = document.getElementById('messagesList');
-        const autoScrollIndicator = document.getElementById('autoScrollIndicator');
         
-        if (!messagesList) return;
-
-        messagesList.addEventListener('scroll', () => {
-            const scrollTop = messagesList.scrollTop;
-            const scrollHeight = messagesList.scrollHeight;
-            const clientHeight = messagesList.clientHeight;
-            
-            // تحقق إذا كان المستخدم قريب من الأسفل (ضمن 100px)
-            const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
-            
-            this.isUserScrolledUp = !isNearBottom;
-            this.autoScroll = isNearBottom;
-            
-            // إظهار/إخفاء مؤشر التمرير التلقائي
-            if (autoScrollIndicator) {
-                if (this.isUserScrolledUp) {
-                    autoScrollIndicator.classList.add('show');
-                } else {
-                    autoScrollIndicator.classList.remove('show');
-                }
+        // Show loading state
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(btn => {
+            if (btn.onclick && btn.onclick.toString().includes('updateOrderStatus')) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحديث...';
+                btn.disabled = true;
             }
         });
-    }
-
-    startPolling() {
-        if (this.checkInterval) {
-            clearInterval(this.checkInterval);
-        }
-
-        if (!this.isRealTimeEnabled) return;
-
-        this.checkInterval = setInterval(() => {
-            if (this.isActive && document.hasFocus()) {
-                this.checkForNewMessages();
+        
+        fetch('{{ route("admin.orders.update", $order) }}', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ status: status })
+        }).then(response => {
+            if (response.ok) {
+                showNotification('تم تحديث حالة الطلب بنجاح', 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showNotification('خطأ في تحديث حالة الطلب', 'error');
+                // Restore buttons
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    // You would need to restore original text here
+                });
             }
-        }, this.checkFrequency);
-
-        this.updateConnectionStatus(true);
+        }).catch(error => {
+            showNotification('خطأ في تحديث حالة الطلب', 'error');
+            // Restore buttons
+            buttons.forEach(btn => {
+                btn.disabled = false;
+            });
+        });
     }
-
-    stopPolling() {
-        if (this.checkInterval) {
-            clearInterval(this.checkInterval);
-            this.checkInterval = null;
-        }
-        this.updateConnectionStatus(false);
+    
+    // Print order
+    function printOrder() {
+        window.print();
     }
-
-    async checkForNewMessages() {
-        try {
-            const url = `/admin/conversations/${this.conversationId}/check-new-messages?last_message_id=${this.lastMessageId}`;
-
-            const response = await fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateX(-120%);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(20px);
+            max-width: 350px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        `;
+        
+        const colors = {
+            success: 'linear-gradient(135deg, #10b981, #059669)',
+            error: 'linear-gradient(135deg, #ef4444, #dc2626)',
+            warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            info: 'linear-gradient(135deg, #3b82f6, #2563eb)'
+        };
+        
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        
+        notification.style.background = colors[type];
+        notification.innerHTML = `<i class="fas ${icons[type]}"></i> ${message}`;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(-120%)';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+    
+    // Initialize animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 100);
+                    observer.unobserve(entry.target);
                 }
             });
-
-            if (response.ok) {
-                const data = await response.json();
-                
-                if (data.has_new_messages && data.messages.length > 0) {
-                    // عرض الرسائل الجديدة من العميل فقط (ليس من الأدمن)
-                    const customerMessages = data.messages.filter(msg => !msg.is_from_admin);
-                    if (customerMessages.length > 0) {
-                        this.displayNewMessages(customerMessages);
-                        this.showNewMessageIndicator();
-                    }
-                    
-                    // تحديث آخر معرف رسالة
-                    data.messages.forEach(msg => {
-                        if (msg.id > this.lastMessageId) {
-                            this.lastMessageId = msg.id;
-                        }
-                    });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Add loading states to buttons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.onclick && this.onclick.toString().includes('updateOrderStatus')) {
+                    // Skip - handled in updateOrderStatus function
+                    return;
                 }
-                this.updateConnectionStatus(true);
-            } else {
-                this.updateConnectionStatus(false);
-            }
-        } catch (error) {
-            console.error('Error checking for new messages:', error);
-            this.updateConnectionStatus(false);
-        }
-    }
-
-    displayNewMessages(messages) {
-        const messagesList = document.getElementById('messagesList');
-        if (!messagesList) return;
-
-        messages.forEach(message => {
-            // تحقق من عدم وجود الرسالة مسبقاً
-            const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
-            if (existingMessage) {
-                console.log('Message already exists, skipping:', message.id);
-                return;
-            }
-
-            const messageElement = this.createMessageElement(message);
-            
-            // إدراج قبل typing indicator إذا وجد
-            const typingIndicator = document.getElementById('typingIndicator');
-            if (typingIndicator) {
-                messagesList.insertBefore(messageElement, typingIndicator);
-            } else {
-                messagesList.appendChild(messageElement);
-            }
-            
-            // إضافة تأثير الظهور
-            setTimeout(() => {
-                messageElement.style.opacity = '1';
-                messageElement.style.transform = 'translateY(0)';
-            }, 50);
-
-            // تحديث العدادات
-            this.updateMessageCount();
-        });
-
-        // تشغيل صوت إشعار
-        this.playNotificationSound();
-        
-        // التمرير التلقائي إذا كان المستخدم لم يمرر لأعلى
-        if (this.autoScroll) {
-            setTimeout(() => {
-                this.scrollToBottom(true); // تمرير سلس
-            }, 100);
-        }
-    }
-
-    createMessageElement(message) {
-        const messageDiv = document.createElement('div');
-        messageDiv.setAttribute('data-message-id', message.id);
-        messageDiv.style.cssText = `
-            margin-bottom: var(--space-xl); display: flex; gap: var(--space-md);
-            opacity: 0; transform: translateY(20px); transition: all 0.3s ease;
-        `;
-        
-        if (message.is_from_admin) {
-            messageDiv.style.flexDirection = 'row-reverse';
-        }
-
-        // إنشاء الأفاتار
-        const avatar = document.createElement('div');
-        avatar.style.cssText = `
-            width: 45px; height: 45px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            color: white; font-weight: 600; font-size: 1rem; 
-            flex-shrink: 0; box-shadow: var(--shadow-md);
-        `;
-        
-        if (message.is_from_admin) {
-            avatar.style.background = 'linear-gradient(135deg, var(--success-500), var(--success-600))';
-            avatar.innerHTML = '<i class="fas fa-user-shield"></i>';
-        } else {
-            avatar.style.background = 'linear-gradient(135deg, var(--admin-primary-500), var(--admin-primary-600))';
-            avatar.textContent = message.avatar;
-        }
-
-        // إنشاء محتوى الرسالة
-        const contentDiv = document.createElement('div');
-        contentDiv.style.cssText = 'flex: 1; max-width: 75%;';
-
-        // معلومات المرسل
-        const senderInfo = document.createElement('div');
-        senderInfo.style.cssText = `
-            font-size: 0.8rem; font-weight: 600; color: var(--admin-secondary-600); 
-            margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-sm);
-        `;
-        
-        if (message.is_from_admin) {
-            senderInfo.style.justifyContent = 'flex-end';
-        }
-
-        const senderBadge = document.createElement('span');
-        senderBadge.style.cssText = `
-            padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.65rem; 
-            text-transform: uppercase; letter-spacing: 0.5px;
-        `;
-        
-        if (message.is_from_admin) {
-            senderBadge.style.cssText += 'background: var(--success-100); color: var(--success-700);';
-            senderBadge.textContent = 'Admin';
-        } else {
-            senderBadge.style.cssText += 'background: var(--admin-primary-100); color: var(--admin-primary-700);';
-            senderBadge.textContent = message.user_name;
-        }
-
-        const timeSpan = document.createElement('span');
-        timeSpan.style.cssText = 'font-size: 0.75rem; color: var(--admin-secondary-500); display: flex; align-items: center; gap: var(--space-xs);';
-        timeSpan.innerHTML = `<i class="fas fa-clock"></i> ${message.created_at}`;
-
-        senderInfo.appendChild(senderBadge);
-        senderInfo.appendChild(timeSpan);
-
-        // فقاعة الرسالة
-        const messageBubble = document.createElement('div');
-        messageBubble.style.cssText = `
-            padding: var(--space-md) var(--space-lg); border-radius: var(--radius-xl); 
-            margin-bottom: var(--space-xs); word-wrap: break-word; line-height: 1.6; 
-            position: relative; box-shadow: var(--shadow-sm);
-        `;
-        
-        if (message.is_from_admin) {
-            messageBubble.style.cssText += `
-                background: linear-gradient(135deg, var(--success-500), var(--success-600)); 
-                color: white; border-bottom-right-radius: var(--radius-sm);
-            `;
-        } else {
-            messageBubble.style.cssText += `
-                background: white; color: var(--admin-secondary-900); 
-                border: 1px solid var(--admin-secondary-200); 
-                border-bottom-left-radius: var(--radius-sm);
-            `;
-        }
-        
-        messageBubble.textContent = message.message;
-
-        contentDiv.appendChild(senderInfo);
-        contentDiv.appendChild(messageBubble);
-        
-        messageDiv.appendChild(avatar);
-        messageDiv.appendChild(contentDiv);
-
-        return messageDiv;
-    }
-
-    async setupFormSubmission() {
-        const form = document.getElementById('messageForm');
-        const textarea = document.getElementById('messageTextarea');
-        const submitButton = document.getElementById('sendButton');
-        const sendingStatus = document.getElementById('sendingStatus');
-        
-        if (!form || !textarea || !submitButton) return;
-
-        let isSubmitting = false;
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (isSubmitting) return;
-            
-            const message = textarea.value.trim();
-            if (!message) {
-                alert('Please enter a message before sending.');
-                return;
-            }
-
-            isSubmitting = true;
-            
-            // تعطيل الـ form
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            textarea.disabled = true;
-            if (sendingStatus) sendingStatus.style.display = 'inline';
-
-            try {
-                // إنشاء FormData بشكل صحيح
-                const formData = new FormData();
-                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-                formData.append('message', message);
                 
-                console.log('Admin sending message:', message);
-                console.log('Form action:', form.action);
-
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                console.log('Response status:', response.status);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Response data:', data);
+                if (this.type === 'submit' || this.tagName === 'A') {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
+                    this.disabled = true;
                     
-                    if (data.success && data.message) {
-                        // إضافة الرسالة فوراً
-                        this.displayNewMessages([data.message]);
-                        
-                        // تحديث آخر معرف رسالة
-                        this.lastMessageId = data.message.id;
-                        
-                        // مسح النص
-                        textarea.value = '';
-                        
-                        // تقليل حجم الـ textarea
-                        textarea.style.height = 'auto';
-                        
-                        // التمرير إلى أسفل (فوري للرسائل المرسلة)
-                        setTimeout(() => {
-                            this.scrollToBottom(true);
-                        }, 100);
-                    } else {
-                        throw new Error(data.error || 'Failed to send message');
-                    }
-                } else {
-                    const errorData = await response.json();
-                    console.error('Error response:', errorData);
-                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }, 2000);
                 }
-            } catch (error) {
-                console.error('Error sending message:', error);
-                alert('خطأ في إرسال الرسالة: ' + error.message + '. يرجى المحاولة مرة أخرى.');
-            } finally {
-                // إعادة تفعيل الـ form
-                isSubmitting = false;
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reply';
-                textarea.disabled = false;
-                textarea.focus();
-                if (sendingStatus) sendingStatus.style.display = 'none';
-            }
+            });
         });
-    }
-
-    scrollToBottom(smooth = true) {
-        const messagesList = document.getElementById('messagesList');
-        const autoScrollIndicator = document.getElementById('autoScrollIndicator');
         
-        if (messagesList) {
-            if (smooth) {
-                messagesList.scrollTo({
-                    top: messagesList.scrollHeight,
-                    behavior: 'smooth'
-                });
-            } else {
-                messagesList.scrollTop = messagesList.scrollHeight;
-            }
+        // Enhanced hover effects
+        document.querySelectorAll('.customer-card, .payment-card, .shipping-card, .timeline-card, .order-details-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+            });
             
-            // إخفاء مؤشر التمرير
-            if (autoScrollIndicator) {
-                autoScrollIndicator.classList.remove('show');
-            }
-            
-            // تحديث حالة التمرير
-            this.isUserScrolledUp = false;
-            this.autoScroll = true;
-        }
-        this.hideNewMessageIndicator();
-    }
-
-    showNewMessageIndicator() {
-        const indicator = document.getElementById('newMessageIndicator');
-        if (indicator && this.isUserScrolledUp) {
-            indicator.classList.add('show');
-        }
-    }
-
-    hideNewMessageIndicator() {
-        const indicator = document.getElementById('newMessageIndicator');
-        if (indicator) {
-            indicator.classList.remove('show');
-        }
-    }
-
-    updateMessageCount() {
-        const messageCountElements = document.querySelectorAll('#messageCount, #sidebarMessageCount');
-        const currentCount = document.querySelectorAll('#messagesList > div[data-message-id]').length;
-        
-        messageCountElements.forEach(element => {
-            element.textContent = currentCount;
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+            });
         });
-    }
-
-    updateConnectionStatus(connected) {
-        const statusElement = document.getElementById('connectionStatus');
-        if (statusElement) {
-            const dot = statusElement.querySelector('.connection-dot');
-            const text = statusElement.querySelector('span');
-            
-            if (connected) {
-                dot.className = 'connection-dot connected';
-                text.textContent = 'Connected';
-            } else {
-                dot.className = 'connection-dot disconnected';
-                text.textContent = 'Disconnected';
-            }
-        }
-    }
-
-    playNotificationSound() {
-        try {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCTGa2+m1bi8EJHzK7+ORSA0PUqfk7bFlHgg2jdXzzXkpBS12wuzZkT8LElyx6+2rWBULTKLh6WNHDTGLz/fbiTAKGGm/8+CK');
-            audio.volume = 0.3;
-            audio.play().catch(() => {}); // تجاهل الأخطاء
-        } catch (e) {
-            // تجاهل أخطاء الصوت
-        }
-    }
-
-    setupVisibilityChange() {
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.isActive = false;
-            } else {
-                this.isActive = true;
-                // تحقق فوري عند العودة للصفحة
-                setTimeout(() => {
-                    if (this.isRealTimeEnabled) {
-                        this.checkForNewMessages();
-                    }
-                }, 500);
-            }
-        });
-
-        // إيقاف عند مغادرة الصفحة
-        window.addEventListener('beforeunload', () => {
-            this.stopPolling();
-        });
-    }
-
-    toggle() {
-        this.isRealTimeEnabled = !this.isRealTimeEnabled;
-        
-        const toggleButton = document.getElementById('realTimeToggle');
-        if (toggleButton) {
-            const span = toggleButton.querySelector('span');
-            if (this.isRealTimeEnabled) {
-                this.startPolling();
-                span.textContent = 'Disable Auto-refresh';
-                toggleButton.style.background = '';
-            } else {
-                this.stopPolling();
-                span.textContent = 'Enable Auto-refresh';
-                toggleButton.style.background = 'var(--warning-100)';
-            }
-        }
-    }
-
-    // تدمير المثيل
-    destroy() {
-        this.stopPolling();
-        this.isActive = false;
-    }
-}
-
-// ========================================
-// Helper Functions
-// ========================================
-
-function scrollToBottom(smooth = true) {
-    if (window.realTimeMessaging) {
-        window.realTimeMessaging.scrollToBottom(smooth);
-    }
-}
-
-function autoResize(textarea) {
-    if (textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-    }
-}
-
-function handleKeyDown(event) {
-    if (event.ctrlKey && event.key === 'Enter') {
-        event.preventDefault();
-        const form = event.target.closest('form');
-        if (form) {
-            form.dispatchEvent(new Event('submit', { cancelable: true }));
-        }
-    }
-}
-
-function toggleRealTimeMessaging() {
-    if (window.realTimeMessaging) {
-        window.realTimeMessaging.toggle();
-    }
-}
-
-// ========================================
-// Auto-initialization
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Admin page DOM loaded, initializing...');
-    
-    // استخراج معرف المحادثة من الـ URL
-    const pathParts = window.location.pathname.split('/');
-    const conversationId = pathParts[pathParts.length - 1];
-    
-    // التحقق من وجود صفحة المحادثة
-    const messagesList = document.getElementById('messagesList');
-    
-    console.log('Admin Conversation ID:', conversationId);
-    console.log('Messages list found:', !!messagesList);
-    
-    if (messagesList && conversationId && !isNaN(conversationId)) {
-        // إنشاء مثيل من نظام الرسائل الفورية للأدمن
-        window.realTimeMessaging = new RealTimeMessaging(conversationId, true);
-        
-        console.log('Real-time messaging started for admin conversation:', conversationId);
-        
-        // التمرير إلى أسفل عند التحميل
-        setTimeout(() => {
-            scrollToBottom(false); // تمرير فوري عند التحميل
-        }, 500);
-        
-        // تركيز على حقل النص
-        const textarea = document.getElementById('messageTextarea');
-        if (textarea) {
-            textarea.focus();
-        }
-    } else {
-        console.error('Failed to initialize admin real-time messaging:', {
-            messagesList: !!messagesList,
-            conversationId,
-            isValidId: !isNaN(conversationId)
-        });
-    }
-});
+    });
 </script>
 @endpush

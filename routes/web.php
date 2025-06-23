@@ -103,7 +103,7 @@ Route::middleware(['auth'])->group(function () {
     // Home/Dashboard
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     
-    // Cart Management - FIX: تصحيح أسماء routes
+    // Cart Management - FIXED: تصحيح أسماء routes
     Route::prefix('cart')->name('cart.')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');
         Route::post('/add-item', [CartController::class, 'addItem'])->name('addItem'); // Fixed: was 'add'
@@ -113,12 +113,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/count', [CartController::class, 'getCartCount'])->name('count');
     });
     
-    // Checkout
+    // Checkout - FIXED: تصحيح أسماء routes للكوبونات
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('index');
         Route::post('/', [CheckoutController::class, 'store'])->name('store');
-        Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('apply-coupon');
-        Route::post('/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('remove-coupon');
+        Route::post('/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('applyCoupon');
+        Route::post('/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('removeCoupon');
     });
     
     // Orders
@@ -258,4 +258,41 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/change-password', [AdminProfileController::class, 'changePassword'])->name('change-password');
         Route::patch('/change-password', [AdminProfileController::class, 'updatePassword'])->name('update-password');
     });
+});
+Route::get('/project-structure', function () {
+    function listFolderFiles($dir, $prefix = '') {
+        $ffs = scandir($dir);
+        $output = '';
+        foreach ($ffs as $ff) {
+            if ($ff != '.' && $ff != '..') {
+                $path = $dir . DIRECTORY_SEPARATOR . $ff;
+                $output .= $prefix . '├── ' . $ff;
+                if (is_dir($path)) {
+                    $output .= "/\n" . listFolderFiles($path, $prefix . '│   ');
+                } else {
+                    $output .= "\n";
+                }
+            }
+        }
+        return $output;
+    }
+
+    $basePaths = [
+        'app/Http/Controllers' => 'Controllers',
+        'app/Models' => 'Model',
+        'config' => 'config',
+        'database/migrations' => 'migrations',
+        'resources/views' => 'Views',
+        'routes' => 'Routes',
+    ];
+
+    $structure = '';
+
+    foreach ($basePaths as $path => $label) {
+        $structure .= "$label:\n";
+        $structure .= listFolderFiles(base_path($path));
+        $structure .= "\n\n";
+    }
+
+    return "<pre>$structure</pre>";
 });
