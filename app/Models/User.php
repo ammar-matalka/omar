@@ -25,6 +25,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Testimonial[] $testimonials
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Conversation[] $conversations
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Message[] $messages
+ * @method bool isAdmin()
+ * @method bool isCustomer()
+ * @method bool hasVerifiedEmail()
+ * @method bool hasInWishlist($productId)
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
