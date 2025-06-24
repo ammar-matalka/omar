@@ -1,5 +1,5 @@
 <?php
-// app/Http/Controllers/EducationalController.php
+// app/Http/Controllers/EducationalController.php (النسخة المُحدثة)
 
 namespace App\Http\Controllers;
 
@@ -16,8 +16,8 @@ class EducationalController extends Controller
      */
     public function index()
     {
-        // جلب أنواع المنتجات التعليمية
-        $productTypes = EducationalProductType::all();
+        // استخدام بيانات ثابتة بدلاً من قاعدة البيانات مؤقتاً
+        $productTypes = $this->getDefaultProductTypes();
         
         // جلب الفئات للتخطيط
         $categories = Category::all();
@@ -31,13 +31,23 @@ class EducationalController extends Controller
     public function form(Request $request)
     {
         $request->validate([
-            'product_type' => 'required|exists:educational_product_types,code'
+            'product_type' => 'required|in:cards,booklets'
         ]);
 
-        $productType = EducationalProductType::where('code', $request->product_type)->first();
+        // استخدام بيانات ثابتة
+        $productTypes = $this->getDefaultProductTypes();
+        $productType = collect($productTypes)->firstWhere('code', $request->product_type);
+        
+        if (!$productType) {
+            return redirect()->route('educational.index')->withErrors(['error' => 'نوع المنتج غير صحيح']);
+        }
+        
         $categories = Category::all();
 
-        return view('educational.form', compact('productType', 'categories'));
+        // تحديد نوع الفورم المطلوب
+        $viewName = $request->product_type === 'cards' ? 'educational.digital-form' : 'educational.physical-form';
+        
+        return view($viewName, compact('productType', 'categories'));
     }
 
     /**
@@ -63,6 +73,11 @@ class EducationalController extends Controller
             'pin_code.size' => 'الرقم السري يجب أن يكون 6 أرقام'
         ]);
 
+        // التحقق من وجود نموذج EducationalCard
+        if (!class_exists(\App\Models\EducationalCard::class)) {
+            return back()->withErrors(['verification' => 'نظام البطاقات التعليمية غير متوفر حالياً']);
+        }
+
         $verification = EducationalCard::verifyCard($request->card_code, $request->pin_code);
 
         if (!$verification['valid']) {
@@ -87,6 +102,17 @@ class EducationalController extends Controller
     {
         if (!Auth::check()) {
             return redirect()->route('login');
+        }
+
+        // التحقق من وجود نموذج EducationalCard
+        if (!class_exists(\App\Models\EducationalCard::class)) {
+            $categories = Category::all();
+            return view('educational.cards.my-cards', [
+                'usedCards' => collect(),
+                'purchasedCards' => collect(),
+                'categories' => $categories,
+                'message' => 'نظام البطاقات التعليمية غير متوفر حالياً'
+            ]);
         }
 
         // جلب البطاقات المفعلة من قبل المستخدم
@@ -138,6 +164,14 @@ class EducationalController extends Controller
      */
     public function updateExpiredCards()
     {
+        // التحقق من وجود نموذج EducationalCard
+        if (!class_exists(\App\Models\EducationalCard::class)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'نظام البطاقات التعليمية غير متوفر حالياً'
+            ]);
+        }
+
         $expiredCards = EducationalCard::where('status', 'active')
                                       ->where('expires_at', '<', now())
                                       ->get();
@@ -149,6 +183,43 @@ class EducationalController extends Controller
         return response()->json([
             'success' => true,
             'updated' => $expiredCards->count()
+        ]);
+    }
+
+    /**
+     * الحصول على أنواع المنتجات الافتراضية
+     */
+    private function getDefaultProductTypes()
+    {
+        // التحقق من وجود الجدول في قاعدة البيانات
+        try {
+            if (class_exists(\App\Models\EducationalProductType::class)) {
+                return EducationalProductType::all();
+            }
+        } catch (\Exception $e) {
+            // في حالة عدم وجود الجدول، استخدم البيانات الثابتة
+        }
+
+        // بيانات ثابتة كبديل
+        return collect([
+            (object) [
+                'id' => 1,
+                'name' => 'بطاقات تعليمية رقمية',
+                'code' => 'cards',
+                'is_digital' => true,
+                'requires_shipping' => false,
+                'display_type' => 'رقمي',
+                'full_description' => 'بطاقات تعليمية رقمية (رقمي - بدون شحن)'
+            ],
+            (object) [
+                'id' => 2,
+                'name' => 'دوسيات ورقية',
+                'code' => 'booklets',
+                'is_digital' => false,
+                'requires_shipping' => true,
+                'display_type' => 'ورقي',
+                'full_description' => 'دوسيات ورقية (ورقي - مع شحن)'
+            ]
         ]);
     }
 }

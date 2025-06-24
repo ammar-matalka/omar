@@ -719,6 +719,10 @@
                     <a href="{{ route('home') }}" class="logo">
                         {{ config('app.name') }}
                     </a>
+                        <li><a href="{{ route('educational.index') }}" class="nav-link {{ request()->routeIs('educational.*') ? 'active' : '' }}">
+        <i class="fas fa-graduation-cap" style="margin-left: var(--space-xs);"></i>
+        التعليم
+    </a></li>
                     
                     <!-- Navigation Links -->
                     <ul class="nav-links">
