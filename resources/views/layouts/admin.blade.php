@@ -908,7 +908,69 @@
                         </a>
                     </div>
                 </div>
-                
+                <!-- Educational System Management -->
+<div class="nav-section">
+    <div class="nav-section-title">النظام التعليمي</div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational.generations.index') }}" class="nav-link {{ request()->routeIs('admin.educational.generations.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-graduation-cap"></i>
+            الأجيال الدراسية
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational.subjects.index') }}" class="nav-link {{ request()->routeIs('admin.educational.subjects.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-book"></i>
+            المواد الدراسية
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational.teachers.index') }}" class="nav-link {{ request()->routeIs('admin.educational.teachers.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-chalkboard-teacher"></i>
+            المعلمين
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational.platforms.index') }}" class="nav-link {{ request()->routeIs('admin.educational.platforms.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-desktop"></i>
+            المنصات التعليمية
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational.packages.index') }}" class="nav-link {{ request()->routeIs('admin.educational.packages.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-box-open"></i>
+            الباقات التعليمية
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational.pricing.index') }}" class="nav-link {{ request()->routeIs('admin.educational.pricing.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-dollar-sign"></i>
+            التسعير
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational.inventory.index') }}" class="nav-link {{ request()->routeIs('admin.educational.inventory.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-boxes"></i>
+            المخزون
+            @if(isset($lowStockCount) && $lowStockCount > 0)
+                <span class="nav-badge">{{ $lowStockCount }}</span>
+            @endif
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{{ route('admin.educational.regions.index') }}" class="nav-link {{ request()->routeIs('admin.educational.regions.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-map-marker-alt"></i>
+            مناطق الشحن
+        </a>
+    </div>
+</div>
                 <!-- Customer Management -->
                 <div class="nav-section">
                     <div class="nav-section-title">إدارة العملاء</div>

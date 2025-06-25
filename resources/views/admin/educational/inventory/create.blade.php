@@ -1,761 +1,903 @@
 @extends('layouts.admin')
 
-@section('title', 'إدارة المنصات التعليمية')
-@section('page-title', 'إدارة المنصات التعليمية')
-
-@section('breadcrumb')
-<div class="breadcrumb-item">
-    <a href="{{ route('admin.dashboard') }}" class="breadcrumb-link">لوحة التحكم</a>
-</div>
-<div class="breadcrumb-item">
-    <i class="fas fa-chevron-right"></i>
-</div>
-<div class="breadcrumb-item">إدارة المنصات التعليمية</div>
-@endsection
+@section('title', 'إضافة مخزون جديد')
 
 @push('styles')
 <style>
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 100px;
-    height: 100px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 900;
-    margin-bottom: 0.5rem;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    opacity: 0.9;
-}
-
-.filter-section {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    padding: 1.5rem;
-    border-radius: 15px;
-    margin-bottom: 2rem;
-    border: 2px solid #dee2e6;
-}
-
-.platform-card {
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent;
-    border-radius: 10px;
-}
-
-.platform-card:hover {
-    border-left-color: #007bff;
-    transform: translateX(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.platform-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.platform-logo {
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-}
-
-.platform-info h5 {
-    margin: 0;
-    color: #495057;
-    font-weight: 700;
-}
-
-.platform-info p {
-    margin: 0;
-    color: #6c757d;
-    font-size: 0.9rem;
-}
-
-.status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 8px;
-}
-
-.status-active {
-    background-color: #28a745;
-    animation: pulse 2s infinite;
-}
-
-.status-inactive {
-    background-color: #dc3545;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-}
-
-.platform-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e9ecef;
-}
-
-.platform-stat {
-    text-align: center;
-}
-
-.platform-stat-value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #495057;
-    display: block;
-}
-
-.platform-stat-label {
-    font-size: 0.8rem;
-    color: #6c757d;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.website-link {
-    color: #007bff;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.3s ease;
-}
-
-.website-link:hover {
-    color: #0056b3;
-    text-decoration: underline;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #6c757d;
-}
-
-.empty-state i {
-    font-size: 5rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-}
-
-.platforms-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
-}
-
-.quick-actions {
+.form-section {
     background: white;
-    border-radius: 15px;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+.section-header {
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.section-content {
     padding: 1.5rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    border: 2px solid #e9ecef;
 }
 
-.table th {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 700;
-    color: #495057;
+.chain-selector {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
-.table tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05);
+.chain-step {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: white;
 }
 
-.badge {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 50px;
+.chain-step.completed {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.chain-step.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 600;
+    font-size: 0.875rem;
+    margin-left: 1rem;
 }
 
-.btn {
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
+.step-number.completed {
+    background: #10b981;
+    color: white;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.step-number.active {
+    background: #3b82f6;
+    color: white;
 }
 
-.dropdown-menu {
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    border: none;
+.inventory-preview {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
 }
 
-.dropdown-item {
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
+.quantity-display {
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 1rem 0;
 }
 
-.dropdown-item:hover {
-    background: linear-gradient(135deg, #e3f2fd, #f8f9fa);
-    transform: translateX(-5px);
-    padding-right: 1.5rem;
+.stock-calculation {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.existing-inventory-warning {
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.quantity-suggestions {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .chain-step {
+        text-align: center;
+    }
+    
+    .step-number {
+        margin: 0 auto 0.5rem;
+    }
+    
+    .quantity-display {
+        font-size: 2rem;
+    }
 }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid">
-    <!-- إحصائيات سريعة -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div style="position: relative; z-index: 2;">
-                <div class="stat-value">{{ $platforms->total() }}</div>
-                <div class="stat-label">
-                    <i class="fas fa-desktop"></i>
-                    إجمالي المنصات
-                </div>
-            </div>
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">إضافة مخزون جديد</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">لوحة التحكم</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.educational.inventory.index') }}">المخزون</a></li>
+                    <li class="breadcrumb-item active">إضافة مخزون جديد</li>
+                </ol>
+            </nav>
         </div>
-
-        <div class="stat-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
-            <div style="position: relative; z-index: 2;">
-                <div class="stat-value">{{ $platforms->where('is_active', true)->count() }}</div>
-                <div class="stat-label">
-                    <i class="fas fa-check-circle"></i>
-                    منصات نشطة
-                </div>
-            </div>
-        </div>
-
-        <div class="stat-card" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
-            <div style="position: relative; z-index: 2;">
-                <div class="stat-value">{{ $generations->count() }}</div>
-                <div class="stat-label">
-                    <i class="fas fa-graduation-cap"></i>
-                    الأجيال المتاحة
-                </div>
-            </div>
-        </div>
-
-        <div class="stat-card" style="background: linear-gradient(135deg, #6f42c1, #e83e8c);">
-            <div style="position: relative; z-index: 2;">
-                <div class="stat-value">{{ $teachers->count() }}</div>
-                <div class="stat-label">
-                    <i class="fas fa-user-tie"></i>
-                    المعلمين المتاحين
-                </div>
-            </div>
-        </div>
+        <a href="{{ route('admin.educational.inventory.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-right me-2"></i>العودة للقائمة
+        </a>
     </div>
 
-    <!-- فلاتر البحث -->
-    <div class="filter-section">
-        <form method="GET" action="{{ route('admin.educational.platforms.index') }}" id="filterForm">
-            <div class="row align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label">
-                        <i class="fas fa-graduation-cap text-primary"></i>
-                        الجيل الدراسي
-                    </label>
-                    <select name="generation_id" class="form-input" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">جميع الأجيال</option>
-                        @foreach($generations as $generation)
-                            <option value="{{ $generation->id }}" {{ request('generation_id') == $generation->id ? 'selected' : '' }}>
-                                {{ $generation->display_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">
-                        <i class="fas fa-book text-success"></i>
-                        المادة الدراسية
-                    </label>
-                    <select name="subject_id" class="form-input" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">جميع المواد</option>
-                        @foreach($subjects as $subject)
-                            <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
-                                {{ $subject->name }} - {{ $subject->generation->display_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">
-                        <i class="fas fa-user-tie text-warning"></i>
-                        المعلم
-                    </label>
-                    <select name="teacher_id" class="form-input" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">جميع المعلمين</option>
-                        @foreach($teachers as $teacher)
-                            <option value="{{ $teacher->id }}" {{ request('teacher_id') == $teacher->id ? 'selected' : '' }}>
-                                {{ $teacher->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label">
-                        <i class="fas fa-toggle-on text-info"></i>
-                        الحالة
-                    </label>
-                    <select name="is_active" class="form-input" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">جميع الحالات</option>
-                        <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>نشط</option>
-                        <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>غير نشط</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <div class="d-flex gap-1">
-                        <a href="{{ route('admin.educational.platforms.index') }}" class="btn btn-secondary flex-fill">
-                            <i class="fas fa-refresh"></i>
-                        </a>
-                        <button type="button" class="btn btn-info flex-fill" onclick="toggleView()">
-                            <i class="fas fa-th" id="viewToggleIcon"></i>
-                        </button>
-                    </div>
-                </div>
+    <form action="{{ route('admin.educational.inventory.store') }}" method="POST" id="inventoryForm">
+        @csrf
+        
+        <!-- Educational Chain Selection -->
+        <div class="form-section">
+            <div class="section-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-link me-2"></i>اختيار المنتج
+                </h5>
             </div>
-
-            <div class="row mt-3">
-                <div class="col-md-6">
-                    <label class="form-label">
-                        <i class="fas fa-search text-secondary"></i>
-                        البحث
-                    </label>
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-input" placeholder="اسم المنصة أو الوصف..." value="{{ request('search') }}">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i>
-                            بحث
-                        </button>
-                    </div>
+            <div class="section-content">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    اختر السلسلة التعليمية والباقة لإنشاء مخزون للدوسيات الورقية فقط
                 </div>
-            </div>
-        </form>
-    </div>
 
-    <!-- الإجراءات السريعة -->
-    <div class="quick-actions">
-        <div class="d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">
-                <i class="fas fa-desktop text-primary"></i>
-                المنصات التعليمية
-            </h4>
-            
-            <div class="d-flex gap-2">
-                <a href="{{ route('admin.educational.platforms.export') }}" class="btn btn-success">
-                    <i class="fas fa-download"></i>
-                    تصدير Excel
-                </a>
-                
-                <a href="{{ route('admin.educational.platforms.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    إضافة منصة جديدة
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- عرض المنصات -->
-    <div id="platformsContent">
-        @if($platforms->count() > 0)
-            <!-- عرض الكروت (افتراضي) -->
-            <div class="platforms-grid" id="cardsView">
-                @foreach($platforms as $platform)
-                    <div class="card platform-card">
-                        <div class="card-body">
-                            <div class="platform-header">
-                                <div class="platform-logo">
-                                    {{ strtoupper(substr($platform->name, 0, 2)) }}
-                                </div>
-                                <div class="platform-info flex-grow-1">
-                                    <h5>
-                                        <div class="status-indicator {{ $platform->is_active ? 'status-active' : 'status-inactive' }}"></div>
-                                        {{ $platform->name }}
-                                    </h5>
-                                    <p>{{ $platform->teacher->name }} - {{ $platform->teacher->subject->name }}</p>
-                                </div>
-                                
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-secondary dropdown-toggle" 
-                                            type="button" 
-                                            data-bs-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.educational.platforms.show', $platform) }}">
-                                                <i class="fas fa-eye text-info"></i>
-                                                عرض التفاصيل
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.educational.platforms.edit', $platform) }}">
-                                                <i class="fas fa-edit text-warning"></i>
-                                                تعديل
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <button class="dropdown-item" onclick="toggleStatus({{ $platform->id }})">
-                                                <i class="fas fa-{{ $platform->is_active ? 'pause' : 'play' }} text-{{ $platform->is_active ? 'secondary' : 'success' }}"></i>
-                                                {{ $platform->is_active ? 'إلغاء التفعيل' : 'تفعيل' }}
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item text-danger" onclick="deletePlatform({{ $platform->id }})">
-                                                <i class="fas fa-trash"></i>
-                                                حذف
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            @if($platform->description)
-                                <p class="text-muted mb-3">{{ Str::limit($platform->description, 100) }}</p>
-                            @endif
-
-                            @if($platform->website_url)
-                                <div class="mb-3">
-                                    <a href="{{ $platform->formatted_website_url }}" 
-                                       target="_blank" 
-                                       class="website-link">
-                                        <i class="fas fa-external-link-alt"></i>
-                                        زيارة الموقع
-                                    </a>
-                                </div>
-                            @endif
-
-                            <div class="platform-stats">
-                                <div class="platform-stat">
-                                    <span class="platform-stat-value text-primary">{{ $platform->educational_packages_count ?? 0 }}</span>
-                                    <span class="platform-stat-label">الباقات</span>
-                                </div>
-                                <div class="platform-stat">
-                                    <span class="platform-stat-value text-success">{{ $platform->active_educational_packages_count ?? 0 }}</span>
-                                    <span class="platform-stat-label">النشطة</span>
-                                </div>
-                                <div class="platform-stat">
-                                    <span class="platform-stat-value text-info">{{ $platform->teacher->subject->generation->display_name }}</span>
-                                    <span class="platform-stat-label">الجيل</span>
-                                </div>
-                            </div>
-
-                            <div class="mt-3">
-                                <span class="badge {{ $platform->is_active ? 'badge-success' : 'badge-danger' }}">
-                                    {{ $platform->is_active ? 'نشط' : 'غير نشط' }}
-                                </span>
+                <div class="chain-selector">
+                    <!-- Step 1: Generation -->
+                    <div class="chain-step active" id="step-generation">
+                        <div class="d-flex align-items-center">
+                            <div class="step-number active">1</div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">اختر الجيل الدراسي</h6>
+                                <select name="generation_id" id="generation_id" class="form-select" required>
+                                    <option value="">اختر الجيل...</option>
+                                    @foreach($generations as $generation)
+                                        <option value="{{ $generation->id }}" {{ old('generation_id') == $generation->id ? 'selected' : '' }}>
+                                            {{ $generation->display_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('generation_id')
+                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
-                @endforeach
-            </div>
 
-            <!-- عرض الجدول (مخفي افتراضياً) -->
-            <div class="card" id="tableView" style="display: none;">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>المنصة</th>
-                                    <th>المعلم</th>
-                                    <th>المادة</th>
-                                    <th>الجيل</th>
-                                    <th>الباقات</th>
-                                    <th>الموقع</th>
-                                    <th>الحالة</th>
-                                    <th width="150" class="text-center">الإجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($platforms as $platform)
-                                    <tr class="platform-card">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="platform-logo me-2" style="width: 35px; height: 35px; font-size: 0.9rem;">
-                                                    {{ strtoupper(substr($platform->name, 0, 2)) }}
-                                                </div>
-                                                <div>
-                                                    <strong>{{ $platform->name }}</strong>
-                                                    <div class="status-indicator {{ $platform->is_active ? 'status-active' : 'status-inactive' }}"></div>
-                                                    @if($platform->description)
-                                                        <small class="text-muted d-block">{{ Str::limit($platform->description, 50) }}</small>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <strong>{{ $platform->teacher->name }}</strong>
-                                            @if($platform->teacher->specialization)
-                                                <small class="text-muted d-block">{{ $platform->teacher->specialization }}</small>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-info">{{ $platform->teacher->subject->name }}</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-secondary">{{ $platform->teacher->subject->generation->display_name }}</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-primary">{{ $platform->educational_packages_count ?? 0 }} باقة</span>
-                                            <span class="badge badge-success">{{ $platform->active_educational_packages_count ?? 0 }} نشطة</span>
-                                        </td>
-                                        <td>
-                                            @if($platform->website_url)
-                                                <a href="{{ $platform->formatted_website_url }}" target="_blank" class="website-link">
-                                                    <i class="fas fa-external-link-alt"></i>
-                                                    زيارة
-                                                </a>
-                                            @else
-                                                <span class="text-muted">لا يوجد</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $platform->is_active ? 'badge-success' : 'badge-danger' }}">
-                                                {{ $platform->is_active ? 'نشط' : 'غير نشط' }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <a href="{{ route('admin.educational.platforms.show', $platform) }}" 
-                                                   class="btn btn-sm btn-info" 
-                                                   title="عرض التفاصيل">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                
-                                                <a href="{{ route('admin.educational.platforms.edit', $platform) }}" 
-                                                   class="btn btn-sm btn-warning" 
-                                                   title="تعديل">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                
-                                                <button type="button" 
-                                                        class="btn btn-sm {{ $platform->is_active ? 'btn-secondary' : 'btn-success' }}" 
-                                                        onclick="toggleStatus({{ $platform->id }})"
-                                                        title="{{ $platform->is_active ? 'إلغاء التفعيل' : 'تفعيل' }}">
-                                                    <i class="fas fa-{{ $platform->is_active ? 'pause' : 'play' }}"></i>
-                                                </button>
-                                                
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-danger" 
-                                                        onclick="deletePlatform({{ $platform->id }})"
-                                                        title="حذف">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <!-- Step 2: Subject -->
+                    <div class="chain-step" id="step-subject">
+                        <div class="d-flex align-items-center">
+                            <div class="step-number">2</div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">اختر المادة</h6>
+                                <select name="subject_id" id="subject_id" class="form-select" required disabled>
+                                    <option value="">اختر الجيل أولاً...</option>
+                                </select>
+                                @error('subject_id')
+                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Teacher -->
+                    <div class="chain-step" id="step-teacher">
+                        <div class="d-flex align-items-center">
+                            <div class="step-number">3</div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">اختر المعلم</h6>
+                                <select name="teacher_id" id="teacher_id" class="form-select" required disabled>
+                                    <option value="">اختر المادة أولاً...</option>
+                                </select>
+                                @error('teacher_id')
+                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Platform -->
+                    <div class="chain-step" id="step-platform">
+                        <div class="d-flex align-items-center">
+                            <div class="step-number">4</div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">اختر المنصة</h6>
+                                <select name="platform_id" id="platform_id" class="form-select" required disabled>
+                                    <option value="">اختر المعلم أولاً...</option>
+                                </select>
+                                @error('platform_id')
+                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Package -->
+                    <div class="chain-step" id="step-package">
+                        <div class="d-flex align-items-center">
+                            <div class="step-number">5</div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">اختر الباقة (الدوسيات الورقية فقط)</h6>
+                                <select name="package_id" id="package_id" class="form-select" required disabled>
+                                    <option value="">اختر المنصة أولاً...</option>
+                                </select>
+                                @error('package_id')
+                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pre-fill from URL parameters -->
+                @if(request('package_id'))
+                    <div class="alert alert-success">
+                        <i class="fas fa-link me-2"></i>
+                        تم تحديد الباقة مسبقاً من الرابط. ستتم تعبئة الحقول تلقائياً.
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Package Information -->
+        <div class="form-section" id="package-info-section" style="display: none;">
+            <div class="section-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-box me-2"></i>معلومات الباقة
+                </h5>
+            </div>
+            <div class="section-content">
+                <div id="package-info">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                
+                <div id="existing-inventory-warning" style="display: none;">
+                    <!-- Will show if inventory already exists -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Quantities -->
+        <div class="form-section" id="quantities-section" style="display: none;">
+            <div class="section-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-warehouse me-2"></i>كميات المخزون
+                </h5>
+            </div>
+            <div class="section-content">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group mb-4">
+                            <label for="quantity_available" class="form-label">الكمية المتاحة <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" name="quantity_available" id="quantity_available" class="form-control" 
+                                       value="{{ old('quantity_available', 0) }}" required min="0" max="100000"
+                                       placeholder="0">
+                                <span class="input-group-text">قطعة</span>
+                            </div>
+                            <div class="form-text">
+                                العدد الإجمالي للدوسيات المتاحة للبيع
+                            </div>
+                            @error('quantity_available')
+                                <div class="text-danger mt-2">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="quantity_reserved" class="form-label">الكمية المحجوزة</label>
+                            <div class="input-group">
+                                <input type="number" name="quantity_reserved" id="quantity_reserved" class="form-control" 
+                                       value="{{ old('quantity_reserved', 0) }}" min="0" max="100000"
+                                       placeholder="0">
+                                <span class="input-group-text">قطعة</span>
+                            </div>
+                            <div class="form-text">
+                                عدد القطع المحجوزة للطلبات المؤكدة (اختياري)
+                            </div>
+                            @error('quantity_reserved')
+                                <div class="text-danger mt-2">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Quick Quantity Suggestions -->
+                        <div class="quantity-suggestions">
+                            <h6><i class="fas fa-lightbulb me-2"></i>اقتراحات كميات سريعة</h6>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="setQuantity(50)">
+                                        50 قطعة
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="setQuantity(100)">
+                                        100 قطعة
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="setQuantity(200)">
+                                        200 قطعة
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="setQuantity(500)">
+                                        500 قطعة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stock Calculation -->
+                        <div class="stock-calculation">
+                            <h6><i class="fas fa-calculator me-2"></i>حساب المخزون</h6>
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="border-end">
+                                        <h6 class="text-muted">إجمالي المخزون</h6>
+                                        <h4 class="text-primary" id="total-stock">0</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border-end">
+                                        <h6 class="text-muted">المحجوز</h6>
+                                        <h4 class="text-warning" id="reserved-stock">0</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-muted">المتاح الفعلي</h6>
+                                    <h4 class="text-success" id="actual-available">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <!-- Inventory Preview -->
+                        <div class="inventory-preview" id="inventory-preview">
+                            <h6 class="mb-3">معاينة المخزون</h6>
+                            <div class="quantity-display" id="preview-quantity">0</div>
+                            <div>قطعة متاحة</div>
+                            
+                            <div class="mt-3" id="stock-status-preview">
+                                <small id="status-text">لا يوجد مخزون</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Pagination -->
-            <div class="d-flex justify-content-center mt-4">
-                {{ $platforms->appends(request()->query())->links() }}
+        <!-- Summary Section -->
+        <div class="form-section" id="summary-section" style="display: none;">
+            <div class="section-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>ملخص المخزون الجديد
+                </h5>
             </div>
-        @else
-            <div class="empty-state">
-                <i class="fas fa-desktop"></i>
-                <h4>لا توجد منصات تعليمية</h4>
-                <p>لم يتم العثور على أي منصات بالمعايير المحددة</p>
-                <a href="{{ route('admin.educational.platforms.create') }}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-plus"></i>
-                    إضافة منصة جديدة
-                </a>
-            </div>
-        @endif
-    </div>
-</div>
-
-<!-- Modal للحذف -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">تأكيد الحذف</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center mb-3">
-                    <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+            <div class="section-content">
+                <div class="row" id="inventory-summary">
+                    <!-- Will be populated by JavaScript -->
                 </div>
-                <h6 class="text-center">هل أنت متأكد من حذف هذه المنصة؟</h6>
-                <p class="text-center text-muted">سيتم حذف المنصة وجميع الباقات المرتبطة بها</p>
-                <div class="alert alert-danger">
-                    <strong>تحذير:</strong> هذا الإجراء لا يمكن التراجع عنه!
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                <form id="deleteForm" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i>
-                        حذف نهائياً
-                    </button>
-                </form>
             </div>
         </div>
-    </div>
+
+        <!-- Form Actions -->
+        <div class="form-section">
+            <div class="section-content">
+                <div class="d-flex justify-content-between">
+                    <a href="{{ route('admin.educational.inventory.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>إلغاء
+                    </a>
+                    <div>
+                        <button type="submit" name="action" value="save" class="btn btn-success me-2">
+                            <i class="fas fa-save me-2"></i>حفظ المخزون
+                        </button>
+                        <button type="submit" name="action" value="save_and_add" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>حفظ وإضافة آخر
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-// تبديل حالة التفعيل
-function toggleStatus(platformId) {
-    fetch(`/admin/educational/platforms/${platformId}/toggle-status`, {
+let selectedChain = {
+    generation: null,
+    subject: null,
+    teacher: null,
+    platform: null,
+    package: null,
+    packageData: null
+};
+
+// Initialize from URL parameters
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const packageId = urlParams.get('package_id');
+    
+    if (packageId) {
+        // Auto-select package if provided in URL
+        fetchPackageDetails(packageId);
+    }
+    
+    // Initialize event listeners
+    initializeEventListeners();
+});
+
+function initializeEventListeners() {
+    // Chain selection events
+    document.getElementById('generation_id').addEventListener('change', handleGenerationChange);
+    document.getElementById('subject_id').addEventListener('change', handleSubjectChange);
+    document.getElementById('teacher_id').addEventListener('change', handleTeacherChange);
+    document.getElementById('platform_id').addEventListener('change', handlePlatformChange);
+    document.getElementById('package_id').addEventListener('change', handlePackageChange);
+    
+    // Quantity input events
+    document.getElementById('quantity_available').addEventListener('input', updateInventoryPreview);
+    document.getElementById('quantity_reserved').addEventListener('input', updateInventoryPreview);
+}
+
+// Chain handlers (similar to pricing create)
+function handleGenerationChange() {
+    const generationId = this.value;
+    selectedChain.generation = generationId;
+    
+    if (generationId) {
+        updateStepStatus('generation', 'completed');
+        updateStepStatus('subject', 'active');
+        loadSubjects(generationId);
+    } else {
+        resetFromStep('generation');
+    }
+}
+
+function handleSubjectChange() {
+    const subjectId = this.value;
+    selectedChain.subject = subjectId;
+    
+    if (subjectId) {
+        updateStepStatus('subject', 'completed');
+        updateStepStatus('teacher', 'active');
+        loadTeachers(subjectId);
+    } else {
+        resetFromStep('subject');
+    }
+}
+
+function handleTeacherChange() {
+    const teacherId = this.value;
+    selectedChain.teacher = teacherId;
+    
+    if (teacherId) {
+        updateStepStatus('teacher', 'completed');
+        updateStepStatus('platform', 'active');
+        loadPlatforms(teacherId);
+    } else {
+        resetFromStep('teacher');
+    }
+}
+
+function handlePlatformChange() {
+    const platformId = this.value;
+    selectedChain.platform = platformId;
+    
+    if (platformId) {
+        updateStepStatus('platform', 'completed');
+        updateStepStatus('package', 'active');
+        loadPackages(platformId);
+    } else {
+        resetFromStep('platform');
+    }
+}
+
+function handlePackageChange() {
+    const packageId = this.value;
+    selectedChain.package = packageId;
+    
+    if (packageId) {
+        updateStepStatus('package', 'completed');
+        fetchPackageDetails(packageId);
+    } else {
+        resetFromStep('package');
+    }
+}
+
+// Load chain data functions (similar to pricing create but filter for physical packages only)
+function loadSubjects(generationId) {
+    fetch(`/admin/educational/api/subjects?generation_id=${generationId}`)
+        .then(response => response.json())
+        .then(data => {
+            const subjectSelect = document.getElementById('subject_id');
+            subjectSelect.innerHTML = '<option value="">اختر المادة...</option>';
+            
+            data.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = subject.name;
+                subjectSelect.appendChild(option);
+            });
+            
+            subjectSelect.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error loading subjects:', error);
+            showAlert('error', 'خطأ في تحميل المواد');
+        });
+}
+
+function loadTeachers(subjectId) {
+    fetch(`/admin/educational/api/teachers?subject_id=${subjectId}`)
+        .then(response => response.json())
+        .then(data => {
+            const teacherSelect = document.getElementById('teacher_id');
+            teacherSelect.innerHTML = '<option value="">اختر المعلم...</option>';
+            
+            data.forEach(teacher => {
+                const option = document.createElement('option');
+                option.value = teacher.id;
+                option.textContent = teacher.name;
+                teacherSelect.appendChild(option);
+            });
+            
+            teacherSelect.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error loading teachers:', error);
+            showAlert('error', 'خطأ في تحميل المعلمين');
+        });
+}
+
+function loadPlatforms(teacherId) {
+    fetch(`/admin/educational/api/platforms?teacher_id=${teacherId}`)
+        .then(response => response.json())
+        .then(data => {
+            const platformSelect = document.getElementById('platform_id');
+            platformSelect.innerHTML = '<option value="">اختر المنصة...</option>';
+            
+            data.forEach(platform => {
+                const option = document.createElement('option');
+                option.value = platform.id;
+                option.textContent = platform.name;
+                platformSelect.appendChild(option);
+            });
+            
+            platformSelect.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error loading platforms:', error);
+            showAlert('error', 'خطأ في تحميل المنصات');
+        });
+}
+
+function loadPackages(platformId) {
+    // Only load physical packages for inventory
+    fetch(`/admin/educational/api/packages?platform_id=${platformId}&type=physical`)
+        .then(response => response.json())
+        .then(data => {
+            const packageSelect = document.getElementById('package_id');
+            packageSelect.innerHTML = '<option value="">اختر الباقة...</option>';
+            
+            if (data.length === 0) {
+                packageSelect.innerHTML = '<option value="">لا توجد دوسيات ورقية في هذه المنصة</option>';
+                packageSelect.disabled = true;
+                return;
+            }
+            
+            data.forEach(pkg => {
+                const option = document.createElement('option');
+                option.value = pkg.id;
+                option.textContent = pkg.name + ' (دوسية ورقية)';
+                packageSelect.appendChild(option);
+            });
+            
+            packageSelect.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error loading packages:', error);
+            showAlert('error', 'خطأ في تحميل الباقات');
+        });
+}
+
+// Fetch package details and check for existing inventory
+function fetchPackageDetails(packageId) {
+    fetch(`/admin/educational/api/package-details/${packageId}`)
+        .then(response => response.json())
+        .then(data => {
+            selectedChain.packageData = data;
+            
+            if (data.is_digital) {
+                showAlert('error', 'لا يمكن إنشاء مخزون للبطاقات الرقمية');
+                return;
+            }
+            
+            displayPackageInfo(data);
+            checkExistingInventory();
+            showQuantitiesSection();
+            updateInventorySummary();
+        })
+        .catch(error => {
+            console.error('Error fetching package details:', error);
+            showAlert('error', 'خطأ في تحميل تفاصيل الباقة');
+        });
+}
+
+// Display package information
+function displayPackageInfo(packageData) {
+    const packageInfo = document.getElementById('package-info');
+    
+    packageInfo.innerHTML = `
+        <div class="d-flex align-items-center p-3 bg-light rounded">
+            <div class="me-3">
+                <i class="fas fa-book fa-2x text-warning"></i>
+            </div>
+            <div>
+                <h6 class="mb-1">${packageData.name}</h6>
+                <span class="badge bg-warning">دوسية ورقية</span>
+                <div class="mt-2">
+                    ${packageData.pages_count ? `<small class="d-block text-muted">عدد الصفحات: ${packageData.pages_count}</small>` : ''}
+                    ${packageData.weight_grams ? `<small class="d-block text-muted">الوزن: ${packageData.weight_grams} جرام</small>` : ''}
+                </div>
+                ${packageData.description ? `<p class="text-muted small mb-0 mt-1">${packageData.description}</p>` : ''}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('package-info-section').style.display = 'block';
+}
+
+// Check for existing inventory
+function checkExistingInventory() {
+    if (!selectedChain.packageData) return;
+    
+    fetch(`/admin/educational/api/check-existing-inventory`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
+        },
+        body: JSON.stringify({
+            generation_id: selectedChain.generation,
+            subject_id: selectedChain.subject,
+            teacher_id: selectedChain.teacher,
+            platform_id: selectedChain.platform,
+            package_id: selectedChain.package
+        })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            showAlert('success', data.message);
-            setTimeout(() => location.reload(), 1500);
+        const warningDiv = document.getElementById('existing-inventory-warning');
+        
+        if (data.exists) {
+            warningDiv.innerHTML = `
+                <div class="existing-inventory-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>تحذير:</strong> يوجد مخزون لهذا المنتج بالفعل.
+                    <br>الكمية الحالية: <strong>${data.inventory.quantity_available}</strong> قطعة متاحة، 
+                    <strong>${data.inventory.quantity_reserved}</strong> قطعة محجوزة.
+                    <br><a href="/admin/educational/inventory/${data.inventory.id}" class="btn btn-sm btn-outline-warning mt-2">
+                        <i class="fas fa-eye me-1"></i>عرض المخزون الموجود
+                    </a>
+                </div>
+            `;
+            warningDiv.style.display = 'block';
         } else {
-            showAlert('error', 'حدث خطأ أثناء تحديث الحالة');
+            warningDiv.style.display = 'none';
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        showAlert('error', 'حدث خطأ أثناء تحديث الحالة');
+        console.error('Error checking existing inventory:', error);
     });
 }
 
-// حذف منصة
-function deletePlatform(platformId) {
-    document.getElementById('deleteForm').action = `/admin/educational/platforms/${platformId}`;
-    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+// Show quantities section
+function showQuantitiesSection() {
+    document.getElementById('quantities-section').style.display = 'block';
+    updateInventoryPreview();
 }
 
-// تبديل طريقة العرض
-function toggleView() {
-    const cardsView = document.getElementById('cardsView');
-    const tableView = document.getElementById('tableView');
-    const toggleIcon = document.getElementById('viewToggleIcon');
+// Update step status (same as pricing)
+function updateStepStatus(step, status) {
+    const stepElement = document.getElementById(`step-${step}`);
+    const stepNumber = stepElement.querySelector('.step-number');
     
-    if (cardsView.style.display === 'none') {
-        // Switch to cards view
-        cardsView.style.display = 'grid';
-        tableView.style.display = 'none';
-        toggleIcon.className = 'fas fa-th';
-    } else {
-        // Switch to table view
-        cardsView.style.display = 'none';
-        tableView.style.display = 'block';
-        toggleIcon.className = 'fas fa-list';
+    // Remove all status classes
+    stepElement.classList.remove('active', 'completed');
+    stepNumber.classList.remove('active', 'completed');
+    
+    // Add new status
+    if (status) {
+        stepElement.classList.add(status);
+        stepNumber.classList.add(status);
     }
 }
 
-// عرض التنبيهات
-function showAlert(type, message) {
-    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-    const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+// Reset from specific step (same as pricing)
+function resetFromStep(step) {
+    const steps = ['generation', 'subject', 'teacher', 'platform', 'package'];
+    const stepIndex = steps.indexOf(step);
     
+    for (let i = stepIndex; i < steps.length; i++) {
+        const currentStep = steps[i];
+        selectedChain[currentStep] = null;
+        
+        if (i === stepIndex) {
+            updateStepStatus(currentStep, 'active');
+        } else {
+            updateStepStatus(currentStep, null);
+        }
+        
+        // Reset select elements
+        if (i > stepIndex) {
+            const selectElement = document.getElementById(`${currentStep}_id`);
+            selectElement.innerHTML = `<option value="">اختر ${getStepLabel(currentStep)}...</option>`;
+            selectElement.disabled = true;
+        }
+    }
+    
+    // Hide sections if needed
+    if (stepIndex <= 4) {
+        document.getElementById('package-info-section').style.display = 'none';
+        document.getElementById('quantities-section').style.display = 'none';
+        document.getElementById('summary-section').style.display = 'none';
+    }
+}
+
+// Get step label
+function getStepLabel(step) {
+    const labels = {
+        'generation': 'الجيل',
+        'subject': 'المادة',
+        'teacher': 'المعلم',
+        'platform': 'المنصة',
+        'package': 'الباقة'
+    };
+    return labels[step] || step;
+}
+
+// Set quantity helper
+function setQuantity(amount) {
+    document.getElementById('quantity_available').value = amount;
+    updateInventoryPreview();
+}
+
+// Update inventory preview
+function updateInventoryPreview() {
+    const available = parseInt(document.getElementById('quantity_available').value) || 0;
+    const reserved = parseInt(document.getElementById('quantity_reserved').value) || 0;
+    const actualAvailable = Math.max(0, available - reserved);
+    
+    // Update preview
+    document.getElementById('preview-quantity').textContent = actualAvailable;
+    
+    // Update stock calculation
+    document.getElementById('total-stock').textContent = available;
+    document.getElementById('reserved-stock').textContent = reserved;
+    document.getElementById('actual-available').textContent = actualAvailable;
+    
+    // Update status
+    const statusText = document.getElementById('status-text');
+    if (actualAvailable <= 0) {
+        statusText.textContent = 'نفدت الكمية';
+        statusText.className = 'text-danger';
+    } else if (actualAvailable <= 10) {
+        statusText.textContent = 'مخزون منخفض';
+        statusText.className = 'text-warning';
+    } else if (actualAvailable <= 50) {
+        statusText.textContent = 'متوفر';
+        statusText.className = 'text-info';
+    } else {
+        statusText.textContent = 'متوفر بكثرة';
+        statusText.className = 'text-success';
+    }
+    
+    updateInventorySummary();
+}
+
+// Update inventory summary
+function updateInventorySummary() {
+    const summary = document.getElementById('inventory-summary');
+    if (!selectedChain.packageData) return;
+    
+    const available = parseInt(document.getElementById('quantity_available').value) || 0;
+    const reserved = parseInt(document.getElementById('quantity_reserved').value) || 0;
+    const data = selectedChain.packageData;
+    
+    summary.innerHTML = `
+        <div class="col-md-3">
+            <strong>المنتج:</strong><br>
+            <span class="text-muted">${data.name}</span>
+            <span class="badge bg-warning ms-2">دوسية</span>
+        </div>
+        <div class="col-md-3">
+            <strong>السلسلة:</strong><br>
+            <span class="text-muted">${data.chain?.generation || 'غير محدد'} - ${data.chain?.subject || 'غير محدد'}</span>
+        </div>
+        <div class="col-md-2">
+            <strong>الكمية المتاحة:</strong><br>
+            <span class="text-success fs-5">${available}</span>
+        </div>
+        <div class="col-md-2">
+            <strong>المحجوز:</strong><br>
+            <span class="text-warning fs-5">${reserved}</span>
+        </div>
+        <div class="col-md-2">
+            <strong>الفعلي:</strong><br>
+            <span class="text-primary fs-5">${Math.max(0, available - reserved)}</span>
+        </div>
+    `;
+    
+    document.getElementById('summary-section').style.display = 'block';
+}
+
+// Form validation
+document.getElementById('inventoryForm').addEventListener('submit', function(e) {
+    const packageId = document.getElementById('package_id').value;
+    const available = parseInt(document.getElementById('quantity_available').value);
+    const reserved = parseInt(document.getElementById('quantity_reserved').value) || 0;
+    
+    if (!packageId) {
+        e.preventDefault();
+        alert('يرجى اختيار الباقة');
+        return;
+    }
+    
+    if (!available || available <= 0) {
+        e.preventDefault();
+        alert('يرجى إدخال كمية متاحة صحيحة');
+        return;
+    }
+    
+    if (reserved > available) {
+        e.preventDefault();
+        alert('الكمية المحجوزة لا يمكن أن تتجاوز الكمية المتاحة');
+        return;
+    }
+    
+    // Check if this will create very large inventory
+    if (available > 10000) {
+        if (!confirm(`تحذير: الكمية المطلوبة كبيرة جداً (${available} قطعة).\n\nهل أنت متأكد من المتابعة؟`)) {
+            e.preventDefault();
+            return;
+        }
+    }
+});
+
+// Show alert messages
+function showAlert(type, message) {
     const alertDiv = document.createElement('div');
-    alertDiv.className = `alert ${alertClass} alert-dismissible fade show`;
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
     alertDiv.innerHTML = `
-        <i class="fas fa-${icon}"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-    
-    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+    document.body.appendChild(alertDiv);
     
     setTimeout(() => {
         alertDiv.remove();
     }, 5000);
 }
-
-// تحسين تجربة المستخدم
-document.addEventListener('DOMContentLoaded', function() {
-    // إضافة animation للكروت
-    const cards = document.querySelectorAll('.platform-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            card.style.transition = 'all 0.5s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 100);
-    });
-    
-    // تحسين Dropdowns
-    const dropdowns = document.querySelectorAll('.dropdown-toggle');
-    dropdowns.forEach(dropdown => {
-        dropdown.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    });
-});
 </script>
 @endpush
