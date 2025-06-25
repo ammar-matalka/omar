@@ -9,16 +9,23 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    // In database/migrations/xxxx_xx_xx_create_messages_table.php
-public function up()
-{
-    Schema::create('messages', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('conversation_id')->constrained()->onDelete('cascade');
-        $table->foreignId('user_id')->constrained(); // Sender ID
-        $table->text('message');
-        $table->boolean('is_from_admin')->default(false);
-        $table->timestamps();
-    });
-}
+    public function up(): void
+    {
+        Schema::create('messages', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('conversation_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->text('message');
+            $table->boolean('is_from_admin')->default(false);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('messages');
+    }
 };
