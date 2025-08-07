@@ -4,19 +4,22 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        // أجيال الطلاب (سنوات الميلاد)
-        Schema::create('generations', function (Blueprint $table) {
-            $table->id();
-            $table->integer('birth_year')->unique();
-            $table->string('name'); // "جيل 2007"
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
+        // أجيال الطلاب (سنوات الميلاد) - تحقق من وجود الجدول أولاً
+        if (!Schema::hasTable('generations')) {
+            Schema::create('generations', function (Blueprint $table) {
+                $table->id();
+                $table->integer('birth_year')->unique();
+                $table->string('name'); // "جيل 2007"
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
 
         // المواد حسب الجيل
         Schema::create('subjects', function (Blueprint $table) {
@@ -60,6 +63,26 @@ return new class extends Migration
             $table->boolean('requires_shipping')->default(true); // FALSE للبطاقات، TRUE للدوسيات
             $table->timestamps();
         });
+
+        // إضافة البيانات الأساسية لأنواع المنتجات
+        DB::table('educational_product_types')->insert([
+            [
+                'name' => 'بطاقة رقمية',
+                'code' => 'DIGITAL_CARD',
+                'is_digital' => true,
+                'requires_shipping' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'دوسية ورقية',
+                'code' => 'PHYSICAL_BOOKLET',
+                'is_digital' => false,
+                'requires_shipping' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        ]);
 
         // باقات المنتجات التعليمية
         Schema::create('educational_packages', function (Blueprint $table) {
@@ -162,6 +185,7 @@ return new class extends Migration
         Schema::dropIfExists('platforms');
         Schema::dropIfExists('teachers');
         Schema::dropIfExists('subjects');
-        Schema::dropIfExists('generations');
+        // لا تحذف جدول generations إذا كان موجود من migration سابق
+        // Schema::dropIfExists('generations');
     }
 };

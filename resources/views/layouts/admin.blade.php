@@ -908,69 +908,128 @@
                         </a>
                     </div>
                 </div>
+                
                 <!-- Educational System Management -->
-<div class="nav-section">
-    <div class="nav-section-title">النظام التعليمي</div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational.generations.index') }}" class="nav-link {{ request()->routeIs('admin.educational.generations.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-graduation-cap"></i>
-            الأجيال الدراسية
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational.subjects.index') }}" class="nav-link {{ request()->routeIs('admin.educational.subjects.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-book"></i>
-            المواد الدراسية
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational.teachers.index') }}" class="nav-link {{ request()->routeIs('admin.educational.teachers.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-chalkboard-teacher"></i>
-            المعلمين
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational.platforms.index') }}" class="nav-link {{ request()->routeIs('admin.educational.platforms.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-desktop"></i>
-            المنصات التعليمية
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational.packages.index') }}" class="nav-link {{ request()->routeIs('admin.educational.packages.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-box-open"></i>
-            الباقات التعليمية
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational.pricing.index') }}" class="nav-link {{ request()->routeIs('admin.educational.pricing.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-dollar-sign"></i>
-            التسعير
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational.inventory.index') }}" class="nav-link {{ request()->routeIs('admin.educational.inventory.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-boxes"></i>
-            المخزون
-            @if(isset($lowStockCount) && $lowStockCount > 0)
-                <span class="nav-badge">{{ $lowStockCount }}</span>
-            @endif
-        </a>
-    </div>
-    
-    <div class="nav-item">
-        <a href="{{ route('admin.educational.regions.index') }}" class="nav-link {{ request()->routeIs('admin.educational.regions.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-map-marker-alt"></i>
-            مناطق الشحن
-        </a>
-    </div>
-</div>
+                <div class="nav-section">
+                    <div class="nav-section-title">النظام التعليمي</div>
+                    
+                    <!-- Basic Educational Components -->
+                    <div class="nav-item">
+                        <a href="{{ route('admin.educational.generations.index') }}" class="nav-link {{ request()->routeIs('admin.educational.generations.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-graduation-cap"></i>
+                            الأجيال الدراسية
+                        </a>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="{{ route('admin.educational.subjects.index') }}" class="nav-link {{ request()->routeIs('admin.educational.subjects.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-book"></i>
+                            المواد الدراسية
+                        </a>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="{{ route('admin.educational.teachers.index') }}" class="nav-link {{ request()->routeIs('admin.educational.teachers.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                            المعلمين
+                        </a>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="{{ route('admin.educational.platforms.index') }}" class="nav-link {{ request()->routeIs('admin.educational.platforms.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-desktop"></i>
+                            المنصات التعليمية
+                        </a>
+                    </div>
+                    
+                    <!-- Educational Products Section -->
+                    <div style="margin: var(--space-lg) 0; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--space-lg);">
+                        <div class="nav-section-title" style="margin-bottom: var(--space-md); font-size: 0.75rem; color: var(--admin-secondary-400);">المنتجات التعليمية</div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.digital-cards.index') }}" class="nav-link {{ request()->routeIs('admin.educational.digital-cards.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-laptop-code"></i>
+                                البطاقات الرقمية
+                                @if(isset($activeDigitalCardsCount) && $activeDigitalCardsCount > 0)
+                                    <span class="nav-badge" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">{{ $activeDigitalCardsCount }}</span>
+                                @endif
+                            </a>
+                        </div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.physical-booklets.index') }}" class="nav-link {{ request()->routeIs('admin.educational.physical-booklets.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-book"></i>
+                                الدوسيات الورقية
+                                @if(isset($lowStockBookletsCount) && $lowStockBookletsCount > 0)
+                                    <span class="nav-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706);">{{ $lowStockBookletsCount }}</span>
+                                @endif
+                            </a>
+                        </div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.packages.index') }}" class="nav-link {{ request()->routeIs('admin.educational.packages.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-box-open"></i>
+                                جميع الباقات
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Management Tools Section -->
+                    <div style="margin: var(--space-lg) 0; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--space-lg);">
+                        <div class="nav-section-title" style="margin-bottom: var(--space-md); font-size: 0.75rem; color: var(--admin-secondary-400);">أدوات الإدارة</div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.pricing.index') }}" class="nav-link {{ request()->routeIs('admin.educational.pricing.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-dollar-sign"></i>
+                                التسعير
+                            </a>
+                        </div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.inventory.index') }}" class="nav-link {{ request()->routeIs('admin.educational.inventory.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-boxes"></i>
+                                إدارة المخزون
+                                @if(isset($lowStockCount) && $lowStockCount > 0)
+                                    <span class="nav-badge">{{ $lowStockCount }}</span>
+                                @endif
+                            </a>
+                        </div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.regions.index') }}" class="nav-link {{ request()->routeIs('admin.educational.regions.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-map-marker-alt"></i>
+                                مناطق الشحن
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions Section -->
+                    <div style="margin: var(--space-lg) 0; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: var(--space-lg);">
+                        <div class="nav-section-title" style="margin-bottom: var(--space-md); font-size: 0.75rem; color: var(--admin-secondary-400);">إجراءات سريعة</div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.digital-cards.create') }}" class="nav-link" style="background: rgba(79, 70, 229, 0.1); color: #a5b4fc; border-radius: 0 25px 25px 0; margin-left: var(--space-md);">
+                                <i class="nav-icon fas fa-plus"></i>
+                                إنشاء بطاقة رقمية
+                            </a>
+                        </div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.physical-booklets.create') }}" class="nav-link" style="background: rgba(5, 150, 105, 0.1); color: #86efac; border-radius: 0 25px 25px 0; margin-left: var(--space-md);">
+                                <i class="nav-icon fas fa-plus"></i>
+                                إنشاء دوسية ورقية
+                            </a>
+                        </div>
+                        
+                        <div class="nav-item">
+                            <a href="{{ route('admin.educational.physical-booklets.low-stock-report') }}" class="nav-link" style="background: rgba(245, 158, 11, 0.1); color: #fcd34d; border-radius: 0 25px 25px 0; margin-left: var(--space-md);">
+                                <i class="nav-icon fas fa-exclamation-triangle"></i>
+                                تقرير المخزون المنخفض
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Customer Management -->
                 <div class="nav-section">
                     <div class="nav-section-title">إدارة العملاء</div>

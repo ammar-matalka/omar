@@ -30,8 +30,9 @@
 .edit-form-wrapper {
     background: white;
     border-radius: 25px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
     overflow: hidden;
+    margin-bottom: 2rem;
 }
 
 .form-header {
@@ -40,6 +41,7 @@
     padding: 3rem;
     text-align: center;
     position: relative;
+    overflow: hidden;
 }
 
 .form-header::before {
@@ -64,13 +66,27 @@
     border-radius: 50%;
 }
 
+.header-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+}
+
 .current-info-section {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    padding: 2rem;
+    padding: 2.5rem;
     border-radius: 20px;
     margin-bottom: 2rem;
     border: 3px solid #dee2e6;
     position: relative;
+    overflow: hidden;
 }
 
 .current-info-section::before {
@@ -78,14 +94,112 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
     border-radius: 0 20px 0 100px;
 }
 
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin: 0.25rem;
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1565c0;
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+    color: #424242;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    color: #2e7d32;
+}
+
+.packages-summary {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.package-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 2px solid #f8f9fa;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+}
+
+.package-item:hover {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    transform: translateX(-5px);
+}
+
 .form-section {
     padding: 3rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid #e9ecef;
+    position: relative;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    right: 0;
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+}
+
+.section-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.section-title h4 {
+    margin: 0;
+    color: #495057;
+    font-weight: 800;
+    font-size: 1.25rem;
+}
+
+.section-title p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.95rem;
 }
 
 .form-group {
@@ -347,82 +461,6 @@
     word-break: break-all;
 }
 
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 3px solid #e9ecef;
-    position: relative;
-}
-
-.section-header::after {
-    content: '';
-    position: absolute;
-    bottom: -3px;
-    right: 0;
-    width: 100px;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 2px;
-}
-
-.section-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 15px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-}
-
-.section-title h4 {
-    margin: 0;
-    color: #495057;
-    font-weight: 800;
-    font-size: 1.25rem;
-}
-
-.section-title p {
-    margin: 0;
-    color: #6c757d;
-    font-size: 0.95rem;
-}
-
-.packages-summary {
-    background: white;
-    border: 3px solid #e9ecef;
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-.package-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 2px solid #f8f9fa;
-    transition: all 0.3s ease;
-}
-
-.package-item:last-child {
-    border-bottom: none;
-}
-
-.package-item:hover {
-    background: #f8f9fa;
-    margin: 0 -1rem;
-    padding: 1rem;
-    border-radius: 10px;
-}
-
 .changes-preview {
     background: #f8f9fa;
     border: 2px solid #dee2e6;
@@ -445,6 +483,65 @@
 .change-item:last-child {
     margin-bottom: 0;
 }
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .form-section {
+        padding: 2rem 1.5rem;
+    }
+    
+    .teacher-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 @endpush
 
@@ -455,7 +552,9 @@
             <div class="edit-form-wrapper">
                 <div class="form-header">
                     <div style="position: relative; z-index: 2;">
-                        <i class="fas fa-edit fa-4x mb-3" style="opacity: 0.9;"></i>
+                        <div class="header-icon">
+                            <i class="fas fa-edit fa-3x"></i>
+                        </div>
                         <h2 class="mb-2">تعديل المنصة التعليمية</h2>
                         <p class="mb-0 opacity-75">{{ $platform->name }}</p>
                     </div>
@@ -468,41 +567,74 @@
                     <div class="form-section">
                         <!-- معلومات حالية -->
                         <div class="current-info-section">
-                            <h4 class="mb-3 text-primary">
-                                <i class="fas fa-info-circle"></i>
-                                المعلومات الحالية للمنصة
-                            </h4>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <strong>المعلم الحالي:</strong>
-                                    <span class="badge badge-info ms-2">{{ $platform->teacher->name }}</span>
-                                </div>
-                                <div class="col-md-4">
-                                    <strong>المادة:</strong>
-                                    <span class="badge badge-secondary ms-2">{{ $platform->teacher->subject->name }}</span>
-                                </div>
-                                <div class="col-md-4">
-                                    <strong>عدد الباقات:</strong>
-                                    <span class="badge badge-primary ms-2">{{ $platform->educationalPackages->count() }} باقة</span>
-                                </div>
-                            </div>
-                            
-                            @if($platform->educationalPackages->count() > 0)
-                                <div class="packages-summary">
-                                    <h6 class="mb-2">الباقات المرتبطة:</h6>
-                                    @foreach($platform->educationalPackages as $package)
-                                        <div class="package-item">
-                                            <div>
-                                                <span>{{ $package->name }}</span>
-                                                <small class="text-muted ms-2">({{ $package->package_type }})</small>
-                                            </div>
-                                            <span class="badge {{ $package->is_active ? 'badge-success' : 'badge-danger' }}">
-                                                {{ $package->is_active ? 'نشط' : 'غير نشط' }}
-                                            </span>
+                            <div style="position: relative; z-index: 2;">
+                                <h4 class="mb-3 text-primary">
+                                    <i class="fas fa-info-circle"></i>
+                                    المعلومات الحالية للمنصة
+                                </h4>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <strong>المعلم الحالي:</strong>
+                                        <div class="info-badge badge-primary">
+                                            <i class="fas fa-user-tie"></i>
+                                            {{ $platform->teacher->name }}
                                         </div>
-                                    @endforeach
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <strong>المادة والجيل:</strong>
+                                        <div class="info-badge badge-secondary">
+                                            <i class="fas fa-book"></i>
+                                            {{ $platform->teacher->subject->name }} - {{ $platform->teacher->subject->generation->display_name }}
+                                        </div>
+                                    </div>
                                 </div>
-                            @endif
+                                
+                                <div class="stats-row">
+                                    <div class="stat-card">
+                                        <div class="stat-value">{{ $platform->educationalPackages->count() }}</div>
+                                        <div class="stat-label">إجمالي الباقات</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value">{{ $platform->educationalPackages->where('is_active', true)->count() }}</div>
+                                        <div class="stat-label">الباقات النشطة</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value">{{ $platform->created_at->format('Y-m-d') }}</div>
+                                        <div class="stat-label">تاريخ الإنشاء</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value">{{ $platform->updated_at->format('Y-m-d') }}</div>
+                                        <div class="stat-label">آخر تحديث</div>
+                                    </div>
+                                </div>
+                                
+                                @if($platform->educationalPackages->count() > 0)
+                                    <div class="packages-summary">
+                                        <h6 class="mb-3">
+                                            <i class="fas fa-box"></i>
+                                            الباقات المرتبطة بالمنصة:
+                                        </h6>
+                                        @foreach($platform->educationalPackages->take(5) as $package)
+                                            <div class="package-item">
+                                                <div>
+                                                    <span class="fw-bold">{{ $package->name }}</span>
+                                                    <small class="text-muted ms-2">({{ $package->package_type }})</small>
+                                                </div>
+                                                <span class="info-badge {{ $package->is_active ? 'badge-success' : 'badge-secondary' }}">
+                                                    {{ $package->is_active ? 'نشط' : 'غير نشط' }}
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                        @if($platform->educationalPackages->count() > 5)
+                                            <div class="text-center mt-2">
+                                                <small class="text-muted">
+                                                    و {{ $platform->educationalPackages->count() - 5 }} باقات أخرى...
+                                                </small>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
                         </div>
 
                         <!-- تحذير -->
@@ -511,11 +643,12 @@
                                 <div style="position: relative; z-index: 2;">
                                     <h5 class="text-warning mb-3">
                                         <i class="fas fa-exclamation-triangle"></i>
-                                        تنبيه مهم
+                                        تنبيه مهم عند التعديل
                                     </h5>
                                     <p class="mb-0">
                                         هذه المنصة لديها {{ $platform->educationalPackages->count() }} باقة مرتبطة. 
-                                        تغيير المعلم قد يؤثر على ترابط البيانات.
+                                        تغيير المعلم المسؤول قد يؤثر على ترابط البيانات والتسعير المرتبط بالمنصة.
+                                        تأكد من مراجعة جميع الباقات والأسعار بعد التعديل.
                                     </p>
                                 </div>
                             </div>
@@ -636,6 +769,7 @@
                                               id="description" 
                                               class="form-textarea" 
                                               rows="4" 
+                                              maxlength="1000"
                                               placeholder="أدخل وصفاً مختصراً عن المنصة وخدماتها التعليمية...">{{ old('description', $platform->description) }}</textarea>
                                     @error('description')
                                         <div class="text-danger">{{ $message }}</div>
@@ -670,42 +804,27 @@
                         </div>
 
                         <!-- معلومات إضافية -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="info-box">
-                                    <div style="position: relative; z-index: 2;">
-                                        <h5 class="text-success mb-3">
-                                            <i class="fas fa-chart-line"></i>
-                                            إحصائيات المنصة الحالية
-                                        </h5>
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>إجمالي الباقات:</strong>
-                                                <span class="badge badge-primary">{{ $platform->educationalPackages->count() }}</span>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>الباقات النشطة:</strong>
-                                                <span class="badge badge-success">{{ $platform->educationalPackages->where('is_active', true)->count() }}</span>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>تاريخ الإنشاء:</strong>
-                                                {{ $platform->created_at->format('Y-m-d') }}
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>آخر تحديث:</strong>
-                                                {{ $platform->updated_at->format('Y-m-d') }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="info-box">
+                            <div style="position: relative; z-index: 2;">
+                                <h5 class="text-success mb-3">
+                                    <i class="fas fa-info-circle"></i>
+                                    نصائح مهمة عند التعديل
+                                </h5>
+                                <ul class="mb-0">
+                                    <li class="mb-2">تأكد من مراجعة جميع الباقات المرتبطة بالمنصة بعد تغيير المعلم</li>
+                                    <li class="mb-2">تحديث اسم المنصة قد يتطلب إعلام الطلاب المشتركين</li>
+                                    <li class="mb-2">تغيير رابط الموقع يجب أن يتم بحذر لتجنب الروابط المعطلة</li>
+                                    <li class="mb-2">يمكن إلغاء تفعيل المنصة مؤقتاً دون حذف البيانات</li>
+                                    <li class="mb-0">جميع التعديلات سيتم حفظها في سجل النشاط</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
 
                     <!-- أزرار التحكم -->
-                    <div class="card-footer bg-light">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex gap-3">
+                    <div class="card-footer bg-light" style="padding: 2rem;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="d-flex gap-3 flex-wrap">
                                 <a href="{{ route('admin.educational.platforms.index') }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-right"></i>
                                     العودة للقائمة
@@ -717,7 +836,7 @@
                                 </a>
                             </div>
                             
-                            <div class="d-flex gap-3">
+                            <div class="d-flex gap-3 flex-wrap">
                                 <button type="reset" class="btn btn-warning">
                                     <i class="fas fa-undo"></i>
                                     إعادة تعيين
@@ -750,12 +869,15 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">تأكيد التعديلات</h5>
+                <h5 class="modal-title">
+                    <i class="fas fa-question-circle"></i>
+                    تأكيد التعديلات
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="text-center mb-3">
-                    <i class="fas fa-question-circle fa-3x text-warning"></i>
+                    <i class="fas fa-edit fa-3x text-warning"></i>
                 </div>
                 <h6 class="text-center">هل أنت متأكد من حفظ التعديلات؟</h6>
                 <div id="changesPreview" class="changes-preview"></div>
@@ -832,7 +954,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 // التحقق من صحة الرابط
                 const urlObj = new URL(url.startsWith('http') ? url : 'https://' + url);
-                urlPreview.textContent = urlObj.href;
+                urlPreview.textContent = `معاينة: ${urlObj.href}`;
                 urlPreview.style.display = 'block';
                 urlPreview.style.color = '#495057';
                 
@@ -1061,6 +1183,7 @@ document.addEventListener('DOMContentLoaded', function() {
         alertDiv.style.right = '20px';
         alertDiv.style.zIndex = '9999';
         alertDiv.style.minWidth = '300px';
+        alertDiv.style.borderRadius = '15px';
         alertDiv.innerHTML = `
             <i class="fas fa-${icon}"></i>
             ${message}
