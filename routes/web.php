@@ -13,6 +13,9 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\LanguageController;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 // Auth Controllers
 use App\Http\Controllers\Auth\LoginController;
@@ -53,11 +56,100 @@ use App\Http\Controllers\Admin\EducationalPricingController;
 use App\Http\Controllers\Admin\EducationalInventoryController;
 use App\Http\Controllers\Admin\ShippingRegionController;
 
+// NEW: Separated Educational Controllers
+use App\Http\Controllers\Admin\DigitalCardsController;
+use App\Http\Controllers\Admin\PhysicalBookletsController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
+
+// ====================================
+// ROUTE MODEL BINDING للفصل بين الأنواع
+// ====================================
+
+// Custom route model binding للبطاقات الرقمية
+Route::bind('digitalCard', function ($value) {
+    $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+    
+    if (!$digitalProductType) {
+        abort(500, 'نوع المنتج الرقمي غير متوفر في النظام');
+    }
+    
+    $package = \App\Models\EducationalPackage::with('productType')->find($value);
+    
+    if (!$package) {
+        abort(404, 'البطاقة الرقمية غير موجودة');
+    }
+    
+    // التأكد من أن هذا منتج رقمي
+    if ($package->product_type_id !== $digitalProductType->id) {
+        abort(404, 'المعرف المطلوب ليس بطاقة رقمية');
+    }
+    
+    if (!$package->productType || !$package->productType->is_digital) {
+        abort(404, 'المعرف المطلوب ليس بطاقة رقمية');
+    }
+    
+    // Additional validation for data integrity
+    if (!is_null($package->pages_count) || !is_null($package->weight_grams)) {
+        Log::error('Digital card has physical properties', [
+            'package_id' => $package->id,
+            'pages_count' => $package->pages_count,
+            'weight_grams' => $package->weight_grams
+        ]);
+        abort(500, 'البطاقة الرقمية تحتوي على بيانات غير صحيحة');
+    }
+    
+    return $package;
+});
+
+// Custom route model binding للدوسيات الورقية
+Route::bind('physicalBooklet', function ($value) {
+    $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+    
+    if (!$physicalProductType) {
+        abort(500, 'نوع المنتج الورقي غير متوفر في النظام');
+    }
+    
+    $package = \App\Models\EducationalPackage::with('productType')->find($value);
+    
+    if (!$package) {
+        abort(404, 'الدوسية الورقية غير موجودة');
+    }
+    
+    // التأكد من أن هذا منتج ورقي
+    if ($package->product_type_id !== $physicalProductType->id) {
+        abort(404, 'المعرف المطلوب ليس دوسية ورقية');
+    }
+    
+    if (!$package->productType || $package->productType->is_digital) {
+        abort(404, 'المعرف المطلوب ليس دوسية ورقية');
+    }
+    
+    // Additional validation for data integrity
+    if (!is_null($package->duration_days) || !is_null($package->lessons_count)) {
+        Log::error('Physical booklet has digital properties', [
+            'package_id' => $package->id,
+            'duration_days' => $package->duration_days,
+            'lessons_count' => $package->lessons_count
+        ]);
+        abort(500, 'الدوسية الورقية تحتوي على بيانات غير صحيحة');
+    }
+    
+    // Physical booklets must have pages_count
+    if (is_null($package->pages_count) || $package->pages_count <= 0) {
+        Log::error('Physical booklet missing pages_count', [
+            'package_id' => $package->id,
+            'pages_count' => $package->pages_count
+        ]);
+        abort(500, 'الدوسية الورقية لا تحتوي على عدد صفحات صحيح');
+    }
+    
+    return $package;
+});
 
 // ====================================
 // PUBLIC ROUTES
@@ -73,9 +165,21 @@ Route::get('/products/{product}', [ProductController::class, 'show'])->name('pro
 Route::get('/products/{product}/images', [ProductController::class, 'getImages'])->name('products.images');
 
 // Educational System (Public)
+// إضافة هذه الـ routes المفقودة في قسم Educational System (Public) في ملف web.php
+
+// Educational System (Public) - أضف هذه الـ routes
 Route::prefix('educational')->name('educational.')->group(function () {
     Route::get('/', [EducationalController::class, 'index'])->name('index');
     Route::get('/form', [EducationalController::class, 'form'])->name('form');
+    
+    // إضافة الـ routes المفقودة
+    Route::get('/digital-cards', [EducationalController::class, 'digitalCards'])->name('digital-cards');
+    Route::get('/physical-booklets', [EducationalController::class, 'physicalBooklets'])->name('physical-booklets');
+    
+    // Routes لتفاصيل المنتجات
+    Route::get('/digital-cards/{digitalCard}', [EducationalController::class, 'showDigitalCard'])->name('digital-cards.show');
+    Route::get('/physical-booklets/{physicalBooklet}', [EducationalController::class, 'showPhysicalBooklet'])->name('physical-booklets.show');
+    
     Route::get('/verify-card', [EducationalController::class, 'verifyCard'])->name('verify-card');
     Route::post('/verify-card', [EducationalController::class, 'processCardVerification'])->name('process-card-verification');
     
@@ -95,11 +199,11 @@ Route::prefix('educational')->name('educational.')->group(function () {
 
 // Educational Cards (Backward compatibility)
 Route::get('/educational-cards', function() {
-    return redirect()->route('educational.index');
+    return redirect()->route('educational.digital-cards');
 })->name('educational-cards.index');
 
 Route::get('/educational-cards/{id}', function($id) {
-    return redirect()->route('educational.index');
+    return redirect()->route('educational.digital-cards');
 })->name('educational-cards.show');
 
 // ====================================
@@ -129,6 +233,15 @@ Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequest
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+// Email Verification Routes
+Route::get('/email/verify', [VerificationController::class, 'show'])->name('verification.notice');
+Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
+Route::post('/email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
+
+// Password Confirmation Routes
+Route::get('/password/confirm', [ConfirmPasswordController::class, 'showConfirmForm'])->name('password.confirm');
+Route::post('/password/confirm', [ConfirmPasswordController::class, 'confirm']);
 
 // ====================================
 // AUTHENTICATED USER ROUTES
@@ -295,7 +408,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     });
     
     // ====================================
-    // EDUCATIONAL SYSTEM ADMIN ROUTES
+    // EDUCATIONAL SYSTEM ADMIN ROUTES (المُصححة)
     // ====================================
     
     Route::prefix('educational')->name('educational.')->group(function () {
@@ -330,7 +443,63 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/platforms/{platform}/statistics', [PlatformController::class, 'statistics'])->name('platforms.statistics');
         Route::get('/platforms/export/csv', [PlatformController::class, 'export'])->name('platforms.export');
         
-        // Educational Packages Management
+        // ====================================
+        // البطاقات الرقمية - DIGITAL CARDS
+        // ====================================
+        
+        Route::prefix('digital-cards')->name('digital-cards.')->group(function () {
+            // Basic CRUD operations
+            Route::get('/', [DigitalCardsController::class, 'index'])->name('index');
+            Route::get('/create', [DigitalCardsController::class, 'create'])->name('create');
+            Route::post('/', [DigitalCardsController::class, 'store'])->name('store');
+            
+            // Routes with custom model binding
+            Route::get('/{digitalCard}', [DigitalCardsController::class, 'show'])->name('show');
+            Route::get('/{digitalCard}/edit', [DigitalCardsController::class, 'edit'])->name('edit');
+            Route::patch('/{digitalCard}', [DigitalCardsController::class, 'update'])->name('update');
+            Route::delete('/{digitalCard}', [DigitalCardsController::class, 'destroy'])->name('destroy');
+            
+            // Additional operations
+            Route::post('/{digitalCard}/toggle-status', [DigitalCardsController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{digitalCard}/clone', [DigitalCardsController::class, 'clone'])->name('clone');
+            
+            // Reports and exports
+            Route::get('/statistics/overview', [DigitalCardsController::class, 'statistics'])->name('statistics');
+            Route::get('/export/csv', [DigitalCardsController::class, 'export'])->name('export');
+        });
+        
+        // ====================================
+        // الدوسيات الورقية - PHYSICAL BOOKLETS
+        // ====================================
+        
+        Route::prefix('physical-booklets')->name('physical-booklets.')->group(function () {
+            // Basic CRUD operations
+            Route::get('/', [PhysicalBookletsController::class, 'index'])->name('index');
+            Route::get('/create', [PhysicalBookletsController::class, 'create'])->name('create');
+            Route::post('/', [PhysicalBookletsController::class, 'store'])->name('store');
+            
+            // Routes with custom model binding
+            Route::get('/{physicalBooklet}', [PhysicalBookletsController::class, 'show'])->name('show');
+            Route::get('/{physicalBooklet}/edit', [PhysicalBookletsController::class, 'edit'])->name('edit');
+            Route::patch('/{physicalBooklet}', [PhysicalBookletsController::class, 'update'])->name('update');
+            Route::delete('/{physicalBooklet}', [PhysicalBookletsController::class, 'destroy'])->name('destroy');
+            
+            // Additional operations
+            Route::post('/{physicalBooklet}/toggle-status', [PhysicalBookletsController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{physicalBooklet}/clone', [PhysicalBookletsController::class, 'clone'])->name('clone');
+            Route::post('/{physicalBooklet}/add-inventory', [PhysicalBookletsController::class, 'addInventory'])->name('add-inventory');
+            
+            // Reports and exports
+            Route::get('/statistics/overview', [PhysicalBookletsController::class, 'statistics'])->name('statistics');
+            Route::get('/reports/low-stock', [PhysicalBookletsController::class, 'lowStockReport'])->name('low-stock-report');
+            Route::get('/reports/no-inventory', [PhysicalBookletsController::class, 'noInventoryReport'])->name('no-inventory-report');
+            Route::get('/export/csv', [PhysicalBookletsController::class, 'export'])->name('export');
+        });
+        
+        // ====================================
+        // GENERAL PACKAGES ROUTE (للتوافق مع النظام الحالي)
+        // ====================================
+        
         Route::resource('packages', EducationalPackageController::class);
         Route::post('/packages/{package}/toggle-status', [EducationalPackageController::class, 'toggleStatus'])->name('packages.toggle-status');
         Route::post('/packages/{package}/clone', [EducationalPackageController::class, 'clone'])->name('packages.clone');
@@ -357,6 +526,221 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/regions/bulk-update-shipping', [ShippingRegionController::class, 'bulkUpdateShipping'])->name('regions.bulk-update-shipping');
         Route::post('/regions/bulk-toggle-status', [ShippingRegionController::class, 'bulkToggleStatus'])->name('regions.bulk-toggle-status');
         Route::get('/regions/export/csv', [ShippingRegionController::class, 'export'])->name('regions.export');
+        
+        // ====================================
+        // EDUCATIONAL API ROUTES FOR ADMIN
+        // ====================================
+        
+        Route::prefix('api')->name('api.')->group(function () {
+            
+            // API للبطاقات الرقمية
+            Route::prefix('digital-cards')->name('digital-cards.')->group(function () {
+                Route::get('/platforms/{platform}/packages', function($platformId) {
+                    $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+                    
+                    if (!$digitalProductType) {
+                        return response()->json(['error' => 'نوع المنتج الرقمي غير متوفر'], 500);
+                    }
+                    
+                    $packages = \App\Models\EducationalPackage::where('platform_id', $platformId)
+                                                            ->where('product_type_id', $digitalProductType->id)
+                                                            ->with('productType')
+                                                            ->orderBy('name')
+                                                            ->get();
+                    return response()->json($packages);
+                })->name('by-platform');
+                
+                Route::get('/check-name-availability', function(\Illuminate\Http\Request $request) {
+                    $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+                    
+                    if (!$digitalProductType) {
+                        return response()->json(['error' => 'نوع المنتج الرقمي غير متوفر'], 500);
+                    }
+                    
+                    $exists = \App\Models\EducationalPackage::where('name', $request->name)
+                                                          ->where('platform_id', $request->platform_id)
+                                                          ->where('product_type_id', $digitalProductType->id)
+                                                          ->exists();
+                    return response()->json(['available' => !$exists]);
+                })->name('check-name');
+                
+                Route::post('/validate-digital-properties', function(\Illuminate\Http\Request $request) {
+                    $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+                    
+                    if (!$digitalProductType) {
+                        return response()->json(['error' => 'نوع المنتج الرقمي غير متوفر'], 500);
+                    }
+                    
+                    $validation = $digitalProductType->validatePackageProperties($request->all());
+                    
+                    return response()->json([
+                        'valid' => $validation['valid'],
+                        'errors' => $validation['errors']
+                    ]);
+                })->name('validate-properties');
+            });
+            
+            // API للدوسيات الورقية
+            Route::prefix('physical-booklets')->name('physical-booklets.')->group(function () {
+                Route::get('/platforms/{platform}/packages', function($platformId) {
+                    $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+                    
+                    if (!$physicalProductType) {
+                        return response()->json(['error' => 'نوع المنتج الورقي غير متوفر'], 500);
+                    }
+                    
+                    $packages = \App\Models\EducationalPackage::where('platform_id', $platformId)
+                                                            ->where('product_type_id', $physicalProductType->id)
+                                                            ->with(['productType', 'educationalInventory'])
+                                                            ->orderBy('name')
+                                                            ->get();
+                    return response()->json($packages);
+                })->name('by-platform');
+                
+                Route::get('/check-name-availability', function(\Illuminate\Http\Request $request) {
+                    $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+                    
+                    if (!$physicalProductType) {
+                        return response()->json(['error' => 'نوع المنتج الورقي غير متوفر'], 500);
+                    }
+                    
+                    $exists = \App\Models\EducationalPackage::where('name', $request->name)
+                                                          ->where('platform_id', $request->platform_id)
+                                                          ->where('product_type_id', $physicalProductType->id)
+                                                          ->exists();
+                    return response()->json(['available' => !$exists]);
+                })->name('check-name');
+                
+                Route::post('/calculate-shipping-weight', function(\Illuminate\Http\Request $request) {
+                    $pages = $request->input('pages', 0);
+                    $paperType = $request->input('paper_type', 5); // جرام per page
+                    $estimatedWeight = $pages * $paperType;
+                    
+                    return response()->json([
+                        'pages' => $pages,
+                        'paper_weight_per_page' => $paperType,
+                        'estimated_weight_grams' => $estimatedWeight,
+                        'estimated_weight_kg' => round($estimatedWeight / 1000, 2)
+                    ]);
+                })->name('calculate-weight');
+                
+                Route::post('/validate-physical-properties', function(\Illuminate\Http\Request $request) {
+                    $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+                    
+                    if (!$physicalProductType) {
+                        return response()->json(['error' => 'نوع المنتج الورقي غير متوفر'], 500);
+                    }
+                    
+                    $validation = $physicalProductType->validatePackageProperties($request->all());
+                    
+                    return response()->json([
+                        'valid' => $validation['valid'],
+                        'errors' => $validation['errors']
+                    ]);
+                })->name('validate-properties');
+                
+                Route::post('/check-inventory-exists', function(\Illuminate\Http\Request $request) {
+                    $inventory = \App\Models\EducationalInventory::where('generation_id', $request->generation_id)
+                                                                ->where('subject_id', $request->subject_id)
+                                                                ->where('teacher_id', $request->teacher_id)
+                                                                ->where('platform_id', $request->platform_id)
+                                                                ->where('package_id', $request->package_id)
+                                                                ->first();
+                    
+                    return response()->json([
+                        'exists' => $inventory !== null,
+                        'inventory' => $inventory ? [
+                            'id' => $inventory->id,
+                            'quantity_available' => $inventory->quantity_available,
+                            'quantity_reserved' => $inventory->quantity_reserved,
+                            'actual_available' => $inventory->actual_available,
+                            'stock_status' => $inventory->stock_status
+                        ] : null
+                    ]);
+                })->name('check-inventory');
+            });
+            
+            // API عامة للسلسلة التعليمية (مشتركة)
+            Route::get('/generations', function() {
+                return response()->json(\App\Models\Generation::active()->orderBy('birth_year', 'desc')->get());
+            })->name('generations');
+            
+            Route::get('/subjects', function(\Illuminate\Http\Request $request) {
+                $query = \App\Models\Subject::active()->with('generation')->orderBy('name');
+                
+                if ($request->filled('generation_id')) {
+                    $query->where('generation_id', $request->generation_id);
+                }
+                
+                return response()->json($query->get());
+            })->name('subjects');
+            
+            Route::get('/teachers', function(\Illuminate\Http\Request $request) {
+                $query = \App\Models\Teacher::active()->with('subject')->orderBy('name');
+                
+                if ($request->filled('subject_id')) {
+                    $query->where('subject_id', $request->subject_id);
+                }
+                
+                return response()->json($query->get());
+            })->name('teachers');
+            
+            Route::get('/platforms', function(\Illuminate\Http\Request $request) {
+                $query = \App\Models\Platform::active()->with('teacher')->orderBy('name');
+                
+                if ($request->filled('teacher_id')) {
+                    $query->where('teacher_id', $request->teacher_id);
+                }
+                
+                return response()->json($query->get());
+            })->name('platforms');
+            
+            Route::get('/packages', function(\Illuminate\Http\Request $request) {
+                $query = \App\Models\EducationalPackage::with('productType');
+                
+                if ($request->filled('platform_id')) {
+                    $query->where('platform_id', $request->platform_id);
+                }
+                
+                if ($request->filled('type')) {
+                    if ($request->type === 'digital') {
+                        $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+                        if ($digitalProductType) {
+                            $query->where('product_type_id', $digitalProductType->id);
+                        }
+                    } elseif ($request->type === 'physical') {
+                        $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+                        if ($physicalProductType) {
+                            $query->where('product_type_id', $physicalProductType->id);
+                        }
+                    }
+                }
+                
+                return response()->json($query->orderBy('name')->get());
+            })->name('packages');
+            
+            Route::get('/package-details/{package}', function(\App\Models\EducationalPackage $package) {
+                $package->load(['productType', 'platform.teacher.subject.generation']);
+                
+                return response()->json([
+                    'id' => $package->id,
+                    'name' => $package->name,
+                    'description' => $package->description,
+                    'is_digital' => $package->is_digital,
+                    'duration_days' => $package->duration_days,
+                    'lessons_count' => $package->lessons_count,
+                    'pages_count' => $package->pages_count,
+                    'weight_grams' => $package->weight_grams,
+                    'product_type' => $package->productType->name,
+                    'chain' => [
+                        'generation' => $package->platform->teacher->subject->generation->display_name,
+                        'subject' => $package->platform->teacher->subject->name,
+                        'teacher' => $package->platform->teacher->name,
+                        'platform' => $package->platform->name
+                    ]
+                ]);
+            })->name('package-details');
+        });
     });
     
     // Admin Profile Management
@@ -370,18 +754,326 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 });
 
 // ====================================
+// DASHBOARD WIDGETS ROUTES
+// ====================================
+
+Route::prefix('admin/dashboard')->name('admin.dashboard.')->middleware(['auth'])->group(function () {
+    
+    Route::get('/educational-overview', function() {
+        $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+        $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+        
+        $stats = [
+            // البطاقات الرقمية
+            'digital_cards' => [
+                'total' => $digitalProductType ? \App\Models\EducationalPackage::where('product_type_id', $digitalProductType->id)->count() : 0,
+                'active' => $digitalProductType ? \App\Models\EducationalPackage::where('product_type_id', $digitalProductType->id)->where('is_active', true)->count() : 0,
+                'cards_generated' => \App\Models\EducationalCard::count(),
+                'cards_used' => \App\Models\EducationalCard::where('status', 'used')->count()
+            ],
+            
+            // الدوسيات الورقية
+            'physical_booklets' => [
+                'total' => $physicalProductType ? \App\Models\EducationalPackage::where('product_type_id', $physicalProductType->id)->count() : 0,
+                'active' => $physicalProductType ? \App\Models\EducationalPackage::where('product_type_id', $physicalProductType->id)->where('is_active', true)->count() : 0,
+                'in_stock' => \App\Models\EducationalInventory::where('quantity_available', '>', 0)->count(),
+                'low_stock' => \App\Models\EducationalInventory::where('quantity_available', '>', 0)
+                                                             ->where('quantity_available', '<=', 10)->count(),
+                'out_of_stock' => \App\Models\EducationalInventory::where('quantity_available', '<=', 0)->count()
+            ],
+            
+            // إحصائيات عامة
+            'general' => [
+                'generations' => \App\Models\Generation::active()->count(),
+                'subjects' => \App\Models\Subject::active()->count(),
+                'teachers' => \App\Models\Teacher::active()->count(),
+                'platforms' => \App\Models\Platform::active()->count(),
+                'total_revenue' => DB::table('order_items')
+                                     ->join('educational_packages', 'order_items.package_id', '=', 'educational_packages.id')
+                                     ->sum('order_items.price')
+            ]
+        ];
+        
+        return response()->json($stats);
+    })->name('educational-overview');
+});
+
+// ====================================
+// LEGACY SUPPORT ROUTES
+// ====================================
+
+// إعادة توجيه الـ routes القديمة للنظام الجديد
+Route::get('/admin/educational/packages/create', function(\Illuminate\Http\Request $request) {
+    // إذا كان المستخدم يريد إنشاء منتج معين
+    if ($request->has('type')) {
+        if ($request->type === 'digital') {
+            return redirect()->route('admin.educational.digital-cards.create');
+        } elseif ($request->type === 'physical') {
+            return redirect()->route('admin.educational.physical-booklets.create');
+        }
+    }
+    
+    // إظهار صفحة اختيار نوع المنتج
+    return view('admin.educational.packages.select-type', [
+        'digital_route' => route('admin.educational.digital-cards.create'),
+        'physical_route' => route('admin.educational.physical-booklets.create')
+    ]);
+})->middleware(['auth'])->name('admin.educational.packages.create-redirect');
+
+Route::get('/admin/educational/packages/{id}/edit', function($id) {
+    $package = \App\Models\EducationalPackage::findOrFail($id);
+    
+    $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+    $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+    
+    if ($digitalProductType && $package->product_type_id === $digitalProductType->id) {
+        return redirect()->route('admin.educational.digital-cards.edit', $package);
+    } elseif ($physicalProductType && $package->product_type_id === $physicalProductType->id) {
+        return redirect()->route('admin.educational.physical-booklets.edit', $package);
+    }
+    
+    // Fallback based on properties
+    if ($package->productType && $package->productType->is_digital) {
+        return redirect()->route('admin.educational.digital-cards.edit', $package);
+    } else {
+        return redirect()->route('admin.educational.physical-booklets.edit', $package);
+    }
+})->middleware(['auth'])->name('admin.educational.packages.edit-redirect');
+
+Route::get('/admin/educational/packages/{id}', function($id) {
+    $package = \App\Models\EducationalPackage::findOrFail($id);
+    
+    $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+    $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+    
+    if ($digitalProductType && $package->product_type_id === $digitalProductType->id) {
+        return redirect()->route('admin.educational.digital-cards.show', $package);
+    } elseif ($physicalProductType && $package->product_type_id === $physicalProductType->id) {
+        return redirect()->route('admin.educational.physical-booklets.show', $package);
+    }
+    
+    // Fallback based on properties
+    if ($package->productType && $package->productType->is_digital) {
+        return redirect()->route('admin.educational.digital-cards.show', $package);
+    } else {
+        return redirect()->route('admin.educational.physical-booklets.show', $package);
+    }
+})->middleware(['auth'])->name('admin.educational.packages.show-redirect');
+
+// ====================================
+// DATA INTEGRITY ROUTES
+// ====================================
+
+Route::prefix('admin/educational/maintenance')->name('admin.educational.maintenance.')->middleware(['auth'])->group(function () {
+    
+    // Fix data integrity issues
+    Route::post('/fix-digital-cards', function() {
+        $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+        
+        if (!$digitalProductType) {
+            return response()->json(['error' => 'نوع المنتج الرقمي غير متوفر'], 500);
+        }
+        
+        $fixed = 0;
+        $digitalCards = \App\Models\EducationalPackage::where('product_type_id', $digitalProductType->id)->get();
+        
+        foreach ($digitalCards as $card) {
+            $updated = false;
+            
+            if (!is_null($card->pages_count)) {
+                $card->pages_count = null;
+                $updated = true;
+            }
+            
+            if (!is_null($card->weight_grams)) {
+                $card->weight_grams = null;
+                $updated = true;
+            }
+            
+            if ($updated) {
+                $card->save();
+                $fixed++;
+            }
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => "تم إصلاح {$fixed} بطاقة رقمية",
+            'fixed_count' => $fixed
+        ]);
+    })->name('fix-digital-cards');
+    
+    Route::post('/fix-physical-booklets', function() {
+        $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+        
+        if (!$physicalProductType) {
+            return response()->json(['error' => 'نوع المنتج الورقي غير متوفر'], 500);
+        }
+        
+        $fixed = 0;
+        $physicalBooklets = \App\Models\EducationalPackage::where('product_type_id', $physicalProductType->id)->get();
+        
+        foreach ($physicalBooklets as $booklet) {
+            $updated = false;
+            
+            if (!is_null($booklet->duration_days)) {
+                $booklet->duration_days = null;
+                $updated = true;
+            }
+            
+            if (!is_null($booklet->lessons_count)) {
+                $booklet->lessons_count = null;
+                $updated = true;
+            }
+            
+            if ($updated) {
+                $booklet->save();
+                $fixed++;
+            }
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => "تم إصلاح {$fixed} دوسية ورقية",
+            'fixed_count' => $fixed
+        ]);
+    })->name('fix-physical-booklets');
+    
+    // Check data integrity
+    Route::get('/check-integrity', function() {
+        $digitalProductType = \App\Models\EducationalProductType::getDigitalCardType();
+        $physicalProductType = \App\Models\EducationalProductType::getPhysicalBookletType();
+        
+        $issues = [];
+        
+        if ($digitalProductType) {
+            $corruptedDigitalCards = \App\Models\EducationalPackage::where('product_type_id', $digitalProductType->id)
+                                                                  ->where(function($q) {
+                                                                      $q->whereNotNull('pages_count')
+                                                                        ->orWhereNotNull('weight_grams');
+                                                                  })
+                                                                  ->count();
+            
+            if ($corruptedDigitalCards > 0) {
+                $issues[] = "يوجد {$corruptedDigitalCards} بطاقة رقمية تحتوي على خصائص ورقية";
+            }
+        }
+        
+        if ($physicalProductType) {
+            $corruptedPhysicalBooklets = \App\Models\EducationalPackage::where('product_type_id', $physicalProductType->id)
+                                                                      ->where(function($q) {
+                                                                          $q->whereNotNull('duration_days')
+                                                                            ->orWhereNotNull('lessons_count');
+                                                                      })
+                                                                      ->count();
+            
+            if ($corruptedPhysicalBooklets > 0) {
+                $issues[] = "يوجد {$corruptedPhysicalBooklets} دوسية ورقية تحتوي على خصائص رقمية";
+            }
+            
+            $missingPagesCount = \App\Models\EducationalPackage::where('product_type_id', $physicalProductType->id)
+                                                              ->where(function($q) {
+                                                                  $q->whereNull('pages_count')
+                                                                    ->orWhere('pages_count', '<=', 0);
+                                                              })
+                                                              ->count();
+            
+            if ($missingPagesCount > 0) {
+                $issues[] = "يوجد {$missingPagesCount} دوسية ورقية بدون عدد صفحات صحيح";
+            }
+        }
+        
+        return response()->json([
+            'issues_count' => count($issues),
+            'issues' => $issues,
+            'healthy' => count($issues) === 0
+        ]);
+    })->name('check-integrity');
+    
+    // Fix all integrity issues at once
+    Route::post('/fix-all-issues', function() {
+        $result = \App\Models\EducationalPackage::fixAllIntegrityIssues();
+        
+        return response()->json([
+            'success' => $result['success'],
+            'message' => "تم فحص {$result['total_issues']} عنصر وإصلاح {$result['fixed_count']} مشكلة",
+            'total_issues' => $result['total_issues'],
+            'fixed_count' => $result['fixed_count']
+        ]);
+    })->name('fix-all-issues');
+});
+
+// ====================================
+// QUICK ACCESS ROUTES
+// ====================================
+
+Route::prefix('quick')->name('quick.')->middleware(['auth'])->group(function () {
+    
+    // اختصار للبطاقات الرقمية
+    Route::get('/digital-cards', function() {
+        return redirect()->route('admin.educational.digital-cards.index');
+    })->name('digital-cards');
+    
+    // اختصار للدوسيات الورقية
+    Route::get('/physical-booklets', function() {
+        return redirect()->route('admin.educational.physical-booklets.index');
+    })->name('physical-booklets');
+    
+    // اختصار لإنشاء بطاقة رقمية
+    Route::get('/create-digital-card', function() {
+        return redirect()->route('admin.educational.digital-cards.create');
+    })->name('create-digital-card');
+    
+    // اختصار لإنشاء دوسية ورقية
+    Route::get('/create-physical-booklet', function() {
+        return redirect()->route('admin.educational.physical-booklets.create');
+    })->name('create-physical-booklet');
+    
+    // اختصار للمخزون المنخفض
+    Route::get('/low-stock', function() {
+        return redirect()->route('admin.educational.physical-booklets.low-stock-report');
+    })->name('low-stock');
+    
+    // اختصار للتسعير
+    Route::get('/pricing', function() {
+        return redirect()->route('admin.educational.pricing.index');
+    })->name('pricing');
+    
+    // اختصار للمخزون
+    Route::get('/inventory', function() {
+        return redirect()->route('admin.educational.inventory.index');
+    })->name('inventory');
+    
+    // اختصار لفحص سلامة البيانات
+    Route::get('/check-integrity', function() {
+        return redirect()->route('admin.educational.maintenance.check-integrity');
+    })->name('check-integrity');
+});
+
+// ====================================
 // UTILITY ROUTES
 // ====================================
+
+// Fallback route for admin redirect
+Route::get('/admin', function() {
+    return redirect()->route('admin.dashboard');
+})->middleware(['auth']);
 
 // Project Structure Debug Route (Remove in production)
 Route::get('/project-structure', function () {
     function listFolderFiles($dir, $prefix = '') {
+        if (!is_dir($dir)) {
+            return '';
+        }
+        
         $ffs = scandir($dir);
         $output = '';
+        
         foreach ($ffs as $ff) {
             if ($ff != '.' && $ff != '..') {
                 $path = $dir . DIRECTORY_SEPARATOR . $ff;
                 $output .= $prefix . '├── ' . $ff;
+                
                 if (is_dir($path)) {
                     $output .= "/\n" . listFolderFiles($path, $prefix . '│   ');
                 } else {
@@ -389,6 +1081,7 @@ Route::get('/project-structure', function () {
                 }
             }
         }
+        
         return $output;
     }
 
@@ -404,15 +1097,73 @@ Route::get('/project-structure', function () {
     $structure = '';
 
     foreach ($basePaths as $path => $label) {
-        $structure .= "$label:\n";
-        $structure .= listFolderFiles(base_path($path));
-        $structure .= "\n\n";
+        $fullPath = base_path($path);
+        if (is_dir($fullPath)) {
+            $structure .= "$label:\n";
+            $structure .= listFolderFiles($fullPath);
+            $structure .= "\n\n";
+        }
     }
 
     return "<pre>$structure</pre>";
-});
+})->name('debug.project-structure');
 
-// Fallback route for admin redirect
-Route::get('/admin', function() {
-    return redirect()->route('admin.dashboard');
-})->middleware(['auth']);
+// Health Check Route
+Route::get('/health-check', function() {
+    $checks = [
+        'database' => false,
+        'educational_product_types' => false,
+        'digital_product_type' => false,
+        'physical_product_type' => false,
+        'data_integrity' => false
+    ];
+    
+    try {
+        // Check database connection
+        DB::connection()->getPdo();
+        $checks['database'] = true;
+        
+        // Check if educational_product_types table exists
+        if (Schema::hasTable('educational_product_types')) {
+            $checks['educational_product_types'] = true;
+            
+            // Check if product types exist
+            $digitalType = \App\Models\EducationalProductType::getDigitalCardType();
+            $physicalType = \App\Models\EducationalProductType::getPhysicalBookletType();
+            
+            if ($digitalType) {
+                $checks['digital_product_type'] = true;
+            }
+            
+            if ($physicalType) {
+                $checks['physical_product_type'] = true;
+            }
+            
+            // Check data integrity
+            $integrityIssues = \App\Models\EducationalPackage::getPackagesWithIntegrityIssues();
+            $checks['data_integrity'] = $integrityIssues->count() === 0;
+        }
+    } catch (\Exception $e) {
+        // Handle errors
+    }
+    
+    $allHealthy = array_reduce($checks, function($carry, $item) {
+        return $carry && $item;
+    }, true);
+    
+    return response()->json([
+        'status' => $allHealthy ? 'healthy' : 'issues_detected',
+        'checks' => $checks,
+        'timestamp' => now()->toISOString()
+    ], $allHealthy ? 200 : 500);
+})->name('health-check');
+
+// API Status Route
+Route::get('/api/status', function() {
+    return response()->json([
+        'status' => 'active',
+        'version' => '1.0.0',
+        'educational_system' => 'separated',
+        'timestamp' => now()->toISOString()
+    ]);
+})->name('api.status');

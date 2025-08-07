@@ -1,13 +1,20 @@
 <?php
-// app/Http/Controllers/EducationalController.php (النسخة المُحدثة)
+// app/Http/Controllers/EducationalController.php (المُصحح بالكامل)
 
 namespace App\Http\Controllers;
 
 use App\Models\EducationalProductType;
 use App\Models\EducationalCard;
+use App\Models\EducationalPackage;
 use App\Models\Category;
+use App\Models\Generation;
+use App\Models\ShippingRegion;
+use App\Models\Subject;
+use App\Models\Teacher;
+use App\Models\Platform;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class EducationalController extends Controller
 {
@@ -16,38 +23,290 @@ class EducationalController extends Controller
      */
     public function index()
     {
-        // استخدام بيانات ثابتة بدلاً من قاعدة البيانات مؤقتاً
+        // جلب أنواع المنتجات من قاعدة البيانات
         $productTypes = $this->getDefaultProductTypes();
         
         // جلب الفئات للتخطيط
         $categories = Category::all();
+
+        // جلب إحصائيات منفصلة للبطاقات الرقمية والدوسيات الورقية
+        $digitalCardsCount = 0;
+        $physicalBookletsCount = 0;
+        $latestDigitalCards = collect();
+        $latestPhysicalBooklets = collect();
+
+        try {
+            // Get digital product type
+            $digitalProductType = EducationalProductType::getDigitalCardType();
+            if ($digitalProductType) {
+                $digitalCardsCount = EducationalPackage::where('product_type_id', $digitalProductType->id)
+                                                     ->where('is_active', true)
+                                                     ->count();
+
+                $latestDigitalCards = EducationalPackage::where('product_type_id', $digitalProductType->id)
+                                                       ->where('is_active', true)
+                                                       ->with(['platform.teacher.subject.generation'])
+                                                       ->latest()
+                                                       ->take(6)
+                                                       ->get();
+            }
+
+            // Get physical product type
+            $physicalProductType = EducationalProductType::getPhysicalBookletType();
+            if ($physicalProductType) {
+                $physicalBookletsCount = EducationalPackage::where('product_type_id', $physicalProductType->id)
+                                                          ->where('is_active', true)
+                                                          ->count();
+
+                $latestPhysicalBooklets = EducationalPackage::where('product_type_id', $physicalProductType->id)
+                                                           ->where('is_active', true)
+                                                           ->with(['platform.teacher.subject.generation'])
+                                                           ->latest()
+                                                           ->take(6)
+                                                           ->get();
+            }
+        } catch (\Exception $e) {
+            Log::warning('Error loading educational data: ' . $e->getMessage());
+        }
         
-        return view('educational.index', compact('productTypes', 'categories'));
+        return view('educational.index', compact(
+            'productTypes', 
+            'categories', 
+            'digitalCardsCount', 
+            'physicalBookletsCount',
+            'latestDigitalCards',
+            'latestPhysicalBooklets'
+        ));
     }
 
     /**
-     * عرض نموذج اختيار المنتج التعليمي
+     * عرض البطاقات الرقمية فقط
+     */
+    public function digitalCards(Request $request)
+    {
+        $digitalProductType = EducationalProductType::getDigitalCardType();
+        
+        if (!$digitalProductType) {
+            return redirect()->route('educational.index')
+                ->with('error', 'نوع المنتج الرقمي غير متوفر في النظام');
+        }
+
+        $query = EducationalPackage::where('product_type_id', $digitalProductType->id)
+                                 ->where('is_active', true)
+                                 ->with(['platform.teacher.subject.generation', 'educationalPricing']);
+
+        // فلترة حسب الجيل
+        if ($request->filled('generation_id')) {
+            $query->whereHas('platform.teacher.subject', function($q) use ($request) {
+                $q->where('generation_id', $request->generation_id);
+            });
+        }
+
+        // فلترة حسب المادة
+        if ($request->filled('subject_id')) {
+            $query->whereHas('platform.teacher', function($q) use ($request) {
+                $q->where('subject_id', $request->subject_id);
+            });
+        }
+
+        // فلترة حسب المعلم
+        if ($request->filled('teacher_id')) {
+            $query->whereHas('platform', function($q) use ($request) {
+                $q->where('teacher_id', $request->teacher_id);
+            });
+        }
+
+        // فلترة حسب مدة الصلاحية
+        if ($request->filled('duration')) {
+            switch ($request->duration) {
+                case 'month':
+                    $query->where('duration_days', '<=', 31);
+                    break;
+                case 'quarter':
+                    $query->whereBetween('duration_days', [32, 90]);
+                    break;
+                case 'semester':
+                    $query->whereBetween('duration_days', [91, 180]);
+                    break;
+                case 'year':
+                    $query->where('duration_days', '>', 180);
+                    break;
+                case 'unlimited':
+                    $query->whereNull('duration_days');
+                    break;
+            }
+        }
+
+        // البحث
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $digitalCards = $query->orderBy('name')->paginate(12);
+
+        $generations = Generation::active()->orderBy('birth_year', 'desc')->get();
+        $subjects = Subject::active()->with('generation')->orderBy('name')->get();
+        $teachers = Teacher::active()->with('subject')->orderBy('name')->get();
+        $categories = Category::all();
+        
+        return view('educational.digital-cards', compact(
+            'digitalCards', 
+            'generations', 
+            'subjects', 
+            'teachers', 
+            'categories'
+        ));
+    }
+
+    /**
+     * عرض الدوسيات الورقية فقط
+     */
+    public function physicalBooklets(Request $request)
+    {
+        $physicalProductType = EducationalProductType::getPhysicalBookletType();
+        
+        if (!$physicalProductType) {
+            return redirect()->route('educational.index')
+                ->with('error', 'نوع المنتج الورقي غير متوفر في النظام');
+        }
+
+        $query = EducationalPackage::where('product_type_id', $physicalProductType->id)
+                                 ->where('is_active', true)
+                                 ->with(['platform.teacher.subject.generation', 'educationalPricing', 'educationalInventory']);
+
+        // فلترة حسب الجيل
+        if ($request->filled('generation_id')) {
+            $query->whereHas('platform.teacher.subject', function($q) use ($request) {
+                $q->where('generation_id', $request->generation_id);
+            });
+        }
+
+        // فلترة حسب المادة
+        if ($request->filled('subject_id')) {
+            $query->whereHas('platform.teacher', function($q) use ($request) {
+                $q->where('subject_id', $request->subject_id);
+            });
+        }
+
+        // فلترة حسب المعلم
+        if ($request->filled('teacher_id')) {
+            $query->whereHas('platform', function($q) use ($request) {
+                $q->where('teacher_id', $request->teacher_id);
+            });
+        }
+
+        // فلترة حسب حالة المخزون
+        if ($request->filled('stock_status')) {
+            switch ($request->stock_status) {
+                case 'in_stock':
+                    $query->whereHas('educationalInventory', function($q) {
+                        $q->where('quantity_available', '>', 0);
+                    });
+                    break;
+                case 'out_of_stock':
+                    $query->whereHas('educationalInventory', function($q) {
+                        $q->where('quantity_available', '<=', 0);
+                    });
+                    break;
+                case 'no_inventory':
+                    $query->whereDoesntHave('educationalInventory');
+                    break;
+            }
+        }
+
+        // البحث
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $physicalBooklets = $query->orderBy('name')->paginate(12);
+
+        $generations = Generation::active()->orderBy('birth_year', 'desc')->get();
+        $subjects = Subject::active()->with('generation')->orderBy('name')->get();
+        $teachers = Teacher::active()->with('subject')->orderBy('name')->get();
+        $regions = ShippingRegion::active()->orderBy('name')->get();
+        $categories = Category::all();
+        
+        return view('educational.physical-booklets', compact(
+            'physicalBooklets', 
+            'generations', 
+            'subjects', 
+            'teachers', 
+            'regions', 
+            'categories'
+        ));
+    }
+
+    /**
+     * عرض تفاصيل بطاقة رقمية
+     */
+    public function showDigitalCard(EducationalPackage $digitalCard)
+    {
+        $digitalProductType = EducationalProductType::getDigitalCardType();
+        
+        // التحقق من أن هذه بطاقة رقمية
+        if (!$digitalProductType || $digitalCard->product_type_id !== $digitalProductType->id) {
+            abort(404, 'البطاقة المطلوبة ليست بطاقة رقمية');
+        }
+
+        $digitalCard->load(['productType', 'platform.teacher.subject.generation', 'educationalPricing']);
+        $categories = Category::all();
+        
+        return view('educational.digital-card-details', compact('digitalCard', 'categories'));
+    }
+
+    /**
+     * عرض تفاصيل دوسية ورقية
+     */
+    public function showPhysicalBooklet(EducationalPackage $physicalBooklet)
+    {
+        $physicalProductType = EducationalProductType::getPhysicalBookletType();
+        
+        // التحقق من أن هذه دوسية ورقية
+        if (!$physicalProductType || $physicalBooklet->product_type_id !== $physicalProductType->id) {
+            abort(404, 'الدوسية المطلوبة ليست دوسية ورقية');
+        }
+
+        $physicalBooklet->load(['productType', 'platform.teacher.subject.generation', 'educationalPricing', 'educationalInventory']);
+        $regions = ShippingRegion::active()->orderBy('name')->get();
+        $categories = Category::all();
+        
+        return view('educational.physical-booklet-details', compact('physicalBooklet', 'regions', 'categories'));
+    }
+
+    /**
+     * عرض نموذج اختيار المنتج التعليمي (مُصحح)
      */
     public function form(Request $request)
     {
-        $request->validate([
-            'product_type' => 'required|in:cards,booklets'
-        ]);
-
-        // استخدام بيانات ثابتة
-        $productTypes = $this->getDefaultProductTypes();
-        $productType = collect($productTypes)->firstWhere('code', $request->product_type);
-        
-        if (!$productType) {
-            return redirect()->route('educational.index')->withErrors(['error' => 'نوع المنتج غير صحيح']);
+        // التحقق من وجود المعامل المطلوب
+        if (!$request->has('product_type')) {
+            return redirect()->route('educational.index')
+                ->with('info', 'يرجى اختيار نوع المنتج التعليمي');
         }
-        
-        $categories = Category::all();
 
-        // تحديد نوع الفورم المطلوب
-        $viewName = $request->product_type === 'cards' ? 'educational.digital-form' : 'educational.physical-form';
+        // التحقق من صحة نوع المنتج
+        $productType = $request->product_type;
         
-        return view($viewName, compact('productType', 'categories'));
+        if (!in_array($productType, ['cards', 'booklets'])) {
+            return redirect()->route('educational.index')
+                ->withErrors(['error' => 'نوع المنتج غير صحيح. يرجى اختيار نوع المنتج من الصفحة الرئيسية.']);
+        }
+
+        // توجيه للصفحة المناسبة حسب الـ routes المتوفرة
+        if ($productType === 'cards') {
+            return redirect()->route('educational.digital-cards');
+        } else {
+            return redirect()->route('educational.physical-booklets');
+        }
     }
 
     /**
@@ -56,7 +315,7 @@ class EducationalController extends Controller
     public function verifyCard()
     {
         $categories = Category::all();
-        return view('educational.cards.verify', compact('categories'));
+        return view('educational.verify-card', compact('categories'));
     }
 
     /**
@@ -78,21 +337,26 @@ class EducationalController extends Controller
             return back()->withErrors(['verification' => 'نظام البطاقات التعليمية غير متوفر حالياً']);
         }
 
-        $verification = EducationalCard::verifyCard($request->card_code, $request->pin_code);
+        try {
+            $verification = EducationalCard::verifyCard($request->card_code, $request->pin_code);
 
-        if (!$verification['valid']) {
-            return back()->withErrors(['verification' => $verification['message']]);
+            if (!$verification['valid']) {
+                return back()->withErrors(['verification' => $verification['message']]);
+            }
+
+            $card = $verification['card'];
+
+            // تفعيل البطاقة
+            if (!$card->useByStudent(Auth::user())) {
+                return back()->withErrors(['verification' => 'فشل في تفعيل البطاقة']);
+            }
+
+            return redirect()->back()->with('success', 'تم تفعيل البطاقة بنجاح!')
+                                     ->with('card_info', $card->card_info);
+        } catch (\Exception $e) {
+            Log::error('Card verification error: ' . $e->getMessage());
+            return back()->withErrors(['verification' => 'حدث خطأ في تفعيل البطاقة']);
         }
-
-        $card = $verification['card'];
-
-        // تفعيل البطاقة
-        if (!$card->useByStudent(Auth::user())) {
-            return back()->withErrors(['verification' => 'فشل في تفعيل البطاقة']);
-        }
-
-        return redirect()->back()->with('success', 'تم تفعيل البطاقة بنجاح!')
-                                 ->with('card_info', $card->card_info);
     }
 
     /**
@@ -104,10 +368,11 @@ class EducationalController extends Controller
             return redirect()->route('login');
         }
 
+        $categories = Category::all();
+
         // التحقق من وجود نموذج EducationalCard
         if (!class_exists(\App\Models\EducationalCard::class)) {
-            $categories = Category::all();
-            return view('educational.cards.my-cards', [
+            return view('educational.my-cards', [
                 'usedCards' => collect(),
                 'purchasedCards' => collect(),
                 'categories' => $categories,
@@ -115,25 +380,51 @@ class EducationalController extends Controller
             ]);
         }
 
-        // جلب البطاقات المفعلة من قبل المستخدم
-        $usedCards = EducationalCard::where('used_by_student_id', Auth::id())
-                                   ->with(['generation', 'subject', 'teacher', 'platform', 'package'])
-                                   ->latest('used_at')
-                                   ->paginate(10);
+        try {
+            $digitalProductType = EducationalProductType::getDigitalCardType();
+            
+            if (!$digitalProductType) {
+                return view('educational.my-cards', [
+                    'usedCards' => collect(),
+                    'purchasedCards' => collect(),
+                    'categories' => $categories,
+                    'message' => 'نوع المنتج الرقمي غير متوفر'
+                ]);
+            }
 
-        // جلب البطاقات المشتراة (لم يتم تفعيلها بعد)
-        $purchasedCards = EducationalCard::whereHas('orderItem.order', function($query) {
-                                            $query->where('user_id', Auth::id());
-                                        })
-                                        ->where('status', 'active')
-                                        ->whereNull('used_by_student_id')
-                                        ->with(['generation', 'subject', 'teacher', 'platform', 'package'])
-                                        ->latest()
-                                        ->paginate(10);
+            // جلب البطاقات المفعلة من قبل المستخدم (البطاقات الرقمية فقط)
+            $usedCards = EducationalCard::where('used_by_student_id', Auth::id())
+                                       ->with(['generation', 'subject', 'teacher', 'platform', 'package'])
+                                       ->whereHas('package', function($q) use ($digitalProductType) {
+                                           $q->where('product_type_id', $digitalProductType->id);
+                                       })
+                                       ->latest('used_at')
+                                       ->paginate(10, ['*'], 'used_page');
 
-        $categories = Category::all();
+            // جلب البطاقات المشتراة (لم يتم تفعيلها بعد) - البطاقات الرقمية فقط
+            $purchasedCards = EducationalCard::whereHas('orderItem.order', function($query) {
+                                                $query->where('user_id', Auth::id());
+                                            })
+                                            ->where('status', 'active')
+                                            ->whereNull('used_by_student_id')
+                                            ->whereHas('package', function($q) use ($digitalProductType) {
+                                                $q->where('product_type_id', $digitalProductType->id);
+                                            })
+                                            ->with(['generation', 'subject', 'teacher', 'platform', 'package'])
+                                            ->latest()
+                                            ->paginate(10, ['*'], 'purchased_page');
 
-        return view('educational.cards.my-cards', compact('usedCards', 'purchasedCards', 'categories'));
+            return view('educational.my-cards', compact('usedCards', 'purchasedCards', 'categories'));
+        } catch (\Exception $e) {
+            Log::error('Error loading my cards: ' . $e->getMessage());
+            
+            return view('educational.my-cards', [
+                'usedCards' => collect(),
+                'purchasedCards' => collect(),
+                'categories' => $categories,
+                'message' => 'حدث خطأ في تحميل البطاقات'
+            ]);
+        }
     }
 
     /**
@@ -156,7 +447,7 @@ class EducationalController extends Controller
 
         $categories = Category::all();
         
-        return view('educational.cards.show', compact('card', 'categories'));
+        return view('educational.card-details', compact('card', 'categories'));
     }
 
     /**
@@ -172,18 +463,27 @@ class EducationalController extends Controller
             ]);
         }
 
-        $expiredCards = EducationalCard::where('status', 'active')
-                                      ->where('expires_at', '<', now())
-                                      ->get();
+        try {
+            $expiredCards = EducationalCard::where('status', 'active')
+                                          ->where('expires_at', '<', now())
+                                          ->get();
 
-        foreach ($expiredCards as $card) {
-            $card->checkExpiration();
+            foreach ($expiredCards as $card) {
+                $card->checkExpiration();
+            }
+
+            return response()->json([
+                'success' => true,
+                'updated' => $expiredCards->count()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating expired cards: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ في تحديث البطاقات المنتهية'
+            ]);
         }
-
-        return response()->json([
-            'success' => true,
-            'updated' => $expiredCards->count()
-        ]);
     }
 
     /**
@@ -194,10 +494,26 @@ class EducationalController extends Controller
         // التحقق من وجود الجدول في قاعدة البيانات
         try {
             if (class_exists(\App\Models\EducationalProductType::class)) {
-                return EducationalProductType::all();
+                $dbProductTypes = EducationalProductType::all();
+                
+                // إذا كان الجدول يحتوي على بيانات، استخدمها
+                if ($dbProductTypes->count() > 0) {
+                    return $dbProductTypes->map(function ($type) {
+                        return (object) [
+                            'id' => $type->id,
+                            'name' => $type->name,
+                            'code' => $type->is_digital ? 'cards' : 'booklets',
+                            'is_digital' => $type->is_digital,
+                            'requires_shipping' => $type->requires_shipping,
+                            'display_type' => $type->is_digital ? 'رقمي' : 'ورقي',
+                            'full_description' => $type->name . ' (' . ($type->is_digital ? 'رقمي - بدون شحن' : 'ورقي - مع شحن') . ')'
+                        ];
+                    });
+                }
             }
         } catch (\Exception $e) {
-            // في حالة عدم وجود الجدول، استخدم البيانات الثابتة
+            // في حالة عدم وجود الجدول أو حدوث خطأ، استخدم البيانات الثابتة
+            Log::warning('Could not load EducationalProductType from database: ' . $e->getMessage());
         }
 
         // بيانات ثابتة كبديل
@@ -221,5 +537,24 @@ class EducationalController extends Controller
                 'full_description' => 'دوسيات ورقية (ورقي - مع شحن)'
             ]
         ]);
+    }
+
+    /**
+     * Get educational package by ID (helper method for routes)
+     */
+    public function getPackage($id)
+    {
+        $package = EducationalPackage::with('productType')->findOrFail($id);
+        
+        $digitalProductType = EducationalProductType::getDigitalCardType();
+        $physicalProductType = EducationalProductType::getPhysicalBookletType();
+        
+        if ($digitalProductType && $package->product_type_id === $digitalProductType->id) {
+            return $this->showDigitalCard($package);
+        } elseif ($physicalProductType && $package->product_type_id === $physicalProductType->id) {
+            return $this->showPhysicalBooklet($package);
+        }
+        
+        abort(404, 'المنتج التعليمي غير موجود');
     }
 }

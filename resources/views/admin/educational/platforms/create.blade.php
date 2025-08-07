@@ -23,17 +23,19 @@
 <style>
 .form-wizard {
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border-radius: 25px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
     overflow: hidden;
+    margin-bottom: 2rem;
 }
 
 .wizard-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 2.5rem;
+    padding: 3rem;
     text-align: center;
     position: relative;
+    overflow: hidden;
 }
 
 .wizard-header::before {
@@ -41,8 +43,8 @@
     position: absolute;
     top: -50%;
     right: -30%;
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
 }
@@ -52,50 +54,111 @@
     position: absolute;
     bottom: -30%;
     left: -30%;
-    width: 150px;
-    height: 150px;
+    width: 180px;
+    height: 180px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 50%;
 }
 
+.wizard-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+}
+
 .form-section {
-    padding: 2.5rem;
+    padding: 3rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid #e9ecef;
+    position: relative;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    right: 0;
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+}
+
+.section-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.section-title h4 {
+    margin: 0;
+    color: #495057;
+    font-weight: 800;
+    font-size: 1.25rem;
+}
+
+.section-title p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.95rem;
 }
 
 .form-group {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .form-label {
     font-weight: 700;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     display: block;
     color: #495057;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .form-label i {
-    margin-left: 10px;
-    width: 20px;
+    margin-left: 12px;
+    width: 24px;
     color: inherit;
 }
 
 .form-input, .form-textarea, .form-select {
     width: 100%;
-    padding: 1rem 1.25rem;
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    font-size: 1rem;
+    padding: 1.25rem 1.5rem;
+    border: 3px solid #e9ecef;
+    border-radius: 15px;
+    transition: all 0.4s ease;
+    font-size: 1.05rem;
     background: #f8f9fa;
 }
 
 .form-input:focus, .form-textarea:focus, .form-select:focus {
     border-color: #667eea;
-    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+    box-shadow: 0 0 0 0.3rem rgba(102, 126, 234, 0.15);
     outline: none;
     background: white;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
 }
 
 .form-input:hover, .form-textarea:hover, .form-select:hover {
@@ -105,98 +168,155 @@
 
 .teacher-preview {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border: 2px solid #dee2e6;
-    border-radius: 15px;
-    padding: 1.5rem;
+    border: 3px solid #dee2e6;
+    border-radius: 20px;
+    padding: 2rem;
     margin-bottom: 2rem;
-    transition: all 0.3s ease;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.teacher-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border-radius: 0 20px 0 100px;
 }
 
 .teacher-preview.active {
     border-color: #667eea;
     background: linear-gradient(135deg, #e3f2fd, #f8f9fa);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
 }
 
 .teacher-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 2;
 }
 
 .teacher-avatar {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea, #764ba2);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: 700;
-    font-size: 1.5rem;
+    font-weight: 900;
+    font-size: 2rem;
     flex-shrink: 0;
-    border: 3px solid white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    border: 4px solid white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
 .teacher-details h5 {
-    margin: 0 0 0.25rem 0;
+    margin: 0 0 0.5rem 0;
     color: #495057;
     font-weight: 700;
+    font-size: 1.25rem;
 }
 
 .teacher-details p {
-    margin: 0;
+    margin: 0 0 0.25rem 0;
     color: #6c757d;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 .form-checkbox {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     accent-color: #667eea;
-    margin-left: 12px;
+    margin-left: 15px;
     cursor: pointer;
 }
 
 .info-box {
     background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
-    border: 2px solid #c3e6cb;
-    border-radius: 15px;
-    padding: 1.5rem;
+    border: 3px solid #c3e6cb;
+    border-radius: 20px;
+    padding: 2rem;
     margin-bottom: 2rem;
+    position: relative;
+}
+
+.info-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(195, 230, 203, 0.2));
+    border-radius: 0 20px 0 80px;
 }
 
 .warning-box {
     background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-    border: 2px solid #ffc107;
-    border-radius: 15px;
-    padding: 1.5rem;
+    border: 3px solid #ffc107;
+    border-radius: 20px;
+    padding: 2rem;
     margin-bottom: 2rem;
+    position: relative;
+}
+
+.warning-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 234, 167, 0.2));
+    border-radius: 0 0 80px 20px;
 }
 
 .text-danger {
     color: #dc3545 !important;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-    font-weight: 500;
+    font-size: 0.9rem;
+    margin-top: 0.75rem;
+    font-weight: 600;
 }
 
 .btn {
-    padding: 0.875rem 2rem;
-    border-radius: 12px;
+    padding: 1rem 2.5rem;
+    border-radius: 15px;
     font-weight: 700;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
+    font-size: 1rem;
+    transition: all 0.4s ease;
     border: none;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
 }
 
 .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
 }
 
 .btn-primary {
@@ -204,17 +324,9 @@
     color: white;
 }
 
-.btn-primary:hover {
-    background: linear-gradient(135deg, #5a6fd8, #6c4298);
-}
-
 .btn-success {
     background: linear-gradient(135deg, #28a745, #20c997);
     color: white;
-}
-
-.btn-success:hover {
-    background: linear-gradient(135deg, #218838, #1fa085);
 }
 
 .btn-secondary {
@@ -222,17 +334,9 @@
     color: white;
 }
 
-.btn-secondary:hover {
-    background: linear-gradient(135deg, #5a6268, #3d4043);
-}
-
 .btn-warning {
     background: linear-gradient(135deg, #ffc107, #fd7e14);
     color: #212529;
-}
-
-.btn-warning:hover {
-    background: linear-gradient(135deg, #e0a800, #e8690b);
 }
 
 .loading-overlay {
@@ -250,21 +354,21 @@
 
 .loading-content {
     background: white;
-    padding: 2.5rem;
-    border-radius: 20px;
+    padding: 3rem;
+    border-radius: 25px;
     text-align: center;
-    max-width: 350px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    max-width: 400px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
 }
 
 .spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #667eea;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #667eea;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     animation: spin 1s linear infinite;
-    margin: 0 auto 1.5rem;
+    margin: 0 auto 2rem;
 }
 
 @keyframes spin {
@@ -273,66 +377,107 @@
 }
 
 .url-preview {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    margin-top: 0.5rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-top: 0.75rem;
     font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #495057;
     word-break: break-all;
 }
 
-.section-header {
+.char-counter {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #e9ecef;
+    justify-content: space-between;
+    margin-top: 0.75rem;
 }
 
-.section-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
+.char-counter small {
+    font-size: 0.85rem;
+}
+
+.progress-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #e9ecef;
+    z-index: 1000;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.floating-help {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
     background: linear-gradient(135deg, #667eea, #764ba2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: white;
-    font-size: 1.25rem;
+    padding: 1rem;
+    border-radius: 50%;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
 }
 
-.section-title {
-    flex: 1;
+.floating-help:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
 }
 
-.section-title h4 {
-    margin: 0;
-    color: #495057;
-    font-weight: 700;
-}
-
-.section-title p {
-    margin: 0;
-    color: #6c757d;
-    font-size: 0.9rem;
+@media (max-width: 768px) {
+    .form-section {
+        padding: 2rem 1.5rem;
+    }
+    
+    .teacher-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .floating-help {
+        bottom: 20px;
+        left: 20px;
+    }
 }
 </style>
 @endpush
 
 @section('content')
+<div class="progress-indicator">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
             <div class="form-wizard">
                 <div class="wizard-header">
                     <div style="position: relative; z-index: 2;">
-                        <i class="fas fa-desktop fa-4x mb-3" style="opacity: 0.9;"></i>
+                        <div class="wizard-icon">
+                            <i class="fas fa-desktop fa-3x"></i>
+                        </div>
                         <h2 class="mb-2">إضافة منصة تعليمية جديدة</h2>
-                        <p class="mb-0 opacity-75">قم بإنشاء منصة تعليمية جديدة لأحد المعلمين</p>
+                        <p class="mb-0 opacity-75">قم بإنشاء منصة تعليمية جديدة لأحد المعلمين المتاحين</p>
                     </div>
                 </div>
 
@@ -346,8 +491,8 @@
                                 <i class="fas fa-user-tie"></i>
                             </div>
                             <div class="section-title">
-                                <h4>اختيار المعلم</h4>
-                                <p>حدد المعلم الذي ستنتمي إليه هذه المنصة</p>
+                                <h4>اختيار المعلم المسؤول</h4>
+                                <p>حدد المعلم الذي ستنتمي إليه هذه المنصة التعليمية</p>
                             </div>
                         </div>
 
@@ -359,7 +504,7 @@
                                         المعلم المسؤول *
                                     </label>
                                     <select name="teacher_id" id="teacher_id" class="form-select" required>
-                                        <option value="">اختر المعلم</option>
+                                        <option value="">اختر المعلم من القائمة</option>
                                         @foreach($teachers as $teacher)
                                             <option value="{{ $teacher->id }}" 
                                                 data-teacher-name="{{ $teacher->name }}"
@@ -378,14 +523,16 @@
 
                                 <!-- معاينة المعلم المختار -->
                                 <div id="teacherPreview" class="teacher-preview" style="display: none;">
-                                    <div class="teacher-info">
-                                        <div class="teacher-avatar" id="teacherAvatar">
-                                            <!-- سيتم ملؤها بـ JavaScript -->
-                                        </div>
-                                        <div class="teacher-details">
-                                            <h5 id="teacherName">اسم المعلم</h5>
-                                            <p id="teacherSubject">المادة - الجيل</p>
-                                            <p id="teacherSpecialization">التخصص</p>
+                                    <div style="position: relative; z-index: 2;">
+                                        <div class="teacher-info">
+                                            <div class="teacher-avatar" id="teacherAvatar">
+                                                <!-- سيتم ملؤها بـ JavaScript -->
+                                            </div>
+                                            <div class="teacher-details">
+                                                <h5 id="teacherName">اسم المعلم</h5>
+                                                <p id="teacherSubject">المادة - الجيل</p>
+                                                <p id="teacherSpecialization">التخصص</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -398,8 +545,8 @@
                                 <i class="fas fa-info-circle"></i>
                             </div>
                             <div class="section-title">
-                                <h4>معلومات المنصة</h4>
-                                <p>أدخل البيانات الأساسية للمنصة التعليمية</p>
+                                <h4>معلومات المنصة التعليمية</h4>
+                                <p>أدخل البيانات الأساسية والتفاصيل الخاصة بالمنصة</p>
                             </div>
                         </div>
 
@@ -416,7 +563,7 @@
                                            id="name" 
                                            class="form-input" 
                                            value="{{ old('name') }}" 
-                                           placeholder="أدخل اسم المنصة التعليمية"
+                                           placeholder="أدخل اسم المنصة التعليمية (مثل: منصة الرياضيات المتقدمة)"
                                            required>
                                     @error('name')
                                         <div class="text-danger">{{ $message }}</div>
@@ -429,7 +576,7 @@
                                 <div class="form-group">
                                     <label for="website_url" class="form-label">
                                         <i class="fas fa-globe text-info"></i>
-                                        رابط الموقع (اختياري)
+                                        رابط الموقع الإلكتروني (اختياري)
                                     </label>
                                     <input type="url" 
                                            name="website_url" 
@@ -455,13 +602,14 @@
                                               id="description" 
                                               class="form-textarea" 
                                               rows="4" 
-                                              placeholder="أدخل وصفاً مختصراً عن المنصة وخدماتها التعليمية...">{{ old('description') }}</textarea>
+                                              maxlength="1000"
+                                              placeholder="أدخل وصفاً مختصراً عن المنصة وخدماتها التعليمية والمميزات التي تقدمها للطلاب...">{{ old('description') }}</textarea>
                                     @error('description')
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror
-                                    <div class="d-flex justify-content-between mt-2">
-                                        <small class="text-muted">الحد الأقصى 1000 حرف</small>
-                                        <small id="descCounter" class="text-muted"></small>
+                                    <div class="char-counter">
+                                        <small class="text-muted">وصف تفصيلي يساعد الطلاب على فهم محتوى المنصة</small>
+                                        <small id="descCounter" class="text-muted">0/1000 حرف</small>
                                     </div>
                                 </div>
                             </div>
@@ -481,8 +629,11 @@
                                                    value="1" 
                                                    {{ old('is_active', 1) ? 'checked' : '' }}
                                                    class="form-checkbox">
-                                            <span style="font-weight: 600;">المنصة نشطة ومتاحة للطلاب</span>
+                                            <span style="font-weight: 600;">المنصة نشطة ومتاحة للطلاب والعمليات التعليمية</span>
                                         </label>
+                                        <small class="text-muted d-block mt-2">
+                                            يمكن تغيير حالة التفعيل لاحقاً من صفحة إدارة المنصات
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -490,41 +641,45 @@
 
                         <!-- معلومات مساعدة -->
                         <div class="info-box">
-                            <h5 class="text-success mb-3">
-                                <i class="fas fa-lightbulb"></i>
-                                نصائح لإنشاء منصة ناجحة
-                            </h5>
-                            <ul class="mb-0">
-                                <li>اختر اسماً واضحاً ومميزاً للمنصة يعكس هويتها التعليمية</li>
-                                <li>تأكد من صحة رابط الموقع الإلكتروني قبل الحفظ</li>
-                                <li>اكتب وصفاً شاملاً يوضح خدمات ومميزات المنصة</li>
-                                <li>يمكن تعديل جميع المعلومات لاحقاً من صفحة التعديل</li>
-                                <li>ستتمكن من إضافة باقات تعليمية للمنصة بعد إنشائها</li>
-                            </ul>
+                            <div style="position: relative; z-index: 2;">
+                                <h5 class="text-success mb-3">
+                                    <i class="fas fa-lightbulb"></i>
+                                    نصائح لإنشاء منصة تعليمية ناجحة
+                                </h5>
+                                <ul class="mb-0">
+                                    <li class="mb-2">اختر اسماً واضحاً ومميزاً للمنصة يعكس هويتها التعليمية ومحتواها</li>
+                                    <li class="mb-2">تأكد من صحة رابط الموقع الإلكتروني وأنه يعمل بشكل صحيح</li>
+                                    <li class="mb-2">اكتب وصفاً شاملاً وواضحاً يوضح خدمات ومميزات المنصة للطلاب</li>
+                                    <li class="mb-2">يمكن تعديل جميع المعلومات لاحقاً من صفحة إدارة المنصات</li>
+                                    <li class="mb-0">ستتمكن من إضافة باقات تعليمية متنوعة للمنصة بعد إنشائها</li>
+                                </ul>
+                            </div>
                         </div>
 
                         @if(request('teacher_id'))
                             <div class="warning-box">
-                                <h5 class="text-warning mb-2">
-                                    <i class="fas fa-info-circle"></i>
-                                    ملاحظة
-                                </h5>
-                                <p class="mb-0">
-                                    تم تحديد المعلم مسبقاً. يمكنك تغييره من القائمة أعلاه إذا لزم الأمر.
-                                </p>
+                                <div style="position: relative; z-index: 2;">
+                                    <h5 class="text-warning mb-2">
+                                        <i class="fas fa-info-circle"></i>
+                                        ملاحظة
+                                    </h5>
+                                    <p class="mb-0">
+                                        تم تحديد المعلم مسبقاً من الرابط. يمكنك تغييره من القائمة أعلاه إذا لزم الأمر.
+                                    </p>
+                                </div>
                             </div>
                         @endif
                     </div>
 
                     <!-- أزرار التحكم -->
-                    <div class="card-footer bg-light">
-                        <div class="d-flex justify-content-between align-items-center">
+                    <div class="card-footer bg-light" style="padding: 2rem;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
                             <a href="{{ route('admin.educational.platforms.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-right"></i>
                                 العودة للقائمة
                             </a>
                             
-                            <div class="d-flex gap-3">
+                            <div class="d-flex gap-3 flex-wrap">
                                 <button type="reset" class="btn btn-warning">
                                     <i class="fas fa-undo"></i>
                                     إعادة تعيين
@@ -548,8 +703,13 @@
     <div class="loading-content">
         <div class="spinner"></div>
         <h5>جاري حفظ المنصة...</h5>
-        <p class="text-muted">يرجى الانتظار</p>
+        <p class="text-muted">يرجى الانتظار قليلاً</p>
     </div>
+</div>
+
+<!-- Floating Help Button -->
+<div class="floating-help" onclick="showHelp()">
+    <i class="fas fa-question fa-lg"></i>
 </div>
 @endsection
 
@@ -564,16 +724,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const descriptionTextarea = document.getElementById('description');
     const descCounter = document.getElementById('descCounter');
     const loadingOverlay = document.getElementById('loadingOverlay');
+    const progressBar = document.getElementById('progressBar');
 
     // تحديد المعلم المختار مسبقاً
     @if(request('teacher_id'))
         teacherSelect.value = "{{ request('teacher_id') }}";
         updateTeacherPreview();
+        updateProgress(25);
     @endif
 
     // التعامل مع اختيار المعلم
     teacherSelect.addEventListener('change', function() {
         updateTeacherPreview();
+        updateProgress();
     });
 
     function updateTeacherPreview() {
@@ -591,13 +754,17 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('teacherSubject').textContent = `${teacherSubject} - ${teacherGeneration}`;
             document.getElementById('teacherSpecialization').textContent = teacherSpecialization;
             
-            // إظهار المعاينة
+            // إظهار المعاينة مع تأثير
             teacherPreview.style.display = 'block';
-            teacherPreview.classList.add('active');
+            setTimeout(() => {
+                teacherPreview.classList.add('active');
+            }, 100);
         } else {
             // إخفاء المعاينة
-            teacherPreview.style.display = 'none';
             teacherPreview.classList.remove('active');
+            setTimeout(() => {
+                teacherPreview.style.display = 'none';
+            }, 300);
         }
     }
 
@@ -609,8 +776,9 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 // التحقق من صحة الرابط
                 const urlObj = new URL(url.startsWith('http') ? url : 'https://' + url);
-                urlPreview.textContent = urlObj.href;
+                urlPreview.textContent = `معاينة: ${urlObj.href}`;
                 urlPreview.style.display = 'block';
+                urlPreview.style.color = '#495057';
                 
                 // إزالة رسالة الخطأ إن وجدت
                 const errorMsg = this.parentElement.querySelector('.text-danger');
@@ -618,13 +786,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorMsg.remove();
                 }
             } catch (e) {
-                urlPreview.textContent = 'رابط غير صحيح';
+                urlPreview.textContent = 'رابط غير صحيح - يرجى التحقق من صحة الرابط';
                 urlPreview.style.display = 'block';
                 urlPreview.style.color = '#dc3545';
             }
         } else {
             urlPreview.style.display = 'none';
         }
+        updateProgress();
     });
 
     // عداد الأحرف للوصف
@@ -640,11 +809,39 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             descCounter.className = 'text-muted';
         }
+        updateProgress();
     }
     
     descriptionTextarea.addEventListener('input', updateDescCounter);
     updateDescCounter();
 
+    // تحديث شريط التقدم
+    function updateProgress(customValue = null) {
+        if (customValue !== null) {
+            progressBar.style.width = customValue + '%';
+            return;
+        }
+
+        let progress = 0;
+        
+        // اختيار المعلم (40%)
+        if (teacherSelect.value) progress += 40;
+        
+        // اسم المنصة (30%)
+        if (document.getElementById('name').value.trim()) progress += 30;
+        
+        // رابط الموقع (15%)
+        if (websiteInput.value.trim()) progress += 15;
+        
+        // الوصف (15%)
+        if (descriptionTextarea.value.trim()) progress += 15;
+        
+        progressBar.style.width = progress + '%';
+    }
+
+    // إضافة مستمعين للحقول لتحديث التقدم
+    document.getElementById('name').addEventListener('input', updateProgress);
+    
     // التحقق من صحة النموذج
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -678,6 +875,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // عرض Loading
         loadingOverlay.style.display = 'flex';
+        progressBar.style.width = '100%';
         
         // تعطيل الأزرار
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -687,7 +885,9 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
         
         // إرسال النموذج
-        form.submit();
+        setTimeout(() => {
+            form.submit();
+        }, 1000);
     });
 
     // إعادة تعيين النموذج
@@ -698,6 +898,7 @@ document.addEventListener('DOMContentLoaded', function() {
             teacherPreview.classList.remove('active');
             urlPreview.style.display = 'none';
             updateDescCounter();
+            updateProgress(0);
         }, 100);
     });
 
@@ -706,6 +907,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
             this.parentElement.style.transform = 'translateY(-2px)';
+            this.parentElement.style.transition = 'transform 0.3s ease';
         });
         
         input.addEventListener('blur', function() {
@@ -725,6 +927,7 @@ document.addEventListener('DOMContentLoaded', function() {
         alertDiv.style.right = '20px';
         alertDiv.style.zIndex = '9999';
         alertDiv.style.minWidth = '300px';
+        alertDiv.style.borderRadius = '15px';
         alertDiv.innerHTML = `
             <i class="fas fa-${icon}"></i>
             ${message}
@@ -751,6 +954,93 @@ document.addEventListener('DOMContentLoaded', function() {
             group.style.transform = 'translateY(0)';
         }, index * 150);
     });
+
+    // تحديث التقدم الأولي
+    updateProgress();
 });
+
+// وظيفة المساعدة
+function showHelp() {
+    const helpModal = `
+        <div class="modal fade" id="helpModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-question-circle"></i>
+                            مساعدة إنشاء منصة تعليمية
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="accordion" id="helpAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#help1">
+                                        كيفية اختيار المعلم المناسب؟
+                                    </button>
+                                </h2>
+                                <div id="help1" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                                    <div class="accordion-body">
+                                        <ul>
+                                            <li>اختر المعلم حسب المادة والجيل المطلوب</li>
+                                            <li>تأكد من أن المعلم نشط ومتاح</li>
+                                            <li>يمكن للمعلم الواحد أن يملك عدة منصات</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help2">
+                                        نصائح لاختيار اسم المنصة
+                                    </button>
+                                </h2>
+                                <div id="help2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                    <div class="accordion-body">
+                                        <ul>
+                                            <li>اختر اسماً واضحاً يعكس محتوى المنصة</li>
+                                            <li>تجنب الأسماء المعقدة أو الطويلة</li>
+                                            <li>يمكن تضمين اسم المعلم أو المادة</li>
+                                            <li>مثال: "منصة الرياضيات المتقدمة - أ.محمد"</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help3">
+                                        أهمية رابط الموقع والوصف
+                                    </button>
+                                </h2>
+                                <div id="help3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                    <div class="accordion-body">
+                                        <ul>
+                                            <li>رابط الموقع يساعد الطلاب للوصول للمحتوى</li>
+                                            <li>الوصف يوضح ما تقدمه المنصة من خدمات</li>
+                                            <li>كلاهما اختياري لكن ينصح بتعبئتهما</li>
+                                            <li>يمكن تعديلهما لاحقاً</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">فهمت</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // إضافة المودال للصفحة إذا لم يكن موجوداً
+    if (!document.getElementById('helpModal')) {
+        document.body.insertAdjacentHTML('beforeend', helpModal);
+    }
+    
+    // إظهار المودال
+    new bootstrap.Modal(document.getElementById('helpModal')).show();
+}
 </script>
 @endpush
